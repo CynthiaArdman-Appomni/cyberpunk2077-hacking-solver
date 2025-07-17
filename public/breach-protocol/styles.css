@@ -21,6 +21,11 @@ body {
     font-size: 1.1em;
 }
 
+.cell.selected {
+    background: #0070f3;
+    color: #fff;
+}
+
 button {
     padding: 8px 16px;
     font-size: 1em;
