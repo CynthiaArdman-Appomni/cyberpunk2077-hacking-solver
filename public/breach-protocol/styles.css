@@ -19,6 +19,38 @@ body {
     padding: 10px 0;
     font-weight: bold;
     font-size: 1.1em;
+    cursor: pointer;
+    user-select: none;
+}
+
+.cell.selected {
+    background: #0070f3;
+    color: #fff;
+}
+
+.cell.start-row {
+    outline: 2px solid #0f0;
+}
+
+#daemons li.solved {
+    text-decoration: line-through;
+    color: #0f0;
+}
+
+#sequence {
+    margin-top: 10px;
+}
+
+.feedback {
+    margin-top: 5px;
+}
+
+.feedback.error {
+    color: #f55;
+}
+
+.feedback.success {
+    color: #0f0;
 }
 
 button {
