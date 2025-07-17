@@ -67,9 +67,66 @@ let solvedDaemons = new Set();
 let startRow = 0;
 let puzzleEnded = false;
 
+function updateHighlights() {
+    const cells = document.querySelectorAll('#grid .cell');
+    cells.forEach(c => c.classList.remove('active', 'dim'));
+    if (puzzleEnded) return;
+
+    if (selection.length === 0) {
+        cells.forEach(c => {
+            if (parseInt(c.dataset.row, 10) === startRow) {
+                c.classList.add('active');
+            } else {
+                c.classList.add('dim');
+            }
+        });
+        return;
+    }
+
+    const last = selection[selection.length - 1];
+    const expectColumn = selection.length % 2 === 1;
+    cells.forEach(c => {
+        const r = parseInt(c.dataset.row, 10);
+        const col = parseInt(c.dataset.col, 10);
+        const selectable = expectColumn ? col === last.c : r === last.r;
+        if (selectable) {
+            c.classList.add('active');
+        } else {
+            c.classList.add('dim');
+        }
+    });
+}
+
+function updatePathLines() {
+    const svg = document.getElementById('pathLines');
+    if (!svg) return;
+    svg.innerHTML = '';
+    if (selection.length < 2) return;
+
+    const getCenter = (pos) => {
+        const cell = document.querySelector(`.cell[data-row="${pos.r}"][data-col="${pos.c}"]`);
+        const rect = cell.getBoundingClientRect();
+        const parentRect = svg.getBoundingClientRect();
+        return { x: rect.left - parentRect.left + rect.width/2, y: rect.top - parentRect.top + rect.height/2 };
+    };
+
+    for (let i = 0; i < selection.length - 1; i++) {
+        const c1 = getCenter(selection[i]);
+        const c2 = getCenter(selection[i+1]);
+        const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1', c1.x);
+        line.setAttribute('y1', c1.y);
+        line.setAttribute('x2', c2.x);
+        line.setAttribute('y2', c2.y);
+        svg.appendChild(line);
+    }
+}
+
 function displayGrid(grid) {
     const container = document.getElementById('grid');
+    const svg = document.getElementById('pathLines');
     container.innerHTML = '';
+    if (svg) container.appendChild(svg);
     grid.forEach((row, r) => {
         row.forEach((value, c) => {
             const cell = document.createElement('div');
@@ -109,6 +166,8 @@ function newPuzzle() {
     displayDaemons(daemonSequences);
     updateSequence();
     updateFeedback('');
+    updateHighlights();
+    updatePathLines();
 }
 
 function updateSequence() {
@@ -143,6 +202,8 @@ function onCellClick(e) {
     if (selection.length === 0) {
         if (r !== startRow) {
             updateFeedback('First selection must be from the highlighted row.', 'error');
+            cell.classList.add('invalid');
+            setTimeout(() => cell.classList.remove('invalid'), 300);
             return;
         }
     } else {
@@ -150,10 +211,14 @@ function onCellClick(e) {
         const expectColumn = selection.length % 2 === 1;
         if (expectColumn && c !== last.c) {
             updateFeedback('Select a cell in the same column.', 'error');
+            cell.classList.add('invalid');
+            setTimeout(() => cell.classList.remove('invalid'), 300);
             return;
         }
         if (!expectColumn && r !== last.r) {
             updateFeedback('Select a cell in the same row.', 'error');
+            cell.classList.add('invalid');
+            setTimeout(() => cell.classList.remove('invalid'), 300);
             return;
         }
     }
@@ -162,6 +227,8 @@ function onCellClick(e) {
     cell.classList.add('selected');
     updateSequence();
     updateFeedback('');
+    updateHighlights();
+    updatePathLines();
     checkDaemons();
     if (solvedDaemons.size === daemonSequences.length) {
         endPuzzle(true);
@@ -180,6 +247,8 @@ function resetSelection() {
     document.querySelectorAll('#daemons li').forEach(li => li.classList.remove('solved'));
     updateSequence();
     updateFeedback('');
+    updateHighlights();
+    updatePathLines();
 }
 
 function sequencesEqual(a, b) {
