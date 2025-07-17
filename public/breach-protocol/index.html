@@ -5,16 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Breach Protocol Puzzle Generator</title>
     <link rel="stylesheet" href="styles.css" />
+    <style>
+      .container {
+        min-height: 100vh;
+        padding: 0 0.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .main {
+        padding: 5rem 0;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .footer {
+        width: 100%;
+        height: 100px;
+        border-top: 1px solid #eaeaea;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .footer img {
+        margin-left: 0.5rem;
+      }
+
+      .footer a {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .title {
+        margin: 0;
+        line-height: 1.15;
+        font-size: 4rem;
+        text-align: center;
+      }
+
+      .description {
+        line-height: 1.5;
+        font-size: 1.5rem;
+        text-align: center;
+      }
+      /* grid and button styles are provided by styles.css */
+    </style>
 </head>
 <body>
-    <h1>Breach Protocol Puzzle Generator</h1>
+<div class="container">
+  <main class="main">
+    <h1 class="title">Breach Protocol Puzzle</h1>
+    <p class="description">Select grid cells to match one of the daemons.</p>
     <div id="grid" class="grid"></div>
     <h2>Daemons</h2>
     <ol id="daemons"></ol>
     <p id="sequence" class="sequence"></p>
     <p id="feedback" class="feedback"></p>
-    <button id="resetPuzzleBtn">Reset Puzzle</button>
-    <button id="newPuzzleBtn">Generate New Puzzle</button>
-    <script src="script.js"></script>
+    <div>
+      <button id="resetPuzzleBtn">Reset Puzzle</button>
+      <button id="newPuzzleBtn">Generate New Puzzle</button>
+    </div>
+  </main>
+  <footer class="footer">
+    <a href="https://vercel.com" target="_blank" rel="noopener noreferrer">
+      Powered by <img src="/vercel.svg" alt="Vercel Logo" class="logo" />
+    </a>
+  </footer>
+</div>
+<script src="script.js"></script>
 </body>
 </html>

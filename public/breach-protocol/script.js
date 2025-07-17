@@ -1,5 +1,7 @@
 // List of allowed hexadecimal values in the puzzle.
 const HEX_VALUES = ['1C', '55', 'BD', 'E9', '7A', 'FF'];
+// Limit on how many selections the player can make
+const MAX_STEPS = 8;
 
 // Returns a random element from HEX_VALUES.
 function randomHex() {
@@ -63,6 +65,7 @@ let daemonSequences = [];
 let selection = [];
 let solvedDaemons = new Set();
 let startRow = 0;
+let puzzleEnded = false;
 
 function displayGrid(grid) {
     const container = document.getElementById('grid');
@@ -101,6 +104,7 @@ function newPuzzle() {
     startRow = Math.floor(Math.random() * currentGrid.length);
     selection = [];
     solvedDaemons.clear();
+    puzzleEnded = false;
     displayGrid(currentGrid);
     displayDaemons(daemonSequences);
     updateSequence();
@@ -119,7 +123,19 @@ function updateFeedback(message, type = '') {
     el.className = 'feedback' + (type ? ' ' + type : '');
 }
 
+function endPuzzle(success) {
+    puzzleEnded = true;
+    if (success) {
+        updateFeedback('Puzzle solved!', 'success');
+    } else {
+        updateFeedback('Puzzle failed. Try again.', 'error');
+    }
+}
+
 function onCellClick(e) {
+    if (puzzleEnded || selection.length >= MAX_STEPS) {
+        return;
+    }
     const cell = e.currentTarget;
     const r = parseInt(cell.dataset.row, 10);
     const c = parseInt(cell.dataset.col, 10);
@@ -147,11 +163,17 @@ function onCellClick(e) {
     updateSequence();
     updateFeedback('');
     checkDaemons();
+    if (solvedDaemons.size === daemonSequences.length) {
+        endPuzzle(true);
+    } else if (selection.length >= MAX_STEPS) {
+        endPuzzle(false);
+    }
 }
 
 function resetSelection() {
     selection = [];
     solvedDaemons.clear();
+    puzzleEnded = false;
     document.querySelectorAll('#grid .cell').forEach(el => {
         el.classList.remove('selected');
     });
