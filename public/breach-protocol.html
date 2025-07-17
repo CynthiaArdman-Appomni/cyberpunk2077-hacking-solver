@@ -6,7 +6,9 @@
 <style>
   body { font-family: Arial, sans-serif; background:#111; color:#0f0; text-align:center; padding:20px; }
   #grid { display:grid; grid-template-columns:repeat(5, 40px); gap:5px; justify-content:center; margin-bottom:20px; }
-  #grid div { border:1px solid #0f0; padding:8px; font-family:monospace; }
+  #grid div { border:1px solid #0f0; padding:8px; font-family:monospace; cursor:pointer; }
+  #grid div.selected { background:#0f0; color:#111; }
+  #message { margin-top:10px; font-weight:bold; }
   #daemons { margin-bottom:20px; }
   #daemons div { margin:5px 0; }
   button { padding:10px 20px; font-size:16px; cursor:pointer; }
@@ -16,11 +18,19 @@
 <h1>Breach Protocol Puzzle Generator</h1>
 <div id="grid"></div>
 <div id="daemons"></div>
+<div id="message"></div>
+<button id="check">Check Solution</button>
+<button id="reset">Reset Path</button>
 <button id="generate">Generate New Puzzle</button>
 <script>
 // Available hex values in the game
 const HEX_VALUES = ["1C", "E9", "BD", "FF", "55", "7A"];
 const GRID_SIZE = 5; // 5x5 grid
+
+let currentGrid = [];
+let currentDaemons = [];
+let selectedPath = [];
+let selectedCoords = [];
 
 // Generates a 5x5 grid filled with random hex values
 function generateGrid() {
@@ -70,10 +80,11 @@ function generateDaemons(grid) {
 function renderGrid(grid) {
   const gridEl = document.getElementById("grid");
   gridEl.innerHTML = "";
-  grid.forEach(row => {
-    row.forEach(value => {
+  grid.forEach((row, r) => {
+    row.forEach((value, c) => {
       const cell = document.createElement("div");
       cell.textContent = value;
+      cell.addEventListener("click", () => selectCell(r, c, cell));
       gridEl.appendChild(cell);
     });
   });
@@ -92,13 +103,46 @@ function renderDaemons(daemons) {
 
 // Main function to generate and display a puzzle
 function generatePuzzle() {
-  const grid = generateGrid();
-  const daemons = generateDaemons(grid);
-  renderGrid(grid);
-  renderDaemons(daemons);
+  currentGrid = generateGrid();
+  currentDaemons = generateDaemons(currentGrid);
+  resetPath();
+  renderGrid(currentGrid);
+  renderDaemons(currentDaemons);
+}
+
+function selectCell(r, c, cell) {
+  if (selectedCoords.length > 0) {
+    const last = selectedCoords[selectedCoords.length - 1];
+    const dr = Math.abs(last.r - r);
+    const dc = Math.abs(last.c - c);
+    if (dr + dc !== 1) {
+      return; // must pick adjacent cell
+    }
+  }
+  if (selectedCoords.some(p => p.r === r && p.c === c)) {
+    return; // don't allow reusing cells
+  }
+  selectedCoords.push({ r, c });
+  selectedPath.push(currentGrid[r][c]);
+  cell.classList.add("selected");
+}
+
+function resetPath() {
+  selectedCoords = [];
+  selectedPath = [];
+  document.querySelectorAll('#grid div.selected').forEach(el => el.classList.remove('selected'));
+  document.getElementById('message').textContent = '';
+}
+
+function checkSolution() {
+  const guess = selectedPath.join(' ');
+  const success = currentDaemons.some(seq => seq.join(' ') === guess);
+  document.getElementById('message').textContent = success ? 'Correct!' : 'Incorrect, try again.';
 }
 
 document.getElementById("generate").addEventListener("click", generatePuzzle);
+document.getElementById("check").addEventListener("click", checkSolution);
+document.getElementById("reset").addEventListener("click", resetPath);
 window.addEventListener("load", generatePuzzle);
 </script>
 </body>
