@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <title>Breach Protocol Puzzle Generator</title>
+<link rel="stylesheet" href="breach-protocol/styles.css" />
 <style>
-  /* copied from pages/index.js original design */
+
   .container {
     min-height: 100vh;
     padding: 0 0.5rem;
@@ -55,39 +56,8 @@
     text-align: center;
   }
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(5, 40px);
-    gap: 5px;
-    justify-content: center;
-    margin-top: 3rem;
-  }
+  /* grid and button styles are provided by breach-protocol/styles.css */
 
-  .cell {
-    border: 1px solid #eaeaea;
-    padding: 8px;
-    font-family: monospace;
-    text-align: center;
-    cursor: pointer;
-    user-select: none;
-  }
-
-  .cell.selected {
-    background: #0070f3;
-    color: white;
-  }
-
-  #daemons {
-    margin-top: 2rem;
-    margin-bottom: 20px;
-  }
-
-  button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    margin: 0.5rem;
-  }
 </style>
 </head>
 <body>
@@ -110,6 +80,6 @@
     </a>
   </footer>
 </div>
-<script src="script.js"></script>
+<script src="breach-protocol/script.js"></script>
 </body>
 </html>
