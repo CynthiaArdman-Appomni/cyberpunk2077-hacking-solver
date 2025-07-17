@@ -61,7 +61,8 @@ function generateDaemons(grid, count = 3) {
 let currentGrid = [];
 let daemonSequences = [];
 let selection = [];
-let solved = false;
+let solvedDaemons = new Set();
+let startRow = 0;
 
 function displayGrid(grid) {
     const container = document.getElementById('grid');
@@ -70,6 +71,7 @@ function displayGrid(grid) {
         row.forEach((value, c) => {
             const cell = document.createElement('div');
             cell.className = 'cell';
+            if (r === startRow) cell.classList.add('start-row');
             cell.textContent = value;
             cell.dataset.row = r;
             cell.dataset.col = c;
@@ -83,9 +85,10 @@ function displayGrid(grid) {
 function displayDaemons(daemons) {
     const list = document.getElementById('daemons');
     list.innerHTML = '';
-    daemons.forEach(seq => {
+    daemons.forEach((seq, idx) => {
         const item = document.createElement('li');
         item.textContent = seq.join(' ');
+        item.dataset.index = idx;
         list.appendChild(item);
     });
     daemonSequences = daemons;
@@ -95,43 +98,66 @@ function displayDaemons(daemons) {
 function newPuzzle() {
     currentGrid = generateGrid();
     daemonSequences = generateDaemons(currentGrid);
+    startRow = Math.floor(Math.random() * currentGrid.length);
+    selection = [];
+    solvedDaemons.clear();
     displayGrid(currentGrid);
     displayDaemons(daemonSequences);
-    selection = [];
-    solved = false;
-    updateSelectionText();
+    updateSequence();
+    updateFeedback('');
 }
 
-function updateSelectionText(message) {
-    const el = document.getElementById('selection');
+function updateSequence() {
+    const el = document.getElementById('sequence');
     const seq = selection.map(p => currentGrid[p.r][p.c]).join(' ');
-    el.textContent = message || (seq ? `Selection: ${seq}` : '');
+    el.textContent = seq;
+}
+
+function updateFeedback(message, type = '') {
+    const el = document.getElementById('feedback');
+    el.textContent = message;
+    el.className = 'feedback' + (type ? ' ' + type : '');
 }
 
 function onCellClick(e) {
-    if (solved) return;
     const cell = e.currentTarget;
     const r = parseInt(cell.dataset.row, 10);
     const c = parseInt(cell.dataset.col, 10);
-    if (selection.length) {
+
+    if (selection.length === 0) {
+        if (r !== startRow) {
+            updateFeedback('First selection must be from the highlighted row.', 'error');
+            return;
+        }
+    } else {
         const last = selection[selection.length - 1];
-        if (Math.abs(last.r - r) + Math.abs(last.c - c) !== 1) {
+        const expectColumn = selection.length % 2 === 1;
+        if (expectColumn && c !== last.c) {
+            updateFeedback('Select a cell in the same column.', 'error');
+            return;
+        }
+        if (!expectColumn && r !== last.r) {
+            updateFeedback('Select a cell in the same row.', 'error');
             return;
         }
     }
+
     selection.push({ r, c });
     cell.classList.add('selected');
-    updateSelectionText();
-    checkSolution();
+    updateSequence();
+    updateFeedback('');
+    checkDaemons();
 }
 
 function resetSelection() {
     selection = [];
-    solved = false;
+    solvedDaemons.clear();
     document.querySelectorAll('#grid .cell').forEach(el => {
         el.classList.remove('selected');
     });
-    updateSelectionText();
+    document.querySelectorAll('#daemons li').forEach(li => li.classList.remove('solved'));
+    updateSequence();
+    updateFeedback('');
 }
 
 function sequencesEqual(a, b) {
@@ -142,24 +168,24 @@ function sequencesEqual(a, b) {
     return true;
 }
 
-function checkSolution() {
+function checkDaemons() {
     const seq = selection.map(p => currentGrid[p.r][p.c]);
-    for (const daemon of daemonSequences) {
-        if (sequencesEqual(seq, daemon)) {
-            solved = true;
-            updateSelectionText('Correct!');
-            return;
+    daemonSequences.forEach((daemon, idx) => {
+        if (solvedDaemons.has(idx)) return;
+        if (seq.length >= daemon.length) {
+            const recent = seq.slice(seq.length - daemon.length);
+            if (sequencesEqual(recent, daemon)) {
+                solvedDaemons.add(idx);
+                const li = document.querySelector(`#daemons li[data-index="${idx}"]`);
+                if (li) li.classList.add('solved');
+                updateFeedback('Daemon breached!', 'success');
+            }
         }
-    }
-    const maxLen = Math.max(...daemonSequences.map(d => d.length));
-    if (seq.length >= maxLen) {
-        solved = true;
-        updateSelectionText('Incorrect!');
-    }
+    });
 }
 
-document.getElementById('generate').addEventListener('click', newPuzzle);
-document.getElementById('reset').addEventListener('click', resetSelection);
+document.getElementById('newPuzzleBtn').addEventListener('click', newPuzzle);
+document.getElementById('resetPuzzleBtn').addEventListener('click', resetSelection);
 
 // Generate initial puzzle
 newPuzzle();
