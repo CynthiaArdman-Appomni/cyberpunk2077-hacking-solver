@@ -58,15 +58,22 @@ function generateDaemons(grid, count = 3) {
     return daemons;
 }
 
-// Render the grid into the DOM.
+let currentGrid = [];
+let daemonSequences = [];
+let selection = [];
+let solved = false;
+
 function displayGrid(grid) {
     const container = document.getElementById('grid');
     container.innerHTML = '';
-    grid.forEach(row => {
-        row.forEach(value => {
+    grid.forEach((row, r) => {
+        row.forEach((value, c) => {
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.textContent = value;
+            cell.dataset.row = r;
+            cell.dataset.col = c;
+            cell.addEventListener('click', onCellClick);
             container.appendChild(cell);
         });
     });
@@ -81,16 +88,78 @@ function displayDaemons(daemons) {
         item.textContent = seq.join(' ');
         list.appendChild(item);
     });
+    daemonSequences = daemons;
 }
 
 // Generate a new puzzle and display it.
 function newPuzzle() {
-    const grid = generateGrid();
-    const daemons = generateDaemons(grid);
-    displayGrid(grid);
-    displayDaemons(daemons);
+    currentGrid = generateGrid();
+    daemonSequences = generateDaemons(currentGrid);
+    displayGrid(currentGrid);
+    displayDaemons(daemonSequences);
+    selection = [];
+    solved = false;
+    updateSelectionText();
 }
 
-document.getElementById('newPuzzleBtn').addEventListener('click', newPuzzle);
-// Generate a puzzle on initial load.
+function updateSelectionText(message) {
+    const el = document.getElementById('selection');
+    const seq = selection.map(p => currentGrid[p.r][p.c]).join(' ');
+    el.textContent = message || (seq ? `Selection: ${seq}` : '');
+}
+
+function onCellClick(e) {
+    if (solved) return;
+    const cell = e.currentTarget;
+    const r = parseInt(cell.dataset.row, 10);
+    const c = parseInt(cell.dataset.col, 10);
+    if (selection.length) {
+        const last = selection[selection.length - 1];
+        if (Math.abs(last.r - r) + Math.abs(last.c - c) !== 1) {
+            return;
+        }
+    }
+    selection.push({ r, c });
+    cell.classList.add('selected');
+    updateSelectionText();
+    checkSolution();
+}
+
+function resetSelection() {
+    selection = [];
+    solved = false;
+    document.querySelectorAll('#grid .cell').forEach(el => {
+        el.classList.remove('selected');
+    });
+    updateSelectionText();
+}
+
+function sequencesEqual(a, b) {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+}
+
+function checkSolution() {
+    const seq = selection.map(p => currentGrid[p.r][p.c]);
+    for (const daemon of daemonSequences) {
+        if (sequencesEqual(seq, daemon)) {
+            solved = true;
+            updateSelectionText('Correct!');
+            return;
+        }
+    }
+    const maxLen = Math.max(...daemonSequences.map(d => d.length));
+    if (seq.length >= maxLen) {
+        solved = true;
+        updateSelectionText('Incorrect!');
+    }
+}
+
+document.getElementById('generate').addEventListener('click', newPuzzle);
+document.getElementById('reset').addEventListener('click', resetSelection);
+
+// Generate initial puzzle
 newPuzzle();
