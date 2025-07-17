@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Breach Protocol Puzzle Generator</title>
+<style>
+  body { font-family: Arial, sans-serif; background:#111; color:#0f0; text-align:center; padding:20px; }
+  #grid { display:grid; grid-template-columns:repeat(5, 40px); gap:5px; justify-content:center; margin-bottom:20px; }
+  #grid div { border:1px solid #0f0; padding:8px; font-family:monospace; }
+  #daemons { margin-bottom:20px; }
+  #daemons div { margin:5px 0; }
+  button { padding:10px 20px; font-size:16px; cursor:pointer; }
+</style>
+</head>
+<body>
+<h1>Breach Protocol Puzzle Generator</h1>
+<div id="grid"></div>
+<div id="daemons"></div>
+<button id="generate">Generate New Puzzle</button>
+<script>
+// Available hex values in the game
+const HEX_VALUES = ["1C", "E9", "BD", "FF", "55", "7A"];
+const GRID_SIZE = 5; // 5x5 grid
+
+// Generates a 5x5 grid filled with random hex values
+function generateGrid() {
+  const grid = [];
+  for (let r = 0; r < GRID_SIZE; r++) {
+    const row = [];
+    for (let c = 0; c < GRID_SIZE; c++) {
+      const value = HEX_VALUES[Math.floor(Math.random() * HEX_VALUES.length)];
+      row.push(value);
+    }
+    grid.push(row);
+  }
+  return grid;
+}
+
+// Returns a random valid path through the grid as an array of values
+function randomPath(grid, length) {
+  let row = Math.floor(Math.random() * GRID_SIZE);
+  let col = Math.floor(Math.random() * GRID_SIZE);
+  const path = [grid[row][col]];
+
+  for (let i = 1; i < length; i++) {
+    const neighbors = [];
+    if (row > 0) neighbors.push({ row: row - 1, col });
+    if (row < GRID_SIZE - 1) neighbors.push({ row: row + 1, col });
+    if (col > 0) neighbors.push({ row, col: col - 1 });
+    if (col < GRID_SIZE - 1) neighbors.push({ row, col: col + 1 });
+    const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+    row = next.row;
+    col = next.col;
+    path.push(grid[row][col]);
+  }
+  return path;
+}
+
+// Generates three daemon sequences with lengths of 3 or 4
+function generateDaemons(grid) {
+  const daemons = [];
+  for (let i = 0; i < 3; i++) {
+    const length = Math.random() < 0.5 ? 3 : 4;
+    daemons.push(randomPath(grid, length));
+  }
+  return daemons;
+}
+
+// Renders the grid on the page
+function renderGrid(grid) {
+  const gridEl = document.getElementById("grid");
+  gridEl.innerHTML = "";
+  grid.forEach(row => {
+    row.forEach(value => {
+      const cell = document.createElement("div");
+      cell.textContent = value;
+      gridEl.appendChild(cell);
+    });
+  });
+}
+
+// Renders daemon sequences as text
+function renderDaemons(daemons) {
+  const daemonEl = document.getElementById("daemons");
+  daemonEl.innerHTML = "";
+  daemons.forEach((seq, index) => {
+    const d = document.createElement("div");
+    d.textContent = `Daemon ${index + 1}: ${seq.join(" ")}`;
+    daemonEl.appendChild(d);
+  });
+}
+
+// Main function to generate and display a puzzle
+function generatePuzzle() {
+  const grid = generateGrid();
+  const daemons = generateDaemons(grid);
+  renderGrid(grid);
+  renderDaemons(daemons);
+}
+
+document.getElementById("generate").addEventListener("click", generatePuzzle);
+window.addEventListener("load", generatePuzzle);
+</script>
+</body>
+</html>
