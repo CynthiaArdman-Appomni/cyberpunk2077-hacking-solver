@@ -1,0 +1,28 @@
+body {
+    background-color: #111;
+    color: #0f0;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    padding: 20px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 50px);
+    grid-gap: 5px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.cell {
+    border: 1px solid #555;
+    padding: 10px 0;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+button {
+    padding: 8px 16px;
+    font-size: 1em;
+    cursor: pointer;
+}
