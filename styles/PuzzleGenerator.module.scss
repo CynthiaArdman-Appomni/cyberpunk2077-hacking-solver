@@ -33,6 +33,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   font-weight: bold;
   text-transform: uppercase;
   font-size: 3rem;
+  text-shadow: 0 0 8px $neon, 0 0 20px $neon;
 
   @include media-breakpoint-up(sm) {
     font-size: 4rem;
@@ -46,6 +47,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   color: $neon;
   font-family: $font-stack;
   font-weight: bold;
+  text-shadow: 0 0 6px $neon;
 }
 
 .grid-box {
@@ -225,6 +227,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 
 .feedback {
   margin-top: 5px;
+  text-shadow: 0 0 4px currentColor;
 
   &.error {
     color: $color-error;

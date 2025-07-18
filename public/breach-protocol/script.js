@@ -187,7 +187,11 @@ function endPuzzle(success) {
     if (success) {
         updateFeedback('Puzzle solved!', 'success');
     } else {
-        updateFeedback('Puzzle failed. Try again.', 'error');
+        const solvedCount = solvedDaemons.size;
+        const maxComplexity = solvedCount
+            ? Math.max(...Array.from(solvedDaemons).map(i => daemonSequences[i].length))
+            : 0;
+        updateFeedback(`Breached ${solvedCount}/${daemonSequences.length} daemons. Complexity ${maxComplexity}.`, 'error');
     }
 }
 
