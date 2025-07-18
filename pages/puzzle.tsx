@@ -16,8 +16,6 @@ import indexStyles from "../styles/Index.module.scss";
 import styles from "../styles/PuzzleGenerator.module.scss";
 
 const HEX_VALUES = ["1C", "55", "BD", "E9", "7A", "FF"];
-const BUFFER_MIN = 4;
-const BUFFER_MAX = 6;
 
 type Pos = { r: number; c: number };
 
@@ -33,7 +31,114 @@ function generateDaemon(length: number): string[] {
   return seq;
 }
 
-function generatePuzzle(rows = 5, cols = 5, count = 3) {
+function scsTwo(a: string[], b: string[]): string[] {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () =>
+    Array(n + 1).fill(0)
+  );
+
+  for (let i = m; i >= 0; i--) {
+    for (let j = n; j >= 0; j--) {
+      if (i === m && j === n) {
+        dp[i][j] = 0;
+      } else if (i === m) {
+        dp[i][j] = n - j;
+      } else if (j === n) {
+        dp[i][j] = m - i;
+      } else if (a[i] === b[j]) {
+        dp[i][j] = 1 + dp[i + 1][j + 1];
+      } else {
+        dp[i][j] = 1 + Math.min(dp[i + 1][j], dp[i][j + 1]);
+      }
+    }
+  }
+
+  const result: string[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < m || j < n) {
+    if (i === m) {
+      result.push(b[j++]);
+    } else if (j === n) {
+      result.push(a[i++]);
+    } else if (a[i] === b[j]) {
+      result.push(a[i]);
+      i++;
+      j++;
+    } else if (dp[i + 1][j] <= dp[i][j + 1]) {
+      result.push(a[i++]);
+    } else {
+      result.push(b[j++]);
+    }
+  }
+  return result;
+}
+
+function shortestCommonSupersequence(seqs: string[][]): string[] {
+  if (seqs.length === 0) return [];
+  const permutations = (arr: string[][]): string[][][] => {
+    if (arr.length <= 1) return [arr];
+    const res: string[][][] = [];
+    arr.forEach((item, idx) => {
+      const rest = arr.slice(0, idx).concat(arr.slice(idx + 1));
+      permutations(rest).forEach((perm) => res.push([item, ...perm]));
+    });
+    return res;
+  };
+
+  let best: string[] | null = null;
+  permutations(seqs).forEach((perm) => {
+    let current = perm[0];
+    for (let i = 1; i < perm.length; i++) {
+      current = scsTwo(current, perm[i]);
+    }
+    if (!best || current.length < best.length) {
+      best = current;
+    }
+  });
+  return best as string[];
+}
+
+function generatePathPositions(
+  length: number,
+  rows: number,
+  cols: number,
+  startRow: number
+): Pos[] {
+  const path: Pos[] = [];
+  let r = startRow;
+  let c = Math.floor(Math.random() * cols);
+  path.push({ r, c });
+  for (let i = 1; i < length; i++) {
+    if (i % 2 === 1) {
+      let newR = Math.floor(Math.random() * rows);
+      if (rows > 1) {
+        while (newR === r) newR = Math.floor(Math.random() * rows);
+      }
+      r = newR;
+    } else {
+      let newC = Math.floor(Math.random() * cols);
+      if (cols > 1) {
+        while (newC === c) newC = Math.floor(Math.random() * cols);
+      }
+      c = newC;
+    }
+    path.push({ r, c });
+  }
+  return path;
+}
+
+function generatePuzzle(rows = 5, cols = 5, count = 3, startRow = 0) {
+  const daemons: string[][] = [];
+  for (let i = 0; i < count; i++) {
+    const length = Math.floor(Math.random() * 3) + 2; // 2-4
+    daemons.push(generateDaemon(length));
+  }
+
+  const solutionSeq = shortestCommonSupersequence(daemons);
+  const bufferSize = solutionSeq.length;
+
   const grid: string[][] = [];
   for (let r = 0; r < rows; r++) {
     const row: string[] = [];
@@ -43,29 +148,13 @@ function generatePuzzle(rows = 5, cols = 5, count = 3) {
     grid.push(row);
   }
 
-  const daemons: string[][] = [];
-  for (let i = 0; i < count; i++) {
-    const length = Math.floor(Math.random() * 3) + 2; // 2-4
-    const daemon = generateDaemon(length);
-    daemons.push(daemon);
-
-    const horizontal = Math.random() < 0.5;
-    if (horizontal) {
-      const r = Math.floor(Math.random() * rows);
-      const cStart = Math.floor(Math.random() * (cols - length + 1));
-      for (let j = 0; j < length; j++) {
-        grid[r][cStart + j] = daemon[j];
-      }
-    } else {
-      const c = Math.floor(Math.random() * cols);
-      const rStart = Math.floor(Math.random() * (rows - length + 1));
-      for (let j = 0; j < length; j++) {
-        grid[rStart + j][c] = daemon[j];
-      }
-    }
+  const path = generatePathPositions(bufferSize, rows, cols, startRow);
+  for (let i = 0; i < path.length; i++) {
+    const { r, c } = path[i];
+    grid[r][c] = solutionSeq[i];
   }
 
-  return { grid, daemons };
+  return { grid, daemons, bufferSize };
 }
 
 const Separator = ({ className }: { className?: string }) => (
@@ -87,11 +176,9 @@ const ReportIssue = () => (
 );
 
 export default function PuzzlePage() {
-  const [puzzle, setPuzzle] = useState(() => generatePuzzle());
-  const [bufferSize, setBufferSize] = useState(() =>
-    Math.floor(Math.random() * (BUFFER_MAX - BUFFER_MIN + 1)) + BUFFER_MIN
-  );
   const startRow = 0;
+  const [puzzle, setPuzzle] = useState(() => generatePuzzle(5, 5, 3, startRow));
+  const [bufferSize, setBufferSize] = useState(() => puzzle.bufferSize);
   const [selection, setSelection] = useState<Pos[]>([]);
   const [solved, setSolved] = useState<Set<number>>(new Set());
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
@@ -102,11 +189,9 @@ export default function PuzzlePage() {
   const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
 
   const newPuzzle = useCallback(() => {
-    const p = generatePuzzle();
+    const p = generatePuzzle(5, 5, 3, startRow);
     setPuzzle(p);
-    setBufferSize(
-      Math.floor(Math.random() * (BUFFER_MAX - BUFFER_MIN + 1)) + BUFFER_MIN
-    );
+    setBufferSize(p.bufferSize);
     setSelection([]);
     setSolved(new Set());
     setFeedback({ msg: "" });
