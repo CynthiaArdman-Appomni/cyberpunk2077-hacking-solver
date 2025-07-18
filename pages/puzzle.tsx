@@ -15,6 +15,22 @@ import Button from "../components/Button";
 import indexStyles from "../styles/Index.module.scss";
 import styles from "../styles/PuzzleGenerator.module.scss";
 
+const terminalMessages = [
+  "//ROOT",
+  "//ACCESS_REQUEST",
+  "//ACCESS_REQUEST_SUCCESS",
+  "//COLLECTING_PACKET_1................COMPLETE",
+  "//COLLECTING_PACKET_2................COMPLETE",
+  "//COLLECTING_PACKET_3................COMPLETE",
+  "//LOGIN",
+  "//LOGIN_SUCCESS",
+  "",
+  "//UPLOAD_IN_PROGRESS",
+  "//UPLOAD_COMPLETE!",
+  "",
+  "ALL DAEMONS UPLOADED",
+];
+
 const HEX_VALUES = ["1C", "55", "BD", "E9", "7A", "FF"];
 
 type Pos = { r: number; c: number };
@@ -233,6 +249,26 @@ const ReportIssue = () => (
   </p>
 );
 
+function TerminalLog({ onExit }: { onExit: () => void }) {
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    if (index >= terminalMessages.length) return;
+    const t = setTimeout(() => setIndex(index + 1), 400);
+    return () => clearTimeout(t);
+  }, [index]);
+
+  return (
+    <div className={styles["terminal-log"]}>
+      {terminalMessages.slice(0, index).join("\n")}
+      {index >= terminalMessages.length && (
+        <div className="mt-3">
+          <Button onClick={onExit}>EXIT INTERFACE</Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PuzzlePage() {
   const startRow = 0;
   const [puzzle, setPuzzle] = useState(() => generatePuzzle(5, 5, 3, startRow));
@@ -241,6 +277,9 @@ export default function PuzzlePage() {
   const [solved, setSolved] = useState<Set<number>>(new Set());
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
   const [ended, setEnded] = useState(false);
+  const [showTerminal, setShowTerminal] = useState(false);
+  const initialTime = 60;
+  const [time, setTime] = useState(initialTime);
   const [breachFlash, setBreachFlash] = useState(false);
   const [dive, setDive] = useState(true);
   const breachAudio = useRef<HTMLAudioElement | null>(null);
@@ -250,6 +289,23 @@ export default function PuzzlePage() {
     const t = setTimeout(() => setDive(false), 800);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (ended) return;
+    setTime(initialTime);
+    const timer = setInterval(() => {
+      setTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setEnded(true);
+          setFeedback({ msg: "Time's up", type: "error" });
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [puzzle, ended]);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
@@ -288,6 +344,7 @@ export default function PuzzlePage() {
     setSolved(new Set());
     setFeedback({ msg: "" });
     setEnded(false);
+    setShowTerminal(false);
   }, []);
 
   const resetSelection = useCallback(() => {
@@ -295,6 +352,7 @@ export default function PuzzlePage() {
     setSolved(new Set());
     setFeedback({ msg: "" });
     setEnded(false);
+    setShowTerminal(false);
   }, []);
 
   const checkDaemons = useCallback(
@@ -416,6 +474,7 @@ export default function PuzzlePage() {
         setEnded(true);
         setFeedback({ msg: "Puzzle solved!", type: "success" });
         successAudio.current?.play();
+        setTimeout(() => setShowTerminal(true), 500);
       } else if (newSel.length >= bufferSize) {
         setEnded(true);
         const solvedCount = newSolved.size;
@@ -462,6 +521,14 @@ export default function PuzzlePage() {
         <Row>
           <Col lg={8}>
             <div className={indexStyles["description-separator"]}></div>
+          </Col>
+        </Row>
+        <Row className="mb-3">
+          <Col xs={6} className={"text-start"}>
+            <strong>BREACH TIME REMAINING:</strong> {time}s
+          </Col>
+          <Col xs={6} className="text-end">
+            <strong>BUFFER:</strong> {sequence}
           </Col>
         </Row>
         <Row>
@@ -566,6 +633,7 @@ export default function PuzzlePage() {
           </Col>
         </Row>
       </Container>
+      {showTerminal && <TerminalLog onExit={newPuzzle} />}
     </Layout>
   );
 }

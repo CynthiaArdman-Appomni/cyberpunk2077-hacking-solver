@@ -2,7 +2,8 @@
 @import "./common";
 
 $neon: $color-highlight;
-$bgcolor: #0f0c17;
+$active: $color-active;
+$bgcolor: $color-bg;
 $font-stack: "Orbitron", "Roboto", sans-serif;
 
 .container {
@@ -170,9 +171,10 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   transition: box-shadow 0.2s, background 0.2s, color 0.2s;
 
   &.active {
-    background: rgba($neon, 0.75);
-    box-shadow: 0 0 25px $neon, 0 0 50px $neon;
-    animation: pulse-neon 0.8s infinite alternate;
+    border-color: $active;
+    background: rgba($active, 0.2);
+    box-shadow: 0 0 10px $active;
+    animation: pulse-glow 1.5s infinite alternate;
   }
 
   &.dim {
@@ -351,6 +353,11 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   animation: pulse-neon 1s;
 }
 
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.5s ease-out;
+}
+
 @keyframes breach-flash {
   0% { opacity: 1; }
   80% { opacity: 1; }
@@ -361,6 +368,11 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   0% { box-shadow: 0 0 0 $neon; }
   50% { box-shadow: 0 0 20px $neon; }
   100% { box-shadow: 0 0 0 $neon; }
+}
+
+@keyframes pulse-glow {
+  from { box-shadow: 0 0 5px $active; }
+  to { box-shadow: 0 0 15px $active; }
 }
 
 @keyframes net-dive {
@@ -384,4 +396,13 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   60% { transform: translate(2px, -2px); opacity: 0.5; }
   80% { transform: translate(-2px, 2px); opacity: 0.8; }
   100% { transform: translate(0, 0); opacity: 0; }
+}
+
+.terminal-log {
+  background-color: rgba(0, 0, 0, 0.9);
+  color: $color-success;
+  padding: 20px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  font-size: 1.2rem;
 }
