@@ -16,15 +16,44 @@ import indexStyles from "../styles/Index.module.scss";
 import styles from "../styles/PuzzleGenerator.module.scss";
 
 const HEX_VALUES = ["1C", "55", "BD", "E9", "7A", "FF"];
-const MAX_STEPS = 8;
+const BUFFER_SIZE = 6;
 
 type Pos = { r: number; c: number };
+
+function containsSubsequence(sequence: string[], target: string[]) {
+  let idx = 0;
+  for (const val of sequence) {
+    if (val === target[idx]) {
+      idx++;
+      if (idx === target.length) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
 
 function randomHex() {
   return HEX_VALUES[Math.floor(Math.random() * HEX_VALUES.length)];
 }
 
-function generateGrid(rows = 5, cols = 5): string[][] {
+function generatePuzzle(
+  rows = 6,
+  cols = 6,
+  daemonCount = 3
+): { grid: string[][]; daemons: string[][] } {
+  // generate daemon sequences first
+  const daemons: string[][] = [];
+  for (let i = 0; i < daemonCount; i++) {
+    const length = Math.floor(Math.random() * 3) + 3; // 3-5
+    const seq: string[] = [];
+    for (let j = 0; j < length; j++) {
+      seq.push(randomHex());
+    }
+    daemons.push(seq);
+  }
+
+  // create grid filled with random hex values
   const grid: string[][] = [];
   for (let r = 0; r < rows; r++) {
     const row: string[] = [];
@@ -33,55 +62,26 @@ function generateGrid(rows = 5, cols = 5): string[][] {
     }
     grid.push(row);
   }
-  return grid;
-}
 
-function pathToSequence(grid: string[][], path: Pos[]): string[] {
-  return path.map((p) => grid[p.r][p.c]);
-}
-
-function generatePath(grid: string[][], length: number): Pos[] {
-  const rows = grid.length;
-  const cols = grid[0].length;
-  let r = Math.floor(Math.random() * rows);
-  let c = Math.floor(Math.random() * cols);
-  const path: Pos[] = [{ r, c }];
-  while (path.length < length) {
-    const opts: Pos[] = [];
-    if (r > 0) opts.push({ r: r - 1, c });
-    if (r < rows - 1) opts.push({ r: r + 1, c });
-    if (c > 0) opts.push({ r, c: c - 1 });
-    if (c < cols - 1) opts.push({ r, c: c + 1 });
-    const next = opts[Math.floor(Math.random() * opts.length)];
-    r = next.r;
-    c = next.c;
-    path.push(next);
-  }
-  return path;
-}
-
-function generateDaemons(grid: string[][], count = 3): string[][] {
-  const daemons: string[][] = [];
-  const rows = grid.length;
-  const cols = grid[0].length;
-  for (let i = 0; i < count; i++) {
-    const length = Math.floor(Math.random() * 3) + 2; // 2-4
+  // place daemon sequences into the grid horizontally or vertically
+  daemons.forEach((daemon) => {
     const horizontal = Math.random() < 0.5;
     if (horizontal) {
       const r = Math.floor(Math.random() * rows);
-      const cStart = Math.floor(Math.random() * (cols - length + 1));
-      daemons.push(grid[r].slice(cStart, cStart + length));
+      const cStart = Math.floor(Math.random() * (cols - daemon.length + 1));
+      for (let i = 0; i < daemon.length; i++) {
+        grid[r][cStart + i] = daemon[i];
+      }
     } else {
       const c = Math.floor(Math.random() * cols);
-      const rStart = Math.floor(Math.random() * (rows - length + 1));
-      const seq: string[] = [];
-      for (let j = 0; j < length; j++) {
-        seq.push(grid[rStart + j][c]);
+      const rStart = Math.floor(Math.random() * (rows - daemon.length + 1));
+      for (let i = 0; i < daemon.length; i++) {
+        grid[rStart + i][c] = daemon[i];
       }
-      daemons.push(seq);
     }
-  }
-  return daemons;
+  });
+
+  return { grid, daemons };
 }
 
 const Separator = ({ className }: { className?: string }) => (
@@ -103,9 +103,8 @@ const ReportIssue = () => (
 );
 
 export default function PuzzlePage() {
-  const [grid, setGrid] = useState(() => generateGrid());
-  const [daemons, setDaemons] = useState(() => generateDaemons(grid));
-  const [startRow, setStartRow] = useState(() => Math.floor(Math.random() * grid.length));
+  const [{ grid, daemons }, setPuzzle] = useState(() => generatePuzzle());
+  const [startRow, setStartRow] = useState(0);
   const [selection, setSelection] = useState<Pos[]>([]);
   const [solved, setSolved] = useState<Set<number>>(new Set());
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
@@ -116,10 +115,8 @@ export default function PuzzlePage() {
   const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
 
   const newPuzzle = useCallback(() => {
-    const g = generateGrid();
-    setGrid(g);
-    setDaemons(generateDaemons(g));
-    setStartRow(Math.floor(Math.random() * g.length));
+    setPuzzle(generatePuzzle());
+    setStartRow(0);
     setSelection([]);
     setSolved(new Set());
     setFeedback({ msg: "" });
@@ -137,17 +134,19 @@ export default function PuzzlePage() {
     (sel: Pos[]) => {
       const seq = sel.map((p) => grid[p.r][p.c]);
       const solvedSet = new Set(solved);
+      let breached = false;
       daemons.forEach((daemon, idx) => {
         if (solvedSet.has(idx)) return;
-        if (seq.length >= daemon.length) {
-          const recent = seq.slice(seq.length - daemon.length);
-          if (recent.join(" ") === daemon.join(" ")) {
-            solvedSet.add(idx);
-            setFeedback({ msg: "DAEMON BREACHED!", type: "success" });
-          }
+        if (containsSubsequence(seq, daemon)) {
+          solvedSet.add(idx);
+          breached = true;
         }
       });
+      if (breached) {
+        setFeedback({ msg: "DAEMON BREACHED!", type: "success" });
+      }
       setSolved(solvedSet);
+      return solvedSet;
     },
     [grid, daemons, solved]
   );
@@ -183,7 +182,7 @@ export default function PuzzlePage() {
 
   const handleCellClick = useCallback(
     (r: number, c: number) => {
-      if (ended || selection.length >= MAX_STEPS) return;
+      if (ended || selection.length >= BUFFER_SIZE) return;
 
       const newSel = selection.slice();
       if (newSel.length === 0) {
@@ -206,11 +205,11 @@ export default function PuzzlePage() {
       newSel.push({ r, c });
       setSelection(newSel);
       setFeedback({ msg: "" });
-      checkDaemons(newSel);
-      if (solved.size + 1 === daemons.length) {
+      const newSolved = checkDaemons(newSel);
+      if (newSolved.size === daemons.length) {
         setEnded(true);
         setFeedback({ msg: "Puzzle solved!", type: "success" });
-      } else if (newSel.length >= MAX_STEPS) {
+      } else if (newSel.length >= BUFFER_SIZE) {
         setEnded(true);
         setFeedback({ msg: "Puzzle failed. Try again.", type: "error" });
       }
@@ -236,112 +235,3 @@ export default function PuzzlePage() {
             <MainTitle className={indexStyles.title} />
             <h2 className={indexStyles.description}>
               Practice the Breach Protocol puzzle.
-            </h2>
-          </Col>
-        </Row>
-        <Row>
-          <Col lg={8}>
-            <div className={indexStyles["description-separator"]}></div>
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={12} lg={8}>
-            <p className={styles.description}>
-              INITIATE BREACH PROTOCOL - TIME TO FLATLINE THESE DAEMONS, CHOOM.
-            </p>
-            <div className={styles["grid-box"]}>
-              <div className={styles["grid-box__header"]}>
-                <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
-              </div>
-              <div className={styles["grid-box__inside"]}>
-                <div className={styles.grid}>
-                  {grid.map((row, r) =>
-                    row.map((val, c) => {
-                      const isSelected = selection.some(
-                        (p) => p.r === r && p.c === c
-                      );
-                      const selectable = (() => {
-                        if (ended) return false;
-                        if (selection.length === 0) {
-                          return r === startRow;
-                        }
-                        const last = selection[selection.length - 1];
-                        const expectColumn = selection.length % 2 === 1;
-                        return expectColumn ? c === last.c : r === last.r;
-                      })();
-                      const classes = [styles.cell];
-                      if (selectable) classes.push(styles.active);
-                      else if (!isSelected) classes.push(styles.dim);
-                      if (isSelected) classes.push(styles.selected);
-                      return (
-                        <div
-                          key={`${r}-${c}`}
-                          className={classes.join(" ")}
-                          onClick={() => handleCellClick(r, c)}
-                        >
-                          {val}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
-            </div>
-          </Col>
-          <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={styles["daemon-box"]}>
-              <div className={styles["daemon-box__header"]}>
-                <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
-              </div>
-              <div className={styles["daemon-box__inside"]}>
-                <ol className={styles.daemons}>
-                  {daemons.map((d, idx) => (
-                    <li
-                      key={idx}
-                      className={solved.has(idx) ? "solved" : undefined}
-                    >
-                      {d.join(" ")}
-                    </li>
-                  ))}
-                </ol>
-                <p className={styles.sequence}>{sequence}</p>
-                {feedback.msg && (
-                  <p
-                    className={`${styles.feedback} ${
-                      feedback.type ? styles[feedback.type] : ""
-                    }`}
-                  >
-                    {feedback.msg}
-                  </p>
-                )}
-              </div>
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col lg={8}>
-            <div className={styles.buttons}>
-              <Button onClick={resetSelection}>Reset Puzzle</Button>
-              <Button onClick={newPuzzle}>Generate New Puzzle</Button>
-            </div>
-          </Col>
-        </Row>
-        <Separator className="mt-5" />
-        <Row>
-          <Col>
-            <ReportIssue />
-          </Col>
-        </Row>
-        <Row className="mt-5">
-          <Col lg={8}>
-            <p>
-              THIS APP IS NOT AFFILIATED WITH CD PROJEKT RED OR CYBERPUNK 2077.
-              TRADEMARK "CYBERPUNK 2077" IS OWNED BY CD PROJEKT <span>S.A.</span>
-            </p>
-          </Col>
-        </Row>
-      </Container>
-    </Layout>
-  );
-}
