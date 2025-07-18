@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getPuzzle } from '../../../../services/puzzleStore';
+import { getPuzzle } from '../../../services/puzzleStore';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
