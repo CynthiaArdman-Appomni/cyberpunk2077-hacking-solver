@@ -235,3 +235,112 @@ export default function PuzzlePage() {
             <MainTitle className={indexStyles.title} />
             <h2 className={indexStyles.description}>
               Practice the Breach Protocol puzzle.
+            </h2>
+          </Col>
+        </Row>
+        <Row>
+          <Col lg={8}>
+            <div className={indexStyles["description-separator"]}></div>
+          </Col>
+        </Row>
+        <Row>
+          <Col xs={12} lg={8}>
+            <p className={styles.description}>
+              INITIATE BREACH PROTOCOL - TIME TO FLATLINE THESE DAEMONS, CHOOM.
+            </p>
+            <div className={styles["grid-box"]}>
+              <div className={styles["grid-box__header"]}>
+                <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
+              </div>
+              <div className={styles["grid-box__inside"]}>
+                <div className={styles.grid}>
+                  {grid.map((row, r) =>
+                    row.map((val, c) => {
+                      const isSelected = selection.some(
+                        (p) => p.r === r && p.c === c
+                      );
+                      const selectable = (() => {
+                        if (ended) return false;
+                        if (selection.length === 0) {
+                          return r === startRow;
+                        }
+                        const last = selection[selection.length - 1];
+                        const expectColumn = selection.length % 2 === 1;
+                        return expectColumn ? c === last.c : r === last.r;
+                      })();
+                      const classes = [styles.cell];
+                      if (selectable) classes.push(styles.active);
+                      else if (!isSelected) classes.push(styles.dim);
+                      if (isSelected) classes.push(styles.selected);
+                      return (
+                        <div
+                          key={`${r}-${c}`}
+                          className={classes.join(" ")}
+                          onClick={() => handleCellClick(r, c)}
+                        >
+                          {val}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </Col>
+          <Col xs={12} lg={4} className="d-flex justify-content-center">
+            <div className={styles["daemon-box"]}>
+              <div className={styles["daemon-box__header"]}>
+                <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
+              </div>
+              <div className={styles["daemon-box__inside"]}>
+                <ol className={styles.daemons}>
+                  {daemons.map((d, idx) => (
+                    <li
+                      key={idx}
+                      className={solved.has(idx) ? "solved" : undefined}
+                    >
+                      {d.join(" ")}
+                    </li>
+                  ))}
+                </ol>
+                <p className={styles.sequence}>{sequence}</p>
+                {feedback.msg && (
+                  <p
+                    className={`${styles.feedback} ${
+                      feedback.type ? styles[feedback.type] : ""
+                    }`}
+                  >
+                    {feedback.msg}
+                  </p>
+                )}
+              </div>
+            </div>
+          </Col>
+        </Row>
+        <Row>
+          <Col lg={8}>
+            <div className={styles.buttons}>
+              <Button onClick={resetSelection}>Reset Puzzle</Button>
+              <Button onClick={newPuzzle}>Generate New Puzzle</Button>
+            </div>
+          </Col>
+        </Row>
+        <Separator className="mt-5" />
+        <Row>
+          <Col>
+            <ReportIssue />
+          </Col>
+        </Row>
+        <Row className="mt-5">
+          <Col lg={8}>
+            <p>
+              THIS APP IS NOT AFFILIATED WITH CD PROJEKT RED OR CYBERPUNK 2077.
+              TRADEMARK "CYBERPUNK 2077" IS OWNED BY CD PROJEKT <span>S.A.</span>
+            </p>
+          </Col>
+        </Row>
+      </Container>
+    </Layout>
+  );
+}
