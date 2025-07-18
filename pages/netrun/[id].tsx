@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import type { GetServerSideProps } from "next";
 import { Container, Row, Col } from "react-bootstrap";
 import cz from "classnames";
 
@@ -10,20 +11,27 @@ import Button from "../../components/Button";
 
 import indexStyles from "../../styles/Index.module.scss";
 import styles from "../../styles/PuzzleGenerator.module.scss";
-import { Pos, Puzzle } from "../../lib/puzzleGenerator";
-import { StoredPuzzle } from "../../services/puzzleStore";
+import { Pos } from "../../lib/puzzleGenerator";
+import { StoredPuzzle, getPuzzle } from "../../services/puzzleStore";
 import { getOrCreateTimer, setTimerStart } from "../../services/timerStore";
 
-export default function PlayPuzzlePage() {
+interface NetrunProps {
+  initialPuzzle: StoredPuzzle | null;
+  hasError?: boolean;
+}
+
+export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps) {
   const router = useRouter();
   const { id } = router.query;
 
-  const [puzzle, setPuzzle] = useState<StoredPuzzle | null>(null);
+  const [puzzle, setPuzzle] = useState<StoredPuzzle | null>(initialPuzzle);
   const [timeLimit, setTimeLimit] = useState(0);
   const [bufferSize, setBufferSize] = useState(0);
   const [selection, setSelection] = useState<Pos[]>([]);
   const [solved, setSolved] = useState<Set<number>>(new Set());
-  const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
+  const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>(
+    hasError ? { msg: "Failed to load puzzle.", type: "error" } : { msg: "" }
+  );
   const [ended, setEnded] = useState(false);
   const [breachFlash, setBreachFlash] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -33,7 +41,7 @@ export default function PlayPuzzlePage() {
   const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || initialPuzzle || hasError) return;
     fetch(`/api/puzzle/${id}`)
       .then(async (res) => {
         if (res.status === 404) throw new Error('notfound');
@@ -45,7 +53,7 @@ export default function PlayPuzzlePage() {
       })
       .catch((err) => {
         if (err.message === 'notfound') {
-          setFeedback({ msg: 'Puzzle not found.', type: 'error' });
+          setFeedback({ msg: 'Puzzle not found or has expired.', type: 'error' });
         } else if (err.message === 'dberr') {
           console.error('Database error:', err);
           setFeedback({ msg: 'Failed to load puzzle due to database error.', type: 'error' });
@@ -54,7 +62,14 @@ export default function PlayPuzzlePage() {
           setFeedback({ msg: 'Failed to load puzzle.', type: 'error' });
         }
       });
-  }, [id]);
+  }, [id, initialPuzzle, hasError]);
+
+  useEffect(() => {
+    if (initialPuzzle) {
+      setTimeLimit(initialPuzzle.timeLimit);
+      setBufferSize(initialPuzzle.bufferSize);
+    }
+  }, [initialPuzzle]);
 
   useEffect(() => {
     if (!id || !puzzle) return;
@@ -389,3 +404,21 @@ export default function PlayPuzzlePage() {
     </Layout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<NetrunProps> = async ({ params }) => {
+  const id = typeof params?.id === 'string' ? params.id : '';
+  if (!id) {
+    return { props: { initialPuzzle: null, hasError: true } };
+  }
+  try {
+    const puzzle = await getPuzzle(id);
+    if (!puzzle) {
+      return { props: { initialPuzzle: null, hasError: true } };
+    }
+    const { grid, daemons, bufferSize, timeLimit, startTime } = puzzle;
+    return { props: { initialPuzzle: { grid, daemons, bufferSize, timeLimit, startTime, path: [], solutionSeq: [], difficulty: 'Unknown', solutionCount: 0 }, hasError: false } };
+  } catch (e) {
+    console.error('Error fetching puzzle:', e);
+    return { props: { initialPuzzle: null, hasError: true } };
+  }
+};
