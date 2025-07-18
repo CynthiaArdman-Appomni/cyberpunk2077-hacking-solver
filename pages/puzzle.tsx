@@ -190,56 +190,78 @@ export default function PuzzlePage() {
         </Row>
         <Row>
           <Col lg={8}>
-            <p className={styles.description}>Select grid cells to match one of the daemons.</p>
-            <div className={styles.grid}>
-              {grid.map((row, r) =>
-                row.map((val, c) => {
-                  const isSelected = selection.some((p) => p.r === r && p.c === c);
-                  const selectable = (() => {
-                    if (ended) return false;
-                    if (selection.length === 0) {
-                      return r === startRow;
-                    }
-                    const last = selection[selection.length - 1];
-                    const expectColumn = selection.length % 2 === 1;
-                    return expectColumn ? c === last.c : r === last.r;
-                  })();
-                  const classes = [styles.cell];
-                  if (selectable) classes.push(styles.active);
-                  else if (!isSelected) classes.push(styles.dim);
-                  if (isSelected) classes.push(styles.selected);
-                  return (
-                    <div
-                      key={`${r}-${c}`}
-                      className={classes.join(" ")}
-                      onClick={() => handleCellClick(r, c)}
-                    >
-                      {val}
-                    </div>
-                  );
-                })
-              )}
+            <p className={styles.description}>
+              Select grid cells to match one of the daemons.
+            </p>
+            <div className={styles["grid-box"]}>
+              <div className={styles["grid-box__header"]}>
+                <h3 className={styles["grid-box__header_text"]}>PUZZLE GRID</h3>
+              </div>
+              <div className={styles["grid-box__inside"]}>
+                <div className={styles.grid}>
+                  {grid.map((row, r) =>
+                    row.map((val, c) => {
+                      const isSelected = selection.some(
+                        (p) => p.r === r && p.c === c
+                      );
+                      const selectable = (() => {
+                        if (ended) return false;
+                        if (selection.length === 0) {
+                          return r === startRow;
+                        }
+                        const last = selection[selection.length - 1];
+                        const expectColumn = selection.length % 2 === 1;
+                        return expectColumn ? c === last.c : r === last.r;
+                      })();
+                      const classes = [styles.cell];
+                      if (selectable) classes.push(styles.active);
+                      else if (!isSelected) classes.push(styles.dim);
+                      if (isSelected) classes.push(styles.selected);
+                      return (
+                        <div
+                          key={`${r}-${c}`}
+                          className={classes.join(" ")}
+                          onClick={() => handleCellClick(r, c)}
+                        >
+                          {val}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
             </div>
           </Col>
         </Row>
         <Row>
           <Col lg={8}>
-            <h2>Daemons</h2>
-            <ol className={styles.daemons}>
-              {daemons.map((d, idx) => (
-                <li key={idx} className={solved.has(idx) ? "solved" : undefined}>
-                  {d.join(" ")}
-                </li>
-              ))}
-            </ol>
-          </Col>
-        </Row>
-        <Row>
-          <Col lg={8}>
-            <p className={styles.sequence}>{sequence}</p>
-            {feedback.msg && (
-              <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
-            )}
+            <div className={styles["daemon-box"]}>
+              <div className={styles["daemon-box__header"]}>
+                <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
+              </div>
+              <div className={styles["daemon-box__inside"]}>
+                <ol className={styles.daemons}>
+                  {daemons.map((d, idx) => (
+                    <li
+                      key={idx}
+                      className={solved.has(idx) ? "solved" : undefined}
+                    >
+                      {d.join(" ")}
+                    </li>
+                  ))}
+                </ol>
+                <p className={styles.sequence}>{sequence}</p>
+                {feedback.msg && (
+                  <p
+                    className={`${styles.feedback} ${
+                      feedback.type ? styles[feedback.type] : ""
+                    }`}
+                  >
+                    {feedback.msg}
+                  </p>
+                )}
+              </div>
+            </div>
           </Col>
         </Row>
         <Row>
