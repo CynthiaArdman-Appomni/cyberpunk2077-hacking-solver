@@ -285,7 +285,10 @@ export default function PlayPuzzlePage() {
                     </li>
                   ))}
                 </ol>
-                <p className={styles.sequence}>{sequence}</p>
+                <p className={styles.sequence}>
+                  <span className={styles['sequence-label']}>Completed Sequence:</span>
+                  {sequence}
+                </p>
                 {feedback.msg && (
                   <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
                 )}
