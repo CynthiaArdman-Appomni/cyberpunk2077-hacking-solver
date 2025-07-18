@@ -1,4 +1,9 @@
+@use "sass:color";
 @import "./common";
+
+$neon: #c6ff00;
+$bgcolor: #0f0c17;
+$font-stack: "Orbitron", "Roboto", sans-serif;
 
 .container {
   width: 100%;
@@ -7,6 +12,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  background: $bgcolor;
 }
 
 .main {
@@ -22,7 +28,10 @@
   margin: 0;
   margin-bottom: 3rem;
   line-height: 1.15;
-  color: $color-highlight;
+  color: $neon;
+  font-family: $font-stack;
+  font-weight: bold;
+  text-transform: uppercase;
   font-size: 3rem;
 
   @include media-breakpoint-up(sm) {
@@ -34,12 +43,13 @@
   line-height: 1.5;
   font-size: 1.5rem;
   text-transform: uppercase;
-  color: $color-highlight;
-  font-weight: 500;
+  color: $neon;
+  font-family: $font-stack;
+  font-weight: bold;
 }
 
 .grid-box {
-  border: 2px solid $color-highlight;
+  border: 2px solid $neon;
   background: transparent;
   margin-bottom: 2rem;
 
@@ -49,14 +59,17 @@
     align-items: center;
     padding: 0 0 0 2rem;
     height: 42px;
-    background: $color-highlight;
-    color: $color-bg;
+    background: $neon;
+    color: $bgcolor;
   }
 
   &__header_text {
     margin: 0;
     padding: 0;
     font-size: 1.5rem;
+    font-family: $font-stack;
+    text-transform: uppercase;
+    font-weight: bold;
   }
 
   &__inside {
@@ -69,7 +82,7 @@
 }
 
 .daemon-box {
-  border: 2px solid $color-highlight;
+  border: 2px solid $neon;
   background: transparent;
   margin-bottom: 2rem;
 
@@ -79,14 +92,17 @@
     align-items: center;
     padding: 0 0 0 2rem;
     height: 42px;
-    background: $color-highlight;
-    color: $color-bg;
+    background: $neon;
+    color: $bgcolor;
   }
 
   &__header_text {
     margin: 0;
     padding: 0;
     font-size: 1.5rem;
+    font-family: $font-stack;
+    text-transform: uppercase;
+    font-weight: bold;
   }
 
   &__inside {
@@ -101,8 +117,8 @@
 .grid {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, 4rem);
-  grid-gap: 0.5rem;
+  grid-template-columns: repeat(5, 60px);
+  grid-gap: 10px;
   justify-content: center;
   margin-bottom: 2rem;
 }
@@ -116,9 +132,9 @@
   pointer-events: none;
 
   line {
-    stroke: $color-highlight;
+    stroke: $neon;
     stroke-width: 2;
-    filter: drop-shadow(0 0 4px $color-highlight);
+    filter: drop-shadow(0 0 4px $neon);
   }
 }
 
@@ -126,19 +142,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 4rem;
-  height: 4rem;
-  border: 2px solid $color-highlight;
+  width: 60px;
+  height: 60px;
+  border: 2px solid $neon;
   font-weight: bold;
   font-size: 1.5rem;
+  font-family: $font-stack;
   cursor: pointer;
   user-select: none;
   background: transparent;
-  color: $color-highlight;
+  color: $neon;
   transition: box-shadow 0.2s, background 0.2s, color 0.2s;
 
   &.active {
-    box-shadow: 0 0 10px $color-highlight, 0 0 20px $color-highlight;
+    box-shadow: 0 0 10px $neon, 0 0 20px $neon;
   }
 
   &.dim {
@@ -146,12 +163,13 @@
   }
 
   &.selected {
-    background: $color-highlight;
-    color: $color-bg;
+    background: lighten($neon, 10%);
+    color: $bgcolor;
+    box-shadow: 0 0 20px $neon;
   }
 
   &:hover:not(.selected) {
-    box-shadow: 0 0 6px $color-highlight;
+    box-shadow: 0 0 6px $neon;
   }
 
   &.invalid {
@@ -161,7 +179,7 @@
 
 @keyframes flash-red {
   0% { background: $color-error; color: #fff; }
-  100% { background: transparent; color: $color-highlight; }
+  100% { background: transparent; color: $neon; }
 }
 
 .daemons {
@@ -170,12 +188,14 @@
   margin: 10px 0;
 
   li {
-    display: inline-block;
-    margin: 0 5px;
+    display: block;
+    margin: 0 0 10px 0;
     padding: 4px 6px;
-    border: 1px solid $color-highlight;
-    color: $color-highlight;
+    border: 1px solid $neon;
+    color: $neon;
     font-weight: bold;
+    font-family: $font-stack;
+    text-transform: uppercase;
 
     &.solved {
       border-color: $color-success;

@@ -211,6 +211,10 @@ export default function PuzzlePage() {
       <Head>
         <title>Breach Protocol Puzzle Generator</title>
         <meta property="og:title" content="Breach Protocol Puzzle Generator" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@700&display=swap"
+          rel="stylesheet"
+        />
       </Head>
       <Container as="main" className={indexStyles.main}>
         <Row>
@@ -227,13 +231,13 @@ export default function PuzzlePage() {
           </Col>
         </Row>
         <Row>
-          <Col lg={8}>
+          <Col xs={12} lg={8}>
             <p className={styles.description}>
-              Select grid cells to match one of the daemons.
+              INITIATE BREACH PROTOCOL - TIME TO FLATLINE THESE DAEMONS, CHOOM.
             </p>
             <div className={styles["grid-box"]}>
               <div className={styles["grid-box__header"]}>
-                <h3 className={styles["grid-box__header_text"]}>PUZZLE GRID</h3>
+                <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
               <div className={styles["grid-box__inside"]}>
                 <div className={styles.grid}>
@@ -271,9 +275,7 @@ export default function PuzzlePage() {
 
             </div>
           </Col>
-        </Row>
-        <Row>
-          <Col lg={8}>
+          <Col xs={12} lg={4}>
             <div className={styles["daemon-box"]}>
               <div className={styles["daemon-box__header"]}>
                 <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
