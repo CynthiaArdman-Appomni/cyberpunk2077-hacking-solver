@@ -47,16 +47,16 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   line-height: 1.5;
   font-size: 1.5rem;
   text-transform: uppercase;
-  color: $neon;
+  color: lighten($neon, 10%);
   font-family: $font-stack;
   font-weight: bold;
-  text-shadow: 0 0 6px $neon;
+  text-shadow: 0 0 8px lighten($neon, 10%);
   margin: 1rem 0 2rem;
 }
 
 .grid-box {
   border: 2px solid $neon;
-  background: $bgcolor;
+  background: color.adjust($color-lighter-bg, $alpha: -0.3);
   margin-bottom: 2rem;
 
   &__header {
@@ -96,7 +96,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 
 .daemon-box {
   border: 2px solid $neon;
-  background: $bgcolor;
+  background: color.adjust($color-lighter-bg, $alpha: -0.3);
   margin-bottom: 2rem;
 
   &__header {
@@ -164,7 +164,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   font-family: $font-stack;
   cursor: pointer;
   user-select: none;
-  background: transparent;
+  background: color.adjust($color-lighter-bg, $alpha: -0.3);
   color: $neon;
   transition: box-shadow 0.2s, background 0.2s, color 0.2s;
 
@@ -276,6 +276,8 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .sequence-label {
   font-weight: bold;
   margin-right: 0.25rem;
+  color: lighten($neon, 15%);
+  text-shadow: 0 0 6px lighten($neon, 15%);
 }
 
 .solution-sequence {
