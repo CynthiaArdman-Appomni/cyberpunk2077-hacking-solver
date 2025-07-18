@@ -172,7 +172,7 @@ function generatePuzzle(
     grid[r][c] = solutionSeq[i];
   }
 
-  return { grid, daemons, bufferSize };
+  return { grid, daemons, bufferSize, path };
 }
 
 const Separator = ({ className }: { className?: string }) => (

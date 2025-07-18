@@ -166,7 +166,7 @@ function generatePuzzle(rows = 5, cols = 5, count = 3, startRow = 0) {
     grid[r][c] = solutionSeq[i];
   }
 
-  return { grid, daemons, bufferSize };
+  return { grid, daemons, bufferSize, path };
 }
 
 const Separator = ({ className }: { className?: string }) => (
