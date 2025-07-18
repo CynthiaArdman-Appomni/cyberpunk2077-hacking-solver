@@ -17,6 +17,22 @@ import styles from "../styles/PuzzleGenerator.module.scss";
 
 const HEX_VALUES = ["1C", "55", "BD", "E9", "7A", "FF"];
 
+const TERMINAL_LOGS = [
+  "//ROOT",
+  "//ACCESS_REQUEST",
+  "//ACCESS_REQUEST_SUCCESS",
+  "//COLLECTING_PACKET_1................COMPLETE",
+  "//COLLECTING_PACKET_2................COMPLETE",
+  "//COLLECTING_PACKET_3................COMPLETE",
+  "//LOGIN",
+  "//LOGIN_SUCCESS",
+  "",
+  "//UPLOAD_IN_PROGRESS",
+  "//UPLOAD_COMPLETE!",
+  "",
+  "ALL DAEMONS UPLOADED",
+];
+
 type Pos = { r: number; c: number };
 
 function randomHex() {
@@ -241,6 +257,8 @@ export default function PuzzlePage() {
   const [solved, setSolved] = useState<Set<number>>(new Set());
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
   const [ended, setEnded] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [logLines, setLogLines] = useState<string[]>([]);
   const [breachFlash, setBreachFlash] = useState(false);
   const [dive, setDive] = useState(true);
   const breachAudio = useRef<HTMLAudioElement | null>(null);
@@ -381,6 +399,42 @@ export default function PuzzlePage() {
     return () => window.removeEventListener("resize", updateLines);
   }, [updateLines]);
 
+  // countdown timer
+  useEffect(() => {
+    if (ended) return;
+    const id = setInterval(() => {
+      setTimeLeft((t) => (t > 0 ? t - 1 : 0));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [ended]);
+
+  useEffect(() => {
+    if (timeLeft === 0 && !ended) {
+      setEnded(true);
+      setFeedback({ msg: "Time's up!", type: "error" });
+    }
+  }, [timeLeft, ended]);
+
+  // terminal log when all daemons breached
+  useEffect(() => {
+    if (ended && solved.size === puzzle.daemons.length) {
+      setLogLines([]);
+      let idx = 0;
+      const id = setInterval(() => {
+        setLogLines((l) => {
+          if (idx >= TERMINAL_LOGS.length) {
+            clearInterval(id);
+            return l;
+          }
+          const line = TERMINAL_LOGS[idx];
+          idx += 1;
+          return [...l, line];
+        });
+      }, 300);
+      return () => clearInterval(id);
+    }
+  }, [ended, solved, puzzle.daemons.length]);
+
   const handleCellClick = useCallback(
     (r: number, c: number) => {
       if (ended || selection.length >= bufferSize) return;
@@ -464,12 +518,23 @@ export default function PuzzlePage() {
             <div className={indexStyles["description-separator"]}></div>
           </Col>
         </Row>
+        <Row className="mb-3">
+          <Col xs={6} lg={4}>
+            <div className={styles["timer-box"]}>BREACH TIME REMAINING: {timeLeft}s</div>
+          </Col>
+          <Col xs={6} lg={{ span: 4, offset: 4 }} className="text-lg-right">
+            <div className={styles["buffer-box"]}>BUFFER: {sequence}</div>
+          </Col>
+        </Row>
         <Row>
           <Col xs={12} lg={8}>
             <p className={styles.description}>
               INITIATE BREACH PROTOCOL - TIME TO FLATLINE THESE DAEMONS, CHOOM.
             </p>
-            <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })}>
+            <div className={cz(styles["grid-box"], {
+              [styles.pulse]: breachFlash,
+              [styles["fade-out"]]: ended && solved.size === puzzle.daemons.length,
+            })}>
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
@@ -511,7 +576,10 @@ export default function PuzzlePage() {
             </div>
           </Col>
           <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={cz(styles["daemon-box"], { [styles.pulse]: breachFlash })}>
+            <div className={cz(styles["daemon-box"], {
+              [styles.pulse]: breachFlash,
+              [styles["fade-out"]]: ended && solved.size === puzzle.daemons.length,
+            })}>
               <div className={styles["daemon-box__header"]}>
                 <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
               </div>
@@ -565,6 +633,16 @@ export default function PuzzlePage() {
             </p>
           </Col>
         </Row>
+        {ended && solved.size === puzzle.daemons.length && (
+          <div className={styles["terminal-overlay"]}>
+            <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
+            {logLines.length === TERMINAL_LOGS.length && (
+              <button className={styles["exit-button"]} onClick={newPuzzle}>
+                EXIT INTERFACE
+              </button>
+            )}
+          </div>
+        )}
       </Container>
     </Layout>
   );

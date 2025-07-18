@@ -2,11 +2,12 @@
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss/mixins/_breakpoints";
 
-$color-highlight: #e0f28e;
+$color-highlight: #d1ed57;
 $color-bg: #0f0c17;
-$color-lighter-bg: #292c3a;
+$color-lighter-bg: #000000;
 $color-error: #f55956;
-$color-success: #56f5a6;
+$color-success: #00ff9c;
+$color-active: #00e6ff;
 
 @mixin body-font {
   font-family: "Rajdhani", Calibri, Candara, Segoe, Segoe UI, Optima, Arial,
