@@ -45,7 +45,7 @@ export default function PlayPuzzlePage() {
       })
       .catch((err) => {
         if (err.message === 'notfound') {
-          setFeedback({ msg: 'Puzzle not found.', type: 'error' });
+          setFeedback({ msg: 'Puzzle not found or has expired.', type: 'error' });
         } else if (err.message === 'dberr') {
           console.error('Database error:', err);
           setFeedback({ msg: 'Failed to load puzzle due to database error.', type: 'error' });
