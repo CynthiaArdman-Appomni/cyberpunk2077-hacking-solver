@@ -1,7 +1,7 @@
 # cyberpunk-2077-hacking-solver
 
 A web-based solver for the Cyberpunk 2077 Breach Protocol hacking minigame. [**Try it online.**](https://cyberpunk-hacker.com/)
-A GM puzzle generator is available at /gm where you can configure grid size, time limit and daemon details.
+A GM puzzle generator is available at /gm where you can configure grid size, time limit and daemon details. After generating a puzzle, a shareable link is provided so you can play it later or send it to friends.
 
 ![](https://raw.githubusercontent.com/cxcorp/cyberpunk2077-hacking-solver/main/doc-images/screencap.gif)
 
