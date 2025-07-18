@@ -48,7 +48,7 @@ const PrivacyPage = () => (
 
               <hr />
               <p>
-                <Link href="/">
+                <Link href="/solver">
                   <a className={styles.backlink}>{"< "}Back</a>
                 </Link>
               </p>
