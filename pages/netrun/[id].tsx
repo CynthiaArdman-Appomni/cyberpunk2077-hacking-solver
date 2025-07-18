@@ -12,6 +12,7 @@ import indexStyles from "../../styles/Index.module.scss";
 import styles from "../../styles/PuzzleGenerator.module.scss";
 import { Pos, Puzzle } from "../../lib/puzzleGenerator";
 import { StoredPuzzle } from "../../services/puzzleStore";
+import { getOrCreateTimer, setTimerStart } from "../../services/timerStore";
 
 export default function PlayPuzzlePage() {
   const router = useRouter();
@@ -39,22 +40,35 @@ export default function PlayPuzzlePage() {
         const data = await res.json();
         setPuzzle(data);
         setTimeLimit(data.timeLimit);
-        if (data.startTime) {
-          const start = new Date(data.startTime).getTime();
-          const remaining = Math.max(
-            0,
-            data.timeLimit - Math.floor((Date.now() - start) / 1000)
-          );
-          setTimeRemaining(remaining);
-        } else {
-          setTimeRemaining(data.timeLimit);
-        }
         setBufferSize(data.bufferSize);
       })
       .catch(() =>
         setFeedback({ msg: 'Failed to load puzzle.', type: 'error' })
       );
   }, [id]);
+
+  useEffect(() => {
+    if (!id || !puzzle) return;
+    getOrCreateTimer(id as string, puzzle.timeLimit, puzzle.startTime || null)
+      .then((timer) => {
+        if (!timer) {
+          setTimeRemaining(puzzle.timeLimit);
+          return;
+        }
+        if (timer.start_time) {
+          const start = new Date(timer.start_time).getTime();
+          const remaining = Math.max(
+            0,
+            timer.duration - Math.floor((Date.now() - start) / 1000)
+          );
+          setPuzzle({ ...puzzle, startTime: timer.start_time });
+          setTimeRemaining(remaining);
+        } else {
+          setTimeRemaining(timer.duration);
+        }
+      })
+      .catch(() => setTimeRemaining(puzzle.timeLimit));
+  }, [id, puzzle]);
 
   useEffect(() => {
     if (ended || !puzzle || !puzzle.startTime) return;
@@ -166,6 +180,7 @@ export default function PlayPuzzlePage() {
         const start = new Date().toISOString();
         setPuzzle({ ...puzzle, startTime: start });
         setTimeRemaining(puzzle.timeLimit);
+        setTimerStart(id as string, start).catch(() => {});
       }
 
       const startRow = 0;
