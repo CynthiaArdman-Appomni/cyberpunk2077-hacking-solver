@@ -62,10 +62,24 @@ function generatePath(grid: string[][], length: number): Pos[] {
 
 function generateDaemons(grid: string[][], count = 3): string[][] {
   const daemons: string[][] = [];
+  const rows = grid.length;
+  const cols = grid[0].length;
   for (let i = 0; i < count; i++) {
-    const length = Math.random() < 0.5 ? 3 : 4;
-    const path = generatePath(grid, length);
-    daemons.push(pathToSequence(grid, path));
+    const length = Math.floor(Math.random() * 3) + 2; // 2-4
+    const horizontal = Math.random() < 0.5;
+    if (horizontal) {
+      const r = Math.floor(Math.random() * rows);
+      const cStart = Math.floor(Math.random() * (cols - length + 1));
+      daemons.push(grid[r].slice(cStart, cStart + length));
+    } else {
+      const c = Math.floor(Math.random() * cols);
+      const rStart = Math.floor(Math.random() * (rows - length + 1));
+      const seq: string[] = [];
+      for (let j = 0; j < length; j++) {
+        seq.push(grid[rStart + j][c]);
+      }
+      daemons.push(seq);
+    }
   }
   return daemons;
 }
@@ -129,7 +143,7 @@ export default function PuzzlePage() {
           const recent = seq.slice(seq.length - daemon.length);
           if (recent.join(" ") === daemon.join(" ")) {
             solvedSet.add(idx);
-            setFeedback({ msg: "Daemon breached!", type: "success" });
+            setFeedback({ msg: "DAEMON BREACHED!", type: "success" });
           }
         }
       });
@@ -217,7 +231,7 @@ export default function PuzzlePage() {
         />
       </Head>
       <Container as="main" className={indexStyles.main}>
-        <Row>
+        <Row className="align-items-center">
           <Col>
             <MainTitle className={indexStyles.title} />
             <h2 className={indexStyles.description}>
@@ -275,7 +289,7 @@ export default function PuzzlePage() {
 
             </div>
           </Col>
-          <Col xs={12} lg={4}>
+          <Col xs={12} lg={4} className="d-flex justify-content-center">
             <div className={styles["daemon-box"]}>
               <div className={styles["daemon-box__header"]}>
                 <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
