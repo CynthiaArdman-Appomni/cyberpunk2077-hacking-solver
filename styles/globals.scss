@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Oxanium:wght@600&display=swap");
 @import "~bootstrap/scss/bootstrap";
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
@@ -68,13 +69,8 @@ body {
   padding: 0;
   margin: 0;
   color: #fff;
-  background-color: rgb(25, 17, 25);
-  background: linear-gradient(
-    176deg,
-    rgba(25, 17, 25, 1) 0%,
-    rgba(13, 15, 17, 1) 100%
-  );
-
+  background-color: $color-bg;
+  background: linear-gradient(176deg, $color-bg 0%, #000 100%);
   // calibri
   @include body-font;
   font-weight: 400;

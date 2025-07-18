@@ -164,6 +164,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 
   &.active {
     box-shadow: 0 0 10px $neon, 0 0 20px $neon;
+    animation: glitch 0.3s;
   }
 
   &.dim {
@@ -174,6 +175,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     background: lighten($neon, 10%);
     color: $bgcolor;
     box-shadow: 0 0 20px $neon;
+    animation: glitch 0.3s;
   }
 
   &.solution {
@@ -201,6 +203,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 
   &:hover:not(.selected) {
     box-shadow: 0 0 6px $neon;
+    animation: glitch 0.3s;
   }
 
   &.invalid {
@@ -234,7 +237,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     &.solved {
       border-color: $color-success;
       color: $color-success;
-      animation: flash-success 0.5s;
+      animation: flash-red 0.2s, flash-success 0.5s 0.2s;
       text-decoration: line-through;
 
       &::after {

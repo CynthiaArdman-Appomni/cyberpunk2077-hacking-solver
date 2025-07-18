@@ -17,3 +17,33 @@ $color-success: #56f5a6;
   font-family: "Rajdhani Mod", Meno, Consolas, monospace;
   font-weight: 500;
 }
+
+@mixin cyber-font {
+  font-family: 'Orbitron', 'Oxanium', 'Rajdhani', sans-serif;
+  text-transform: uppercase;
+}
+
+@keyframes glitch {
+  0% {
+    transform: none;
+    filter: none;
+  }
+  20% {
+    transform: translateX(-2px);
+    filter: drop-shadow(0 0 2px #ff0033);
+  }
+  40% {
+    transform: translateX(2px);
+  }
+  60% {
+    transform: translateX(-2px);
+    filter: drop-shadow(0 0 2px #ff0033);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}

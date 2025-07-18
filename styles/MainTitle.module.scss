@@ -2,6 +2,8 @@
 
 .title {
   margin-left: -3px;
+  @include cyber-font;
+  text-shadow: 0 0 8px $color-highlight;
   margin-bottom: 3rem;
   line-height: 1.15;
   color: $color-highlight;

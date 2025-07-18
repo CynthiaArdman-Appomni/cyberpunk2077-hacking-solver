@@ -12,7 +12,7 @@ const MainTitle = ({ className, as = "h1" }: Props) => {
   return (
     <Tag className={[styles.title, className].filter((s) => s).join(" ")}>
       <Link href="/solver">
-        <a>Cyberpunk 2077 Hacking Minigame Solver</a>
+        <a>NIGHT CITY RP NETRUN PROTOCOL</a>
       </Link>
     </Tag>
   );
