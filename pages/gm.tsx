@@ -383,12 +383,24 @@ export default function GMPage() {
             {puzzleId && (
               <Form.Group className="mb-2" controlId="share">
                 <Form.Label>Share Link</Form.Label>
-                <Form.Control
-                  readOnly
-                  type="text"
-                  value={`https://ncrpdive.com/netrun/${puzzleId}`}
-                  onFocus={(e) => e.currentTarget.select()}
-                />
+                <div className="d-flex">
+                  <Form.Control
+                    readOnly
+                    type="text"
+                    value={`https://ncrpdive.com/netrun/${puzzleId}`}
+                    onFocus={(e) => e.currentTarget.select()}
+                  />
+                  <Button
+                    className="ms-2"
+                    onClick={() => {
+                      navigator.clipboard.writeText(
+                        `https://ncrpdive.com/netrun/${puzzleId}`
+                      );
+                    }}
+                  >
+                    Copy Link
+                  </Button>
+                </div>
               </Form.Group>
             )}
           </Col>
