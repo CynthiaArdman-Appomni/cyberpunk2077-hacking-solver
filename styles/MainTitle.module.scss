@@ -8,10 +8,11 @@
   line-height: 1.15;
   color: $color-highlight;
 
-  font-size: 3rem;
+  font-size: 3.5rem;
+  letter-spacing: 0.1em;
 
   @include media-breakpoint-up(sm) {
-    font-size: 4rem;
+    font-size: 4.5rem;
   }
 }
 

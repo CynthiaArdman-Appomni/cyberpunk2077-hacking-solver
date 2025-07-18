@@ -22,6 +22,9 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  &.net-dive {
+    animation: net-dive 0.8s ease-out;
+  }
 }
 
 .title {
@@ -79,7 +82,8 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     flex-direction: column;
     flex: 1 1 auto;
     justify-content: center;
-    padding: 2rem 10%;
+    align-items: center;
+    padding: 1rem;
   }
 }
 
@@ -118,7 +122,8 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     flex-direction: column;
     flex: 1 1 auto;
     justify-content: center;
-    padding: 2rem 10%;
+    align-items: center;
+    padding: 1rem;
   }
 }
 
@@ -163,9 +168,9 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   transition: box-shadow 0.2s, background 0.2s, color 0.2s;
 
   &.active {
-    background: rgba($neon, 0.2);
-    box-shadow: 0 0 15px $neon, 0 0 30px $neon;
-    animation: glitch 0.3s;
+    background: rgba($neon, 0.35);
+    box-shadow: 0 0 20px $neon, 0 0 40px $neon;
+    animation: pulse-neon 1s infinite alternate;
   }
 
   &.dim {
@@ -203,8 +208,8 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   }
 
   &:hover:not(.selected) {
-    box-shadow: 0 0 6px $neon;
-    transform: scale(1.05);
+    box-shadow: 0 0 8px $neon;
+    transform: scale(1.1);
     animation: glitch 0.3s;
   }
 
@@ -244,6 +249,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
       animation: flash-red 0.2s, flash-success 0.5s 0.2s, subtle-glitch 2s infinite;
       text-decoration: line-through;
       text-decoration-thickness: 2px;
+      position: relative;
 
       &::after {
         content: 'BREACHED';
@@ -303,10 +309,27 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   text-shadow: 0 0 10px $color-success, 0 0 20px $color-success;
   pointer-events: none;
   opacity: 0;
+  &::before,
+  &::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    opacity: 0.8;
+  }
+  &::before {
+    color: magenta;
+    animation: breach-glitch-before 1.5s forwards;
+  }
+  &::after {
+    color: cyan;
+    animation: breach-glitch-after 1.5s forwards;
+  }
 }
 
 .breach-notify.show {
-  animation: breach-flash 1.5s forwards, glitch 0.4s;
+  animation: breach-flash 1.5s forwards, glitch 0.3s 6;
 }
 
 .grid-box.pulse,
@@ -324,4 +347,27 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   0% { box-shadow: 0 0 0 $neon; }
   50% { box-shadow: 0 0 20px $neon; }
   100% { box-shadow: 0 0 0 $neon; }
+}
+
+@keyframes net-dive {
+  0% { transform: scale(2); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes breach-glitch-before {
+  0% { transform: translate(0, 0); opacity: 0.8; }
+  20% { transform: translate(-2px, -2px); opacity: 0.5; }
+  40% { transform: translate(2px, 2px); opacity: 0.8; }
+  60% { transform: translate(-2px, 2px); opacity: 0.5; }
+  80% { transform: translate(2px, -2px); opacity: 0.8; }
+  100% { transform: translate(0, 0); opacity: 0; }
+}
+
+@keyframes breach-glitch-after {
+  0% { transform: translate(0, 0); opacity: 0.8; }
+  20% { transform: translate(2px, 2px); opacity: 0.5; }
+  40% { transform: translate(-2px, -2px); opacity: 0.8; }
+  60% { transform: translate(2px, -2px); opacity: 0.5; }
+  80% { transform: translate(-2px, 2px); opacity: 0.8; }
+  100% { transform: translate(0, 0); opacity: 0; }
 }

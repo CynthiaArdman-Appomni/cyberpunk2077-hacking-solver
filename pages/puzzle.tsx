@@ -242,6 +242,14 @@ export default function PuzzlePage() {
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
   const [ended, setEnded] = useState(false);
   const [breachFlash, setBreachFlash] = useState(false);
+  const [dive, setDive] = useState(true);
+  const breachAudio = useRef<HTMLAudioElement | null>(null);
+  const successAudio = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const t = setTimeout(() => setDive(false), 800);
+    return () => clearTimeout(t);
+  }, []);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
@@ -332,6 +340,7 @@ export default function PuzzlePage() {
       });
       if (solvedAny) {
         setFeedback({ msg: "DAEMON BREACHED!", type: "success" });
+        breachAudio.current?.play();
         setBreachFlash(true);
         setTimeout(() => setBreachFlash(false), 1500);
       } else if (interrupted) {
@@ -401,6 +410,7 @@ export default function PuzzlePage() {
       if (newSolved.size === puzzle.daemons.length) {
         setEnded(true);
         setFeedback({ msg: "Puzzle solved!", type: "success" });
+        successAudio.current?.play();
       } else if (newSel.length >= bufferSize) {
         setEnded(true);
         const solvedCount = newSolved.size;
@@ -430,9 +440,11 @@ export default function PuzzlePage() {
           rel="stylesheet"
         />
       </Head>
-      <Container as="main" className={indexStyles.main}>
+      <Container as="main" className={cz(indexStyles.main, dive && styles['net-dive'])}>
+        <audio ref={breachAudio} src="/beep.mp3" />
+        <audio ref={successAudio} src="/success.mp3" />
         {breachFlash && (
-          <div className={`${styles['breach-notify']} ${styles.show}`}>DAEMON BREACHED</div>
+          <div className={`${styles['breach-notify']} ${styles.show}`} data-text="DAEMON BREACHED">DAEMON BREACHED</div>
         )}
         <Row className="align-items-center">
           <Col>
