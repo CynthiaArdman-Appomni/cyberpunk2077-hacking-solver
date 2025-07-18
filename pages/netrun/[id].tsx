@@ -11,12 +11,13 @@ import Button from "../../components/Button";
 import indexStyles from "../../styles/Index.module.scss";
 import styles from "../../styles/PuzzleGenerator.module.scss";
 import { Pos, Puzzle } from "../../lib/puzzleGenerator";
+import { StoredPuzzle } from "../../services/puzzleStore";
 
 export default function PlayPuzzlePage() {
   const router = useRouter();
   const { id } = router.query;
 
-  const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
+  const [puzzle, setPuzzle] = useState<StoredPuzzle | null>(null);
   const [timeLimit, setTimeLimit] = useState(0);
   const [bufferSize, setBufferSize] = useState(0);
   const [selection, setSelection] = useState<Pos[]>([]);
@@ -32,28 +33,39 @@ export default function PlayPuzzlePage() {
 
   useEffect(() => {
     if (!id) return;
-    fetch(`/api/puzzle/${id}`).then(async (res) => {
-      if (!res.ok) return;
-      const data = await res.json();
-      setPuzzle(data);
-      setTimeLimit(data.timeLimit);
-      setTimeRemaining(data.timeLimit);
-      setBufferSize(data.bufferSize);
-    });
+    fetch(`/api/puzzle/${id}`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error('load failed');
+        const data = await res.json();
+        setPuzzle(data);
+        setTimeLimit(data.timeLimit);
+        const start = new Date(data.startTime).getTime();
+        const remaining = Math.max(
+          0,
+          data.timeLimit - Math.floor((Date.now() - start) / 1000)
+        );
+        setTimeRemaining(remaining);
+        setBufferSize(data.bufferSize);
+      })
+      .catch(() =>
+        setFeedback({ msg: 'Failed to load puzzle.', type: 'error' })
+      );
   }, [id]);
 
   useEffect(() => {
-    if (ended) return;
+    if (ended || !puzzle) return;
     const handle = setInterval(() => {
-      setTimeRemaining((t) => {
-        if (t <= 1) {
-          clearInterval(handle);
-          setEnded(true);
-          setFeedback({ msg: "TIME UP", type: "error" });
-          return 0;
-        }
-        return t - 1;
-      });
+      const start = new Date(puzzle.startTime).getTime();
+      const remaining = Math.max(
+        0,
+        puzzle.timeLimit - Math.floor((Date.now() - start) / 1000)
+      );
+      if (remaining <= 0) {
+        setEnded(true);
+        setFeedback({ msg: "TIME UP", type: "error" });
+        clearInterval(handle);
+      }
+      setTimeRemaining(remaining);
     }, 1000);
     return () => clearInterval(handle);
   }, [ended, puzzle]);
@@ -230,6 +242,9 @@ export default function PlayPuzzlePage() {
         <Row>
           <Col xs={12} lg={8}>
             <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
+            {puzzle && (
+              <p className={styles.description}>DIFFICULTY: {puzzle.difficulty}</p>
+            )}
             <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
@@ -296,7 +311,24 @@ export default function PlayPuzzlePage() {
         <Row>
           <Col lg={8}>
             <div className={styles.buttons}>
-              <Button onClick={() => { setSelection([]); setSolved(new Set()); setFeedback({ msg: "" }); setEnded(false); setTimeRemaining(timeLimit); }}>Reset Puzzle</Button>
+              <Button
+                onClick={() => {
+                  setSelection([]);
+                  setSolved(new Set());
+                  setFeedback({ msg: "" });
+                  setEnded(false);
+                  if (puzzle) {
+                    const start = new Date(puzzle.startTime).getTime();
+                    const remaining = Math.max(
+                      0,
+                      puzzle.timeLimit - Math.floor((Date.now() - start) / 1000)
+                    );
+                    setTimeRemaining(remaining);
+                  }
+                }}
+              >
+                Reset Puzzle
+              </Button>
             </div>
           </Col>
         </Row>
