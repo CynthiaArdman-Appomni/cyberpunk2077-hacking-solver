@@ -231,7 +231,15 @@ export default function PlayPuzzlePage() {
           <title>Puzzle</title>
         </Head>
         <Container as="main" className={indexStyles.main}>
-          <p className={styles.description}>Loading...</p>
+          {feedback.msg ? (
+            <p
+              className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ''}`}
+            >
+              {feedback.msg}
+            </p>
+          ) : (
+            <p className={styles.description}>Loading...</p>
+          )}
         </Container>
       </Layout>
     );
