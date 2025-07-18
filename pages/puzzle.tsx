@@ -2,7 +2,7 @@ import React, {
   useState,
   useCallback,
   useRef,
-  useLayoutEffect,
+  useEffect,
 } from "react";
 import Head from "next/head";
 import { Container, Row, Col } from "react-bootstrap";
@@ -277,11 +277,11 @@ export default function PuzzlePage() {
     setLines(newLines);
   }, [selection]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     updateLines();
   }, [updateLines, puzzle]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     window.addEventListener("resize", updateLines);
     return () => window.removeEventListener("resize", updateLines);
   }, [updateLines]);
