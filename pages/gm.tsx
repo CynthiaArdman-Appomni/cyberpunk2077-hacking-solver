@@ -2,7 +2,6 @@ import React, {
   useState,
   useCallback,
   useRef,
-  useLayoutEffect,
   useEffect,
 } from "react";
 import Head from "next/head";
@@ -334,11 +333,11 @@ export default function GMPage() {
     setLines(newLines);
   }, [selection]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     updateLines();
   }, [updateLines, puzzle]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     window.addEventListener("resize", updateLines);
     return () => window.removeEventListener("resize", updateLines);
   }, [updateLines]);
