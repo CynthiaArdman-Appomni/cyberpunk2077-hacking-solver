@@ -33,6 +33,7 @@ export default function GMPage() {
   const startRow = 0;
   const [difficulty, setDifficulty] = useState("Easy");
   const [timeLimit, setTimeLimit] = useState("60");
+  const [startOnFirstClick, setStartOnFirstClick] = useState(false);
 
   const [puzzle, setPuzzle] = useState<StoredPuzzle | null>(null);
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
@@ -73,6 +74,7 @@ export default function GMPage() {
         body: JSON.stringify({
           difficulty,
           timeLimit: tl,
+          startOnFirstClick,
         }),
       });
       if (!res.ok) throw new Error('fail');
@@ -90,14 +92,18 @@ export default function GMPage() {
     setEnded(false);
     setSolutionPath(null);
     setSolutionSequence("");
-    const start = new Date(p.startTime).getTime();
-    const remaining = Math.max(0, tl - Math.floor((Date.now() - start) / 1000));
+    const remaining = p.startTime
+      ? Math.max(
+          0,
+          tl - Math.floor((Date.now() - new Date(p.startTime).getTime()) / 1000)
+        )
+      : tl;
     setTimeRemaining(remaining);
     setDebugInfo(`Solution path: ${pathString}`);
     } catch (e) {
       setFeedback({ msg: 'Failed to generate puzzle.', type: 'error' });
     }
-  }, [difficulty, timeLimit]);
+  }, [difficulty, timeLimit, startOnFirstClick]);
 
   const resetSelection = useCallback(() => {
     setSelection([]);
@@ -109,22 +115,26 @@ export default function GMPage() {
     if (puzzle) {
       const tl = parseNumber(timeLimit);
       if (tl !== null) {
-        const start = new Date(puzzle.startTime).getTime();
-        const remaining = Math.max(
-          0,
-          tl - Math.floor((Date.now() - start) / 1000)
-        );
-        setTimeRemaining(remaining);
+        if (puzzle.startTime) {
+          const start = new Date(puzzle.startTime).getTime();
+          const remaining = Math.max(
+            0,
+            tl - Math.floor((Date.now() - start) / 1000)
+          );
+          setTimeRemaining(remaining);
+        } else {
+          setTimeRemaining(tl);
+        }
       }
     }
   }, [timeLimit, puzzle]);
 
   useEffect(() => {
     newPuzzle();
-  }, [difficulty, timeLimit, newPuzzle]);
+  }, [difficulty, timeLimit, startOnFirstClick, newPuzzle]);
 
   useEffect(() => {
-    if (ended || !puzzle) return;
+    if (ended || !puzzle || !puzzle.startTime) return;
     const id = setInterval(() => {
       const start = new Date(puzzle.startTime).getTime();
       const tl = parseNumber(timeLimit) || puzzle.timeLimit;
@@ -250,6 +260,13 @@ export default function GMPage() {
     (r: number, c: number) => {
       if (ended || selection.length >= bufferSize) return;
 
+      if (puzzle && !puzzle.startTime) {
+        const start = new Date().toISOString();
+        setPuzzle({ ...puzzle, startTime: start });
+        const tl = parseNumber(timeLimit) || puzzle.timeLimit;
+        setTimeRemaining(tl);
+      }
+
       const newSel = selection.slice();
       if (newSel.length === 0) {
         if (r !== startRow) {
@@ -363,6 +380,18 @@ export default function GMPage() {
                   value={timeLimit}
                   onChange={(e) => setTimeLimit(e.currentTarget.value)}
                 />
+              </Form.Group>
+              <Form.Group className="mb-2" controlId="startMode">
+                <Form.Label>Start timer</Form.Label>
+                <Form.Select
+                  value={startOnFirstClick ? "firstClick" : "immediate"}
+                  onChange={(e) =>
+                    setStartOnFirstClick(e.currentTarget.value === "firstClick")
+                  }
+                >
+                  <option value="immediate">Immediately</option>
+                  <option value="firstClick">On first click</option>
+                </Form.Select>
               </Form.Group>
               <Button className="mt-2" onClick={newPuzzle}>Generate Puzzle</Button>
             </Form>
