@@ -47,6 +47,7 @@ export default function GMPage() {
   const [solutionPath, setSolutionPath] = useState<Pos[] | null>(null);
   const [solutionSequence, setSolutionSequence] = useState("");
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
+  const [solutionCount, setSolutionCount] = useState<number | null>(null);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
@@ -83,6 +84,8 @@ export default function GMPage() {
       const id: string = data.id;
       const pathString = p.path.map((pos) => `(${pos.r},${pos.c})`).join(" -> ");
 
+      setSolutionCount(p.solutionCount);
+
       setPuzzle(p);
       setPuzzleId(id);
       setBufferSize(p.bufferSize);
@@ -99,7 +102,7 @@ export default function GMPage() {
         )
       : tl;
     setTimeRemaining(remaining);
-    setDebugInfo(`Solution path: ${pathString}`);
+    setDebugInfo(`Solution path: ${pathString} | Solutions: ${p.solutionCount}`);
     } catch (e) {
       setFeedback({ msg: 'Failed to generate puzzle.', type: 'error' });
     }
@@ -424,7 +427,12 @@ export default function GMPage() {
           <Col xs={12} lg={8}>
             <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
             {puzzle && (
-              <p className={styles.description}>DIFFICULTY: {puzzle.difficulty}</p>
+              <>
+                <p className={styles.description}>DIFFICULTY: {puzzle.difficulty}</p>
+                {solutionCount !== null && (
+                  <p className={styles.description}>SOLUTIONS: {solutionCount}</p>
+                )}
+              </>
             )}
             <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
               <div className={styles["grid-box__header"]}>
