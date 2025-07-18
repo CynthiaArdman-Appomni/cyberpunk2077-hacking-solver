@@ -286,7 +286,7 @@ export default function GMPage() {
         });
       }
     },
-    [ended, selection, startRow, checkDaemons, puzzle.daemons.length, solved.size]
+    [ended, selection, startRow, checkDaemons, puzzle?.daemons.length, solved.size]
   );
 
   if (!puzzle) {
