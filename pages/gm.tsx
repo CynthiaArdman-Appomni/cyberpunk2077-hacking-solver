@@ -303,10 +303,10 @@ export default function GMPage() {
   }
 
   const sequence = selection.map((p) => puzzle.grid[p.r][p.c]).join(" ");
-  const gridStyle: React.CSSProperties = {
+  const gridStyle = {
     "--cols": puzzle.grid[0].length.toString(),
     "--cell-size": `${cellSize}px`,
-  };
+  } as React.CSSProperties;
 
   return (
     <Layout>
