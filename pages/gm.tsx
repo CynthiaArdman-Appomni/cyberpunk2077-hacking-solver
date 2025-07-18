@@ -471,7 +471,10 @@ export default function GMPage() {
                     </li>
                   ))}
                 </ol>
-                <p className={styles.sequence}>{sequence}</p>
+                <p className={styles.sequence}>
+                  <span className={styles['sequence-label']}>Completed Sequence:</span>
+                  {sequence}
+                </p>
                 {solutionSequence && (
                   <p className={styles["solution-sequence"]}>{solutionSequence}</p>
                 )}

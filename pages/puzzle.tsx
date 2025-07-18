@@ -520,7 +520,10 @@ export default function PuzzlePage() {
                     </li>
                   ))}
                 </ol>
-                <p className={styles.sequence}>{sequence}</p>
+                <p className={styles.sequence}>
+                  <span className={styles['sequence-label']}>Completed Sequence:</span>
+                  {sequence}
+                </p>
                 {feedback.msg && (
                   <p
                     className={`${styles.feedback} ${
