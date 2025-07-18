@@ -8,7 +8,7 @@ const puzzles = new Map<string, StoredPuzzle>();
 const useSupabase = !!supabase;
 const useNeon = !!sql;
 
-export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible';
+export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible' | 'Unknown';
 
 export interface StoredPuzzle extends Puzzle {
   timeLimit: number;
@@ -86,8 +86,9 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
       const daemons = row.daemons as string[][];
       const timeLimit = row.duration as number;
       const startTime = row.start_time ? new Date(row.start_time).toISOString() : null;
-      const bufferSize = combineDaemons(daemons).length;
-      return { grid, daemons, bufferSize, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0 };
+      const solutionSeq = combineDaemons(daemons);
+      const bufferSize = solutionSeq.length;
+      return { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0 };
     } catch (e) {
       console.error('Database error:', e);
       throw e;
