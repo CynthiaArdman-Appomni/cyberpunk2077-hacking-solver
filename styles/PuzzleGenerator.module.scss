@@ -1,7 +1,7 @@
 @use "sass:color";
 @import "./common";
 
-$neon: #d1ed57;
+$neon: $color-highlight;
 $bgcolor: #0f0c17;
 $font-stack: "Orbitron", "Roboto", sans-serif;
 
@@ -169,7 +169,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   transition: box-shadow 0.2s, background 0.2s, color 0.2s;
 
   &.active {
-    background: rgba($neon, 0.55);
+    background: rgba($neon, 0.75);
     box-shadow: 0 0 25px $neon, 0 0 50px $neon;
     animation: pulse-neon 0.8s infinite alternate;
   }
