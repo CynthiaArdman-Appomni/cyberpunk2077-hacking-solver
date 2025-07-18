@@ -163,7 +163,8 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   transition: box-shadow 0.2s, background 0.2s, color 0.2s;
 
   &.active {
-    box-shadow: 0 0 10px $neon, 0 0 20px $neon;
+    background: rgba($neon, 0.2);
+    box-shadow: 0 0 15px $neon, 0 0 30px $neon;
     animation: glitch 0.3s;
   }
 
@@ -203,6 +204,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 
   &:hover:not(.selected) {
     box-shadow: 0 0 6px $neon;
+    transform: scale(1.05);
     animation: glitch 0.3s;
   }
 
@@ -220,11 +222,13 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   list-style: none;
   padding: 0;
   margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
   li {
-    display: inline-block;
+    display: block;
     margin: 0 0 1rem 0;
-    margin-right: 0.5rem;
     padding: 4px 6px;
     border: 1px solid $neon;
     color: $neon;
@@ -232,13 +236,14 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     font-size: 1rem;
     font-family: $font-stack;
     text-transform: uppercase;
-    white-space: nowrap;
+    text-align: center;
 
     &.solved {
       border-color: $color-success;
       color: $color-success;
-      animation: flash-red 0.2s, flash-success 0.5s 0.2s;
+      animation: flash-red 0.2s, flash-success 0.5s 0.2s, subtle-glitch 2s infinite;
       text-decoration: line-through;
+      text-decoration-thickness: 2px;
 
       &::after {
         content: 'BREACHED';
@@ -285,4 +290,38 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   :global(button) {
     margin: 0 0.5rem;
   }
+}
+
+.breach-notify {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: $font-stack;
+  font-size: 3rem;
+  color: $color-success;
+  text-shadow: 0 0 10px $color-success, 0 0 20px $color-success;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.breach-notify.show {
+  animation: breach-flash 1.5s forwards, glitch 0.4s;
+}
+
+.grid-box.pulse,
+.daemon-box.pulse {
+  animation: pulse-neon 1s;
+}
+
+@keyframes breach-flash {
+  0% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes pulse-neon {
+  0% { box-shadow: 0 0 0 $neon; }
+  50% { box-shadow: 0 0 20px $neon; }
+  100% { box-shadow: 0 0 0 $neon; }
 }
