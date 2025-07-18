@@ -13,6 +13,7 @@ $neon: #d1ed57;
 
   &:hover:not(:disabled) {
     box-shadow: 0 0 15px $neon;
+    animation: glitch 0.3s;
   }
 
   &:disabled {
