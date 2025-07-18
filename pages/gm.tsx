@@ -184,35 +184,56 @@ const ReportIssue = () => (
 
 export default function GMPage() {
   const startRow = 0;
-  const [rows, setRows] = useState(5);
-  const [cols, setCols] = useState(5);
-  const [daemonCount, setDaemonCount] = useState(3);
-  const [maxDaemonLen, setMaxDaemonLen] = useState(4);
-  const [timeLimit, setTimeLimit] = useState(60);
+  const [rows, setRows] = useState("5");
+  const [cols, setCols] = useState("5");
+  const [daemonCount, setDaemonCount] = useState("3");
+  const [maxDaemonLen, setMaxDaemonLen] = useState("4");
+  const [timeLimit, setTimeLimit] = useState("60");
 
   const [puzzle, setPuzzle] = useState(() =>
-    generatePuzzle(rows, cols, daemonCount, startRow, maxDaemonLen)
+    generatePuzzle(
+      parseInt(rows, 10),
+      parseInt(cols, 10),
+      parseInt(daemonCount, 10),
+      startRow,
+      parseInt(maxDaemonLen, 10)
+    )
   );
   const [bufferSize, setBufferSize] = useState(() => puzzle.bufferSize);
   const [selection, setSelection] = useState<Pos[]>([]);
   const [solved, setSolved] = useState<Set<number>>(new Set());
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
   const [ended, setEnded] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(timeLimit);
+  const [timeRemaining, setTimeRemaining] = useState(parseInt(timeLimit, 10));
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
   const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
 
+  const parseNumber = (value: string): number | null => {
+    const n = parseInt(value, 10);
+    return Number.isNaN(n) ? null : n;
+  };
+
   const newPuzzle = useCallback(() => {
-    const p = generatePuzzle(rows, cols, daemonCount, startRow, maxDaemonLen);
+    const r = parseNumber(rows);
+    const c = parseNumber(cols);
+    const dc = parseNumber(daemonCount);
+    const ml = parseNumber(maxDaemonLen);
+    const tl = parseNumber(timeLimit);
+
+    if (r === null || c === null || dc === null || ml === null || tl === null) {
+      return;
+    }
+
+    const p = generatePuzzle(r, c, dc, startRow, ml);
     setPuzzle(p);
     setBufferSize(p.bufferSize);
     setSelection([]);
     setSolved(new Set());
     setFeedback({ msg: "" });
     setEnded(false);
-    setTimeRemaining(timeLimit);
+    setTimeRemaining(tl);
   }, [rows, cols, daemonCount, startRow, maxDaemonLen, timeLimit]);
 
   const resetSelection = useCallback(() => {
@@ -220,8 +241,15 @@ export default function GMPage() {
     setSolved(new Set());
     setFeedback({ msg: "" });
     setEnded(false);
-    setTimeRemaining(timeLimit);
+    const tl = parseNumber(timeLimit);
+    if (tl !== null) {
+      setTimeRemaining(tl);
+    }
   }, [timeLimit]);
+
+  useEffect(() => {
+    newPuzzle();
+  }, [rows, cols, daemonCount, maxDaemonLen, timeLimit, newPuzzle]);
 
   useEffect(() => {
     if (ended) return;
@@ -372,23 +400,48 @@ export default function GMPage() {
             <Form className="mb-3">
               <Form.Group className="mb-2" controlId="rows">
                 <Form.Label>Rows</Form.Label>
-                <Form.Control type="number" min="1" value={rows} onChange={(e) => setRows(parseInt(e.currentTarget.value, 10) || 1)} />
+                <Form.Control
+                  type="number"
+                  min="1"
+                  value={rows}
+                  onChange={(e) => setRows(e.currentTarget.value)}
+                />
               </Form.Group>
               <Form.Group className="mb-2" controlId="cols">
                 <Form.Label>Columns</Form.Label>
-                <Form.Control type="number" min="1" value={cols} onChange={(e) => setCols(parseInt(e.currentTarget.value, 10) || 1)} />
+                <Form.Control
+                  type="number"
+                  min="1"
+                  value={cols}
+                  onChange={(e) => setCols(e.currentTarget.value)}
+                />
               </Form.Group>
               <Form.Group className="mb-2" controlId="daemonCount">
                 <Form.Label>Number of Daemons</Form.Label>
-                <Form.Control type="number" min="1" value={daemonCount} onChange={(e) => setDaemonCount(parseInt(e.currentTarget.value, 10) || 1)} />
+                <Form.Control
+                  type="number"
+                  min="1"
+                  value={daemonCount}
+                  onChange={(e) => setDaemonCount(e.currentTarget.value)}
+                />
               </Form.Group>
               <Form.Group className="mb-2" controlId="maxLen">
                 <Form.Label>Max Daemon Length</Form.Label>
-                <Form.Control type="number" min="2" value={maxDaemonLen} onChange={(e) => setMaxDaemonLen(parseInt(e.currentTarget.value, 10) || 2)} />
+                <Form.Control
+                  type="number"
+                  min="2"
+                  value={maxDaemonLen}
+                  onChange={(e) => setMaxDaemonLen(e.currentTarget.value)}
+                />
               </Form.Group>
               <Form.Group className="mb-2" controlId="timer">
                 <Form.Label>Timer (seconds)</Form.Label>
-                <Form.Control type="number" min="5" value={timeLimit} onChange={(e) => setTimeLimit(parseInt(e.currentTarget.value, 10) || 5)} />
+                <Form.Control
+                  type="number"
+                  min="5"
+                  value={timeLimit}
+                  onChange={(e) => setTimeLimit(e.currentTarget.value)}
+                />
               </Form.Group>
               <Button className="mt-2" onClick={newPuzzle}>Generate Puzzle</Button>
             </Form>
