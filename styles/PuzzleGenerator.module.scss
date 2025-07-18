@@ -2,6 +2,7 @@
 @import "./common";
 
 $neon: $color-highlight;
+$active-color: $color-active;
 $bgcolor: #0f0c17;
 $font-stack: "Orbitron", "Roboto", sans-serif;
 
@@ -170,9 +171,10 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   transition: box-shadow 0.2s, background 0.2s, color 0.2s;
 
   &.active {
-    background: rgba($neon, 0.75);
-    box-shadow: 0 0 25px $neon, 0 0 50px $neon;
-    animation: pulse-neon 0.8s infinite alternate;
+    background: rgba($active-color, 0.75);
+    border-color: $active-color;
+    box-shadow: 0 0 25px $active-color, 0 0 50px $active-color;
+    animation: pulse-glow 1.5s infinite alternate;
   }
 
   &.dim {
@@ -357,6 +359,30 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   animation: breach-flash 1.5s forwards, glitch 0.3s 6;
 }
 
+.fade-out {
+  animation: fade-out 0.5s forwards;
+}
+
+.terminal-log {
+  background-color: rgba(0, 0, 0, 0.9);
+  color: $color-success;
+  padding: 20px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  text-shadow: 0 0 6px $color-success;
+}
+
+.exit-button {
+  margin-top: 20px;
+  background: transparent;
+  border: 2px solid $color-success;
+  color: $color-success;
+  font-family: $font-stack;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
 .grid-box.pulse,
 .daemon-box.pulse {
   animation: pulse-neon 1s;
@@ -372,6 +398,11 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   0% { box-shadow: 0 0 0 $neon; }
   50% { box-shadow: 0 0 20px $neon; }
   100% { box-shadow: 0 0 0 $neon; }
+}
+
+@keyframes pulse-glow {
+  from { box-shadow: 0 0 5px $active-color; }
+  to { box-shadow: 0 0 15px $active-color; }
 }
 
 @keyframes net-dive {
@@ -395,6 +426,11 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   60% { transform: translate(2px, -2px); opacity: 0.5; }
   80% { transform: translate(-2px, 2px); opacity: 0.8; }
   100% { transform: translate(0, 0); opacity: 0; }
+}
+
+@keyframes fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 /* Responsive layout for puzzle generator pages */

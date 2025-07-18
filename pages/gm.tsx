@@ -6,6 +6,7 @@ import cz from "classnames";
 import Layout from "../components/Layout";
 import MainTitle from "../components/MainTitle";
 import Button from "../components/Button";
+import TerminalLog from "../components/TerminalLog";
 
 import indexStyles from "../styles/Index.module.scss";
 import styles from "../styles/PuzzleGenerator.module.scss";
@@ -48,6 +49,7 @@ export default function GMPage() {
   const [solutionSequence, setSolutionSequence] = useState("");
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [solutionCount, setSolutionCount] = useState<number | null>(null);
+  const [showLog, setShowLog] = useState(false);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
@@ -259,6 +261,13 @@ export default function GMPage() {
     return () => window.removeEventListener("resize", updateLines);
   }, [updateLines]);
 
+  useEffect(() => {
+    if (ended && solved.size === puzzle.daemons.length) {
+      const t = setTimeout(() => setShowLog(true), 500);
+      return () => clearTimeout(t);
+    }
+  }, [ended, solved, puzzle?.daemons.length]);
+
   const handleCellClick = useCallback(
     (r: number, c: number) => {
       if (ended || selection.length >= bufferSize) return;
@@ -431,17 +440,18 @@ export default function GMPage() {
                 )}
               </>
             )}
-            <div className={cz(styles['grid-box'], { [styles.pulse]: breachFlash })} ref={gridRef}>
-              <div className={styles['grid-box__header']}>
-                <h3 className={styles['grid-box__header_text']}>ENTER CODE MATRIX</h3>
-              </div>
-              <div className={styles['grid-box__inside']}>
-                <div className={styles.grid} style={gridStyle}>
-                  <svg className={styles['path-lines']} viewBox="0 0 100 100" preserveAspectRatio="none">
-                    {lines.map((line, idx) => (
-                      <line key={idx} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
-                    ))}
-                  </svg>
+            {!showLog && (
+              <div className={cz(styles['grid-box'], { [styles.pulse]: breachFlash, [styles['fade-out']]: ended && solved.size === puzzle?.daemons.length })} ref={gridRef}>
+                <div className={styles['grid-box__header']}>
+                  <h3 className={styles['grid-box__header_text']}>ENTER CODE MATRIX</h3>
+                </div>
+                <div className={styles['grid-box__inside']}>
+                  <div className={styles.grid} style={gridStyle}>
+                    <svg className={styles['path-lines']} viewBox="0 0 100 100" preserveAspectRatio="none">
+                      {lines.map((line, idx) => (
+                        <line key={idx} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
+                      ))}
+                    </svg>
                   {puzzle.grid.map((row, r) =>
                     row.map((val, c) => {
                       if (!cellRefs.current[r]) cellRefs.current[r] = [];
@@ -474,6 +484,8 @@ export default function GMPage() {
                 </div>
               </div>
             </div>
+            )}
+            {showLog && <TerminalLog onExit={() => setShowLog(false)} />}
           </div>
           <div className={styles.sidebar}>
             <div className={cz(styles['daemon-box'], { [styles.pulse]: breachFlash })}>

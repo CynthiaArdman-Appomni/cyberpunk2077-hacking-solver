@@ -11,6 +11,7 @@ import cz from "classnames";
 import Layout from "../components/Layout";
 import MainTitle from "../components/MainTitle";
 import Button from "../components/Button";
+import TerminalLog from "../components/TerminalLog";
 
 import indexStyles from "../styles/Index.module.scss";
 import styles from "../styles/PuzzleGenerator.module.scss";
@@ -243,6 +244,7 @@ export default function PuzzlePage() {
   const [ended, setEnded] = useState(false);
   const [breachFlash, setBreachFlash] = useState(false);
   const [dive, setDive] = useState(true);
+  const [showLog, setShowLog] = useState(false);
   const breachAudio = useRef<HTMLAudioElement | null>(null);
   const successAudio = useRef<HTMLAudioElement | null>(null);
 
@@ -250,6 +252,13 @@ export default function PuzzlePage() {
     const t = setTimeout(() => setDive(false), 800);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (ended && solved.size === puzzle.daemons.length) {
+      const t = setTimeout(() => setShowLog(true), 500);
+      return () => clearTimeout(t);
+    }
+  }, [ended, solved, puzzle.daemons.length]);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
@@ -465,7 +474,8 @@ export default function PuzzlePage() {
             <p className={styles.description}>
               INITIATE BREACH PROTOCOL - TIME TO FLATLINE THESE DAEMONS, CHOOM.
             </p>
-            <div className={cz(styles['grid-box'], { [styles.pulse]: breachFlash })}>
+            {!showLog && (
+              <div className={cz(styles['grid-box'], { [styles.pulse]: breachFlash, [styles['fade-out']]: ended && solved.size === puzzle.daemons.length })}>
               <div className={styles['grid-box__header']}>
                 <h3 className={styles['grid-box__header_text']}>ENTER CODE MATRIX</h3>
               </div>
@@ -501,6 +511,8 @@ export default function PuzzlePage() {
                 </div>
               </div>
             </div>
+            )}
+            {showLog && <TerminalLog onExit={() => setShowLog(false)} />}
           </div>
           <div className={styles.sidebar}>
             <div className={cz(styles['daemon-box'], { [styles.pulse]: breachFlash })}>
