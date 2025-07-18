@@ -97,8 +97,8 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .daemon-box {
   border: 2px solid $neon;
   background: color.adjust($color-lighter-bg, $alpha: -0.3);
-
   margin-bottom: 2rem;
+  height: 100%;
 
   &__header {
     font-size: 1.5rem;
@@ -240,7 +240,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     border: 1px solid $neon;
     color: $neon;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-family: $font-stack;
     text-transform: uppercase;
     text-align: center;
@@ -279,6 +279,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   margin-right: 0.25rem;
   color: lighten($neon, 10%);
   text-shadow: 0 0 6px lighten($neon, 10%);
+  display: block;
 }
 
 .solution-sequence {
@@ -301,12 +302,23 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   }
 }
 
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  :global(.form-group) {
+    margin-bottom: 0.5rem;
+  }
+}
+
 .buttons {
-  margin: 2rem 0;
-  text-align: center;
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 
   :global(button) {
-    margin: 0 0.5rem;
+    width: 100%;
   }
 }
 
@@ -388,25 +400,33 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 /* Responsive layout for puzzle generator pages */
 .layout {
   width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.puzzle-area {
+  margin-top: 0;
 }
 
 @media (min-width: 1024px) {
   .layout {
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    max-width: 1400px;
-    margin: 0 auto;
+    grid-template-columns: 1fr 2fr 1.2fr;
     gap: 20px;
     align-items: flex-start;
   }
   .controls {
     grid-column: 1;
+    align-self: flex-start;
   }
   .puzzle-area {
     grid-column: 2;
+    align-self: flex-start;
+    margin-top: 0;
   }
   .sidebar {
     grid-column: 3;
+    align-self: flex-start;
   }
 }
 

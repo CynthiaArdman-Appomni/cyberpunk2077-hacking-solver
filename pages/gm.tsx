@@ -357,8 +357,8 @@ export default function GMPage() {
         </Row>
         <div className={styles.layout}>
           <div className={styles.controls}>
-            <Form className="mb-3">
-              <Form.Group className="mb-2" controlId="difficulty">
+            <Form>
+              <Form.Group controlId="difficulty">
                 <Form.Label>Difficulty</Form.Label>
                 <Form.Select
                   value={difficulty}
@@ -370,7 +370,7 @@ export default function GMPage() {
                   <option>Impossible</option>
                 </Form.Select>
               </Form.Group>
-              <Form.Group className="mb-2" controlId="timer">
+              <Form.Group controlId="timer">
                 <Form.Label>Timer (seconds)</Form.Label>
                 <Form.Control
                   type="number"
@@ -379,7 +379,7 @@ export default function GMPage() {
                   onChange={(e) => setTimeLimit(e.currentTarget.value)}
                 />
               </Form.Group>
-              <Form.Group className="mb-2" controlId="startMode">
+              <Form.Group controlId="startMode">
                 <Form.Label>Start timer</Form.Label>
                 <Form.Select
                   value={startOnFirstClick ? "firstClick" : "immediate"}
@@ -391,10 +391,10 @@ export default function GMPage() {
                   <option value="firstClick">On first click</option>
                 </Form.Select>
               </Form.Group>
-              <Button className="mt-2" onClick={newPuzzle}>Generate Puzzle</Button>
+              <Button onClick={newPuzzle}>Generate Puzzle</Button>
             </Form>
             {puzzleId && (
-              <Form.Group className="mb-2" controlId="share">
+              <Form.Group controlId="share">
                 <Form.Label>Share Link</Form.Label>
                 <div className="d-flex">
                   <Form.Control
