@@ -61,18 +61,18 @@
   font-display: swap;
 }
 
-$color-highlight: #fcee09;
+$color-highlight: #d1ed57;
 
 html,
 body {
   padding: 0;
   margin: 0;
   color: #fff;
-  background-color: rgb(10, 10, 14);
+  background-color: rgb(25, 17, 25);
   background: linear-gradient(
     176deg,
-    rgba(10, 10, 14, 1) 0%,
-    rgba(0, 0, 0, 1) 100%
+    rgba(25, 17, 25, 1) 0%,
+    rgba(13, 15, 17, 1) 100%
   );
 
   // calibri
