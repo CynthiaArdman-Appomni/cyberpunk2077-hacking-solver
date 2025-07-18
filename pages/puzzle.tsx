@@ -1,4 +1,9 @@
-import React, { useState, useCallback } from "react";
+import React, {
+  useState,
+  useCallback,
+  useRef,
+  useLayoutEffect,
+} from "react";
 import Head from "next/head";
 import { Container, Row, Col } from "react-bootstrap";
 import cz from "classnames";
@@ -92,6 +97,10 @@ export default function PuzzlePage() {
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
   const [ended, setEnded] = useState(false);
 
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
+  const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
+
   const newPuzzle = useCallback(() => {
     const g = generateGrid();
     setGrid(g);
@@ -128,6 +137,35 @@ export default function PuzzlePage() {
     },
     [grid, daemons, solved]
   );
+
+  const updateLines = useCallback(() => {
+    if (!gridRef.current) return;
+    const containerRect = gridRef.current.getBoundingClientRect();
+    const newLines: { x1: number; y1: number; x2: number; y2: number }[] = [];
+    for (let i = 0; i < selection.length - 1; i++) {
+      const from = cellRefs.current[selection[i].r]?.[selection[i].c];
+      const to = cellRefs.current[selection[i + 1].r]?.[selection[i + 1].c];
+      if (!from || !to) continue;
+      const r1 = from.getBoundingClientRect();
+      const r2 = to.getBoundingClientRect();
+      newLines.push({
+        x1: r1.left - containerRect.left + r1.width / 2,
+        y1: r1.top - containerRect.top + r1.height / 2,
+        x2: r2.left - containerRect.left + r2.width / 2,
+        y2: r2.top - containerRect.top + r2.height / 2,
+      });
+    }
+    setLines(newLines);
+  }, [selection]);
+
+  useLayoutEffect(() => {
+    updateLines();
+  }, [updateLines, grid]);
+
+  useLayoutEffect(() => {
+    window.addEventListener("resize", updateLines);
+    return () => window.removeEventListener("resize", updateLines);
+  }, [updateLines]);
 
   const handleCellClick = useCallback(
     (r: number, c: number) => {
@@ -191,7 +229,12 @@ export default function PuzzlePage() {
         <Row>
           <Col lg={8}>
             <p className={styles.description}>Select grid cells to match one of the daemons.</p>
-            <div className={styles.grid}>
+            <div className={styles.grid} ref={gridRef}>
+              <svg className={styles["path-lines"]}>
+                {lines.map((l, idx) => (
+                  <line key={idx} x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2} />
+                ))}
+              </svg>
               {grid.map((row, r) =>
                 row.map((val, c) => {
                   const isSelected = selection.some((p) => p.r === r && p.c === c);
@@ -211,6 +254,10 @@ export default function PuzzlePage() {
                   return (
                     <div
                       key={`${r}-${c}`}
+                      ref={(el) => {
+                        if (!cellRefs.current[r]) cellRefs.current[r] = [];
+                        cellRefs.current[r][c] = el;
+                      }}
                       className={classes.join(" ")}
                       onClick={() => handleCellClick(r, c)}
                     >
@@ -260,7 +307,7 @@ export default function PuzzlePage() {
           <Col lg={8}>
             <p>
               THIS APP IS NOT AFFILIATED WITH CD PROJEKT RED OR CYBERPUNK 2077.
-              TRADEMARK "CYBERPUNK 2077" IS OWNED BY CD PROJEKT S.A.
+              TRADEMARK "CYBERPUNK 2077" IS OWNED BY CD PROJEKT <span>S.A.</span>
             </p>
           </Col>
         </Row>
