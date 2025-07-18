@@ -1,6 +1,75 @@
 import optimizeSequences from "./sequence-optimizer";
 import { getRootsAllValues } from "./tree";
 
+function scsTwo(a: number[], b: number[]): number[] {
+  const m = a.length;
+  const n = b.length;
+  const dp: number[][] = Array.from({ length: m + 1 }, () =>
+    Array(n + 1).fill(0)
+  );
+
+  for (let i = m; i >= 0; i--) {
+    for (let j = n; j >= 0; j--) {
+      if (i === m && j === n) {
+        dp[i][j] = 0;
+      } else if (i === m) {
+        dp[i][j] = n - j;
+      } else if (j === n) {
+        dp[i][j] = m - i;
+      } else if (a[i] === b[j]) {
+        dp[i][j] = 1 + dp[i + 1][j + 1];
+      } else {
+        dp[i][j] = 1 + Math.min(dp[i + 1][j], dp[i][j + 1]);
+      }
+    }
+  }
+
+  const result: number[] = [];
+  let i = 0;
+  let j = 0;
+  while (i < m || j < n) {
+    if (i === m) {
+      result.push(b[j++]);
+    } else if (j === n) {
+      result.push(a[i++]);
+    } else if (a[i] === b[j]) {
+      result.push(a[i]);
+      i++;
+      j++;
+    } else if (dp[i + 1][j] <= dp[i][j + 1]) {
+      result.push(a[i++]);
+    } else {
+      result.push(b[j++]);
+    }
+  }
+  return result;
+}
+
+function shortestCommonSupersequence(seqs: number[][]): number[] {
+  if (seqs.length === 0) return [];
+  const permutations = (arr: number[][]): number[][][] => {
+    if (arr.length <= 1) return [arr];
+    const res: number[][][] = [];
+    arr.forEach((item, idx) => {
+      const rest = arr.slice(0, idx).concat(arr.slice(idx + 1));
+      permutations(rest).forEach((perm) => res.push([item, ...perm]));
+    });
+    return res;
+  };
+
+  let best: number[] | null = null;
+  permutations(seqs).forEach((perm) => {
+    let current = perm[0];
+    for (let i = 1; i < perm.length; i++) {
+      current = scsTwo(current, perm[i]);
+    }
+    if (!best || current.length < best.length) {
+      best = current;
+    }
+  });
+  return best!;
+}
+
 export interface Coord {
   x: number;
   y: number;
@@ -82,6 +151,11 @@ export default function runSolver(
       includes: [sequence],
     })),
     ...getRootsAllValues(roots),
+    // ensure candidate that includes all sequences
+    {
+      result: shortestCommonSupersequence(sequences),
+      includes: sequences,
+    },
   ];
 
   const seqsThatFitInBuffer = values.filter(
