@@ -1,55 +1,32 @@
-import { supabase } from './supabaseClient';
-
 export interface PuzzleTimer {
   puzzle_id: string;
   start_time: string | null;
   duration: number;
 }
 
+const timers = new Map<string, PuzzleTimer>();
+
 export async function getOrCreateTimer(
   puzzleId: string,
   duration: number,
   startTime: string | null
 ): Promise<PuzzleTimer | null> {
-  if (!supabase) return null;
-  try {
-    const { data, error } = await supabase
-      .from('puzzle_timers')
-      .select('puzzle_id,start_time,duration')
-      .eq('puzzle_id', puzzleId)
-      .single();
-    if (!error && data) {
-      return data as PuzzleTimer;
-    }
-  } catch (e) {
-    console.error('timer fetch failed', e);
+  let timer = timers.get(puzzleId);
+  if (!timer) {
+    timer = { puzzle_id: puzzleId, start_time: startTime, duration };
+    timers.set(puzzleId, timer);
   }
-  try {
-    const { data, error } = await supabase
-      .from('puzzle_timers')
-      .insert([{ puzzle_id: puzzleId, start_time: startTime, duration }])
-      .select()
-      .single();
-    if (!error) {
-      return data as PuzzleTimer;
-    }
-  } catch (e) {
-    console.error('timer init failed', e);
-  }
-  return null;
+  return timer;
 }
 
 export async function setTimerStart(
   puzzleId: string,
   startTime: string
 ): Promise<void> {
-  if (!supabase) return;
-  try {
-    await supabase
-      .from('puzzle_timers')
-      .update({ start_time: startTime })
-      .eq('puzzle_id', puzzleId);
-  } catch (e) {
-    console.error('timer update failed', e);
+  const timer = timers.get(puzzleId);
+  if (timer) {
+    timer.start_time = startTime;
+  } else {
+    timers.set(puzzleId, { puzzle_id: puzzleId, start_time: startTime, duration: 0 });
   }
 }

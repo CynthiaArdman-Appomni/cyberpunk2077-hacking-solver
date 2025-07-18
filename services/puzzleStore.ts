@@ -1,11 +1,9 @@
 import { randomBytes } from 'crypto';
 import { generatePuzzle, combineDaemons, Puzzle } from '../lib/puzzleGenerator';
 import { countSolutions as countSolutionsForMatrix } from '../lib/bruteCounter';
-import { supabase } from './supabaseClient';
 import { sql, ensurePuzzleTable } from './neonClient';
 
 const puzzles = new Map<string, StoredPuzzle>();
-const useSupabase = !!supabase;
 const useNeon = !!process.env.NETLIFY_DATABASE_URL;
 
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible' | 'Unknown';
@@ -58,6 +56,7 @@ export async function createPuzzle(options: {
     difficulty,
     solutionCount,
   };
+  puzzles.set(id, stored);
   if (useNeon) {
     await ensurePuzzleTable();
     try {
@@ -67,10 +66,6 @@ export async function createPuzzle(options: {
     } catch (e) {
       console.error('Database error:', e);
     }
-  } else if (useSupabase) {
-    await supabase!.from('puzzles').insert([{ id, data: stored }]);
-  } else {
-    puzzles.set(id, stored);
   }
   return { id, puzzle: stored };
 }
@@ -80,28 +75,19 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
     await ensurePuzzleTable();
     try {
       const rows = await sql!`SELECT grid, daemons, start_time, duration FROM puzzles WHERE id = ${id}`;
-      if (rows.length === 0) return null;
-      const row = rows[0] as any;
-      const grid = row.grid as string[][];
-      const daemons = row.daemons as string[][];
-      const timeLimit = row.duration as number;
-      const startTime = row.start_time ? new Date(row.start_time).toISOString() : null;
-      const solutionSeq = combineDaemons(daemons);
-      const bufferSize = solutionSeq.length;
-      return { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0 };
+      if (rows.length > 0) {
+        const row = rows[0] as any;
+        const grid = row.grid as string[][];
+        const daemons = row.daemons as string[][];
+        const timeLimit = row.duration as number;
+        const startTime = row.start_time ? new Date(row.start_time).toISOString() : null;
+        const solutionSeq = combineDaemons(daemons);
+        const bufferSize = solutionSeq.length;
+        return { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0 };
+      }
     } catch (e) {
       console.error('Database error:', e);
-      throw e;
     }
-  }
-  if (useSupabase) {
-    const { data, error } = await supabase!
-      .from('puzzles')
-      .select('data')
-      .eq('id', id)
-      .single();
-    if (error || !data) return null;
-    return data.data as StoredPuzzle;
   }
   return puzzles.get(id) || null;
 }
