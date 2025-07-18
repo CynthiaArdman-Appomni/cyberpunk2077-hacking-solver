@@ -357,20 +357,51 @@ function sequencesEqual(a, b) {
     return true;
 }
 
-function checkDaemons() {
-    const seq = selection.map(p => currentGrid[p.r][p.c]);
-    daemonSequences.forEach((daemon, idx) => {
-        if (solvedDaemons.has(idx)) return;
-        if (seq.length >= daemon.length) {
-            const recent = seq.slice(seq.length - daemon.length);
-            if (sequencesEqual(recent, daemon)) {
-                solvedDaemons.add(idx);
-                const li = document.querySelector(`#daemons li[data-index="${idx}"]`);
-                if (li) li.classList.add('solved');
-                updateFeedback('Daemon breached!', 'success');
+function containsSubsequence(arr, subseq) {
+    let idx = 0;
+    for (const val of arr) {
+        if (val === subseq[idx]) {
+            idx++;
+            if (idx === subseq.length) return true;
+        }
+    }
+    return false;
+}
+
+function containsContiguous(arr, subseq) {
+    for (let i = 0; i <= arr.length - subseq.length; i++) {
+        let match = true;
+        for (let j = 0; j < subseq.length; j++) {
+            if (arr[i + j] !== subseq[j]) {
+                match = false;
+                break;
             }
         }
+        if (match) return true;
+    }
+    return false;
+}
+
+function checkDaemons() {
+    const seq = selection.map(p => currentGrid[p.r][p.c]);
+    let interrupted = false;
+    let solvedAny = false;
+    daemonSequences.forEach((daemon, idx) => {
+        if (solvedDaemons.has(idx)) return;
+        if (containsContiguous(seq, daemon)) {
+            solvedDaemons.add(idx);
+            const li = document.querySelector(`#daemons li[data-index="${idx}"]`);
+            if (li) li.classList.add('solved');
+            solvedAny = true;
+        } else if (containsSubsequence(seq, daemon)) {
+            interrupted = true;
+        }
     });
+    if (solvedAny) {
+        updateFeedback('Daemon breached!', 'success');
+    } else if (interrupted) {
+        updateFeedback('Sequence interrupted', 'error');
+    }
 }
 
 document.getElementById('newPuzzleBtn').addEventListener('click', newPuzzle);

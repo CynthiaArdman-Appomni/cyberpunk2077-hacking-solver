@@ -323,13 +323,36 @@ export default function GMPage() {
         return false;
       };
 
+      const containsContiguous = (arr: string[], subseq: string[]) => {
+        for (let i = 0; i <= arr.length - subseq.length; i++) {
+          let match = true;
+          for (let j = 0; j < subseq.length; j++) {
+            if (arr[i + j] !== subseq[j]) {
+              match = false;
+              break;
+            }
+          }
+          if (match) return true;
+        }
+        return false;
+      };
+
+      let interrupted = false;
+      let solvedAny = false;
       puzzle.daemons.forEach((daemon, idx) => {
         if (solvedSet.has(idx)) return;
-        if (containsSubsequence(seq, daemon)) {
+        if (containsContiguous(seq, daemon)) {
           solvedSet.add(idx);
-          setFeedback({ msg: "DAEMON BREACHED!", type: "success" });
+          solvedAny = true;
+        } else if (containsSubsequence(seq, daemon)) {
+          interrupted = true;
         }
       });
+      if (solvedAny) {
+        setFeedback({ msg: "DAEMON BREACHED!", type: "success" });
+      } else if (interrupted) {
+        setFeedback({ msg: "SEQUENCE INTERRUPTED", type: "error" });
+      }
       setSolved(solvedSet);
       return solvedSet;
     },
