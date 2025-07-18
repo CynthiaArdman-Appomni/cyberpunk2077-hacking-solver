@@ -79,7 +79,7 @@ function mergeWithOverlap(a: string[], b: string[]) {
   return merged;
 }
 
-function combineDaemons(daemons: string[][]) {
+export function combineDaemons(daemons: string[][]) {
   if (daemons.length === 0) return [] as string[];
   let seqs = daemons.map((d) => d.slice());
   while (seqs.length > 1) {
@@ -150,6 +150,7 @@ export interface Puzzle {
   daemons: string[][];
   bufferSize: number;
   path: Pos[];
+  solutionSeq: string[];
 }
 
 export function generatePuzzle(
@@ -183,5 +184,5 @@ export function generatePuzzle(
     grid[r][c] = solutionSeq[i];
   }
 
-  return { grid, daemons, bufferSize, path };
+  return { grid, daemons, bufferSize, path, solutionSeq };
 }

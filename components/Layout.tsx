@@ -14,12 +14,25 @@ function PrivacyLink() {
 function GitHubLink() {
   return (
     <a
-      href="https://github.com/cxcorp/cyberpunk2077-hacking-solver"
+      href="https://github.com/CynthiaArdman-Appomni/cyberpunk2077-hacking-solver"
       rel="noopener"
-      className={styles["github-link"]}
+      className={styles["footer-link"]}
       target="_blank"
     >
-      GitHub
+      📂 View the code or report issues on GitHub
+    </a>
+  );
+}
+
+function DiscordLink() {
+  return (
+    <a
+      href="https://discord.gg/ncrp"
+      target="_blank"
+      rel="noopener"
+      className={styles["footer-link"]}
+    >
+      Enjoying the dive, Netrunner? Join Night City RP!
     </a>
   );
 }
@@ -38,6 +51,7 @@ const Layout: FC = ({ children }) => {
           <Container>
             <Row>
               <Col className={styles.footer__content}>
+                <DiscordLink />
                 <GitHubLink />
                 <PrivacyLink />
                 <Copyright className={styles.copyright} />
