@@ -1,10 +1,12 @@
 import { neon } from '@netlify/neon';
 
-export const sql = neon(); // automatically uses NETLIFY_DATABASE_URL
+const connectionString = process.env.NETLIFY_DATABASE_URL;
+
+export const sql = connectionString ? neon(connectionString) : null;
 
 let initialized = false;
 export async function ensurePuzzleTable() {
-  if (initialized) return;
+  if (!sql || initialized) return;
   await sql`\
 CREATE TABLE IF NOT EXISTS puzzles (
   id TEXT PRIMARY KEY,
