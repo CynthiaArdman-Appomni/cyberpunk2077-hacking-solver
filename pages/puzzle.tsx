@@ -172,6 +172,7 @@ export default function PuzzlePage() {
     <Layout>
       <Head>
         <title>Breach Protocol Puzzle Generator</title>
+        <meta property="og:title" content="Breach Protocol Puzzle Generator" />
       </Head>
       <Container as="main" className={indexStyles.main}>
         <Row>
@@ -188,7 +189,7 @@ export default function PuzzlePage() {
           </Col>
         </Row>
         <Row>
-          <Col>
+          <Col lg={8}>
             <p className={styles.description}>Select grid cells to match one of the daemons.</p>
             <div className={styles.grid}>
               {grid.map((row, r) =>
@@ -222,7 +223,7 @@ export default function PuzzlePage() {
           </Col>
         </Row>
         <Row>
-          <Col>
+          <Col lg={8}>
             <h2>Daemons</h2>
             <ol className={styles.daemons}>
               {daemons.map((d, idx) => (
@@ -234,7 +235,7 @@ export default function PuzzlePage() {
           </Col>
         </Row>
         <Row>
-          <Col>
+          <Col lg={8}>
             <p className={styles.sequence}>{sequence}</p>
             {feedback.msg && (
               <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
@@ -242,7 +243,7 @@ export default function PuzzlePage() {
           </Col>
         </Row>
         <Row>
-          <Col>
+          <Col lg={8}>
             <div className={styles.buttons}>
               <Button onClick={resetSelection}>Reset Puzzle</Button>
               <Button onClick={newPuzzle}>Generate New Puzzle</Button>
