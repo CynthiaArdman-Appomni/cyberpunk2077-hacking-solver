@@ -355,13 +355,8 @@ export default function GMPage() {
             <h2 className={indexStyles.description}>Customize and practice the Breach Protocol puzzle.</h2>
           </Col>
         </Row>
-        <Row>
-          <Col lg={8}>
-            <div className={indexStyles["description-separator"]}></div>
-          </Col>
-        </Row>
-        <Row className="mb-4">
-          <Col lg={8}>
+        <div className={styles.layout}>
+          <div className={styles.controls}>
             <Form className="mb-3">
               <Form.Group className="mb-2" controlId="difficulty">
                 <Form.Label>Difficulty</Form.Label>
@@ -421,10 +416,12 @@ export default function GMPage() {
                 </div>
               </Form.Group>
             )}
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={12} lg={8}>
+            <div className={styles.buttons}>
+              <Button onClick={resetSelection}>Reset Puzzle</Button>
+              <Button onClick={showSolutionPath}>Show Solution Path</Button>
+            </div>
+          </div>
+          <div className={styles['puzzle-area']}>
             <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
             {puzzle && (
               <>
@@ -434,13 +431,13 @@ export default function GMPage() {
                 )}
               </>
             )}
-            <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
-              <div className={styles["grid-box__header"]}>
-                <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
+            <div className={cz(styles['grid-box'], { [styles.pulse]: breachFlash })} ref={gridRef}>
+              <div className={styles['grid-box__header']}>
+                <h3 className={styles['grid-box__header_text']}>ENTER CODE MATRIX</h3>
               </div>
-              <div className={styles["grid-box__inside"]}>
+              <div className={styles['grid-box__inside']}>
                 <div className={styles.grid} style={gridStyle}>
-                  <svg className={styles["path-lines"]} viewBox="0 0 100 100" preserveAspectRatio="none">
+                  <svg className={styles['path-lines']} viewBox="0 0 100 100" preserveAspectRatio="none">
                     {lines.map((line, idx) => (
                       <line key={idx} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
                     ))}
@@ -477,17 +474,17 @@ export default function GMPage() {
                 </div>
               </div>
             </div>
-          </Col>
-          <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={cz(styles["daemon-box"], { [styles.pulse]: breachFlash })}>
-              <div className={styles["daemon-box__header"]}>
-                <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
+          </div>
+          <div className={styles.sidebar}>
+            <div className={cz(styles['daemon-box'], { [styles.pulse]: breachFlash })}>
+              <div className={styles['daemon-box__header']}>
+                <h3 className={styles['daemon-box__header_text']}>DAEMONS</h3>
               </div>
-              <div className={styles["daemon-box__inside"]}>
+              <div className={styles['daemon-box__inside']}>
                 <ol className={styles.daemons}>
                   {puzzle.daemons.map((d, idx) => (
-                    <li key={idx} className={solved.has(idx) ? "solved" : undefined}>
-                      {d.join(" ")}
+                    <li key={idx} className={solved.has(idx) ? 'solved' : undefined}>
+                      {d.join(' ')}
                     </li>
                   ))}
                 </ol>
@@ -496,26 +493,16 @@ export default function GMPage() {
                   {sequence}
                 </p>
                 {solutionSequence && (
-                  <p className={styles["solution-sequence"]}>{solutionSequence}</p>
+                  <p className={styles['solution-sequence']}>{solutionSequence}</p>
                 )}
                 {feedback.msg && (
-                  <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
+                  <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ''}`}>{feedback.msg}</p>
                 )}
-                {debugInfo && (
-                  <p className={styles.debug}>{debugInfo}</p>
-                )}
+                {debugInfo && <p className={styles.debug}>{debugInfo}</p>}
               </div>
             </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col lg={8}>
-            <div className={styles.buttons}>
-              <Button onClick={resetSelection}>Reset Puzzle</Button>
-              <Button onClick={showSolutionPath}>Show Solution Path</Button>
-            </div>
-          </Col>
-        </Row>
+          </div>
+        </div>
         <Separator className="mt-5" />
         <Row>
           <Col>

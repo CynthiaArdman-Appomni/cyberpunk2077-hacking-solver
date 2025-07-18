@@ -454,27 +454,26 @@ export default function PuzzlePage() {
             </h2>
           </Col>
         </Row>
-        <Row>
-          <Col lg={8}>
-            <div className={indexStyles["description-separator"]}></div>
-          </Col>
-        </Row>
-        <Row>
-          <Col xs={12} lg={8}>
+        <div className={styles.layout}>
+          <div className={styles.controls}>
+            <div className={styles.buttons}>
+              <Button onClick={resetSelection}>Reset Puzzle</Button>
+              <Button onClick={newPuzzle}>Generate New Puzzle</Button>
+            </div>
+          </div>
+          <div className={styles['puzzle-area']}>
             <p className={styles.description}>
               INITIATE BREACH PROTOCOL - TIME TO FLATLINE THESE DAEMONS, CHOOM.
             </p>
-            <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })}>
-              <div className={styles["grid-box__header"]}>
-                <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
+            <div className={cz(styles['grid-box'], { [styles.pulse]: breachFlash })}>
+              <div className={styles['grid-box__header']}>
+                <h3 className={styles['grid-box__header_text']}>ENTER CODE MATRIX</h3>
               </div>
-              <div className={styles["grid-box__inside"]}>
+              <div className={styles['grid-box__inside']}>
                 <div className={styles.grid}>
                   {puzzle.grid.map((row, r) =>
                     row.map((val, c) => {
-                      const isSelected = selection.some(
-                        (p) => p.r === r && p.c === c
-                      );
+                      const isSelected = selection.some((p) => p.r === r && p.c === c);
                       const selectable = (() => {
                         if (ended) return false;
                         if (selection.length === 0) {
@@ -491,7 +490,7 @@ export default function PuzzlePage() {
                       return (
                         <div
                           key={`${r}-${c}`}
-                          className={classes.join(" ")}
+                          className={classes.join(' ')}
                           onClick={() => handleCellClick(r, c)}
                         >
                           {val}
@@ -501,22 +500,21 @@ export default function PuzzlePage() {
                   )}
                 </div>
               </div>
-
             </div>
-          </Col>
-          <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={cz(styles["daemon-box"], { [styles.pulse]: breachFlash })}>
-              <div className={styles["daemon-box__header"]}>
-                <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
+          </div>
+          <div className={styles.sidebar}>
+            <div className={cz(styles['daemon-box'], { [styles.pulse]: breachFlash })}>
+              <div className={styles['daemon-box__header']}>
+                <h3 className={styles['daemon-box__header_text']}>DAEMONS</h3>
               </div>
-              <div className={styles["daemon-box__inside"]}>
+              <div className={styles['daemon-box__inside']}>
                 <ol className={styles.daemons}>
                   {puzzle.daemons.map((d, idx) => (
                     <li
                       key={idx}
-                      className={solved.has(idx) ? "solved" : undefined}
+                      className={solved.has(idx) ? 'solved' : undefined}
                     >
-                      {d.join(" ")}
+                      {d.join(' ')}
                     </li>
                   ))}
                 </ol>
@@ -525,26 +523,12 @@ export default function PuzzlePage() {
                   {sequence}
                 </p>
                 {feedback.msg && (
-                  <p
-                    className={`${styles.feedback} ${
-                      feedback.type ? styles[feedback.type] : ""
-                    }`}
-                  >
-                    {feedback.msg}
-                  </p>
+                  <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ''}`}>{feedback.msg}</p>
                 )}
               </div>
             </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col lg={8}>
-            <div className={styles.buttons}>
-              <Button onClick={resetSelection}>Reset Puzzle</Button>
-              <Button onClick={newPuzzle}>Generate New Puzzle</Button>
-            </div>
-          </Col>
-        </Row>
+          </div>
+        </div>
         <Separator className="mt-5" />
         <Row>
           <Col>

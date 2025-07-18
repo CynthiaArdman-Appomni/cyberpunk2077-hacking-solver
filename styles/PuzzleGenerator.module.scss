@@ -384,3 +384,42 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   80% { transform: translate(-2px, 2px); opacity: 0.8; }
   100% { transform: translate(0, 0); opacity: 0; }
 }
+
+/* Responsive layout for puzzle generator pages */
+.layout {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    max-width: 1400px;
+    margin: 0 auto;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .controls {
+    grid-column: 1;
+  }
+  .puzzle-area {
+    grid-column: 2;
+  }
+  .sidebar {
+    grid-column: 3;
+  }
+}
+
+@media (max-width: 1023px) {
+  .layout {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+  }
+  .controls,
+  .puzzle-area,
+  .sidebar {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+}
