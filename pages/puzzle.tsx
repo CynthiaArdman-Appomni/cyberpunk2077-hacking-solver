@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from "react";
 import Head from "next/head";
+import { Container, Row, Col } from "react-bootstrap";
 import Layout from "../components/Layout";
 import MainTitle from "../components/MainTitle";
 import Button from "../components/Button";
@@ -151,15 +152,19 @@ export default function PuzzlePage() {
         <title>Breach Protocol Puzzle Generator</title>
       </Head>
       <Layout>
-        <div className={styles.container}>
-          <main className={styles.main}>
-            <MainTitle className={styles.title} />
-            <p className={styles.description}>Select grid cells to match one of the daemons.</p>
-            <div className={styles.grid}>
+        <Container as="main" className={styles.main}>
+          <Row>
+            <Col>
+              <MainTitle className={styles.title} />
+              <p className={styles.description}>Select grid cells to match one of the daemons.</p>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <div className={styles.grid}>
               {grid.map((row, r) =>
                 row.map((val, c) => {
                   const isSelected = selection.some((p) => p.r === r && p.c === c);
-                  let className = styles.cell;
                   const selectable = (() => {
                     if (ended) return false;
                     if (selection.length === 0) {
@@ -185,24 +190,37 @@ export default function PuzzlePage() {
                 })
               )}
             </div>
-            <h2>Daemons</h2>
-            <ol className={styles.daemons}>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <h2>Daemons</h2>
+              <ol className={styles.daemons}>
               {daemons.map((d, idx) => (
                 <li key={idx} className={solved.has(idx) ? "solved" : undefined}>
                   {d.join(" ")}
                 </li>
               ))}
-            </ol>
-            <p className={styles.sequence}>{sequence}</p>
-            {feedback.msg && (
-              <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
-            )}
-            <div className={styles.buttons}>
-              <Button onClick={resetSelection}>Reset Puzzle</Button>
-              <Button onClick={newPuzzle}>Generate New Puzzle</Button>
-            </div>
-          </main>
-        </div>
+              </ol>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <p className={styles.sequence}>{sequence}</p>
+              {feedback.msg && (
+                <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
+              )}
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <div className={styles.buttons}>
+                <Button onClick={resetSelection}>Reset Puzzle</Button>
+                <Button onClick={newPuzzle}>Generate New Puzzle</Button>
+              </div>
+            </Col>
+          </Row>
+        </Container>
       </Layout>
     </>
   );
