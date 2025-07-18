@@ -54,9 +54,17 @@
   margin-left: auto;
 }
 
-.privacy-link,
-.github-link {
+.footer-link {
   margin-right: 2rem;
+  transition: text-shadow 0.2s ease-in-out;
+
+  &:hover {
+    text-shadow: 0 0 6px #d1ed57;
+  }
+}
+
+.privacy-link {
+  @extend .footer-link;
 }
 
 @keyframes matrix-move {

@@ -1,28 +1,64 @@
 import { randomBytes } from 'crypto';
-import { generatePuzzle, Puzzle } from '../lib/puzzleGenerator';
+import { generatePuzzle, combineDaemons, Puzzle } from '../lib/puzzleGenerator';
+import brute from '../lib/bruter';
+import { supabase } from './supabaseClient';
+
+export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible';
 
 export interface StoredPuzzle extends Puzzle {
   timeLimit: number;
+  startTime: string;
+  difficulty: Difficulty;
 }
 
-const puzzles = new Map<string, StoredPuzzle>();
+function countSolutions(puzzle: Puzzle): number {
+  const hexToNum = (h: string) => parseInt(h, 16);
+  const matrix = puzzle.grid.map((row) => row.map(hexToNum));
+  const pattern = combineDaemons(puzzle.daemons).map(hexToNum);
+  return brute(pattern, matrix, true).length;
+}
 
-export function createPuzzle(options: {
-  rows: number;
-  cols: number;
-  daemonCount: number;
-  maxDaemonLen: number;
-  startRow?: number;
+async function generatePuzzleWithDifficulty(diff: Difficulty): Promise<Puzzle> {
+  // try up to 50 times to find a puzzle matching difficulty
+  for (let i = 0; i < 50; i++) {
+    const puzzle = generatePuzzle();
+    const solutions = countSolutions(puzzle);
+    if (
+      (diff === 'Easy' && solutions > 5) ||
+      (diff === 'Medium' && solutions >= 2 && solutions <= 5) ||
+      (diff === 'Hard' && solutions === 1) ||
+      (diff === 'Impossible' && solutions === 0)
+    ) {
+      return puzzle;
+    }
+  }
+  // fallback random puzzle
+  return generatePuzzle();
+}
+
+export async function createPuzzle(options: {
+  difficulty: Difficulty;
   timeLimit: number;
-}): { id: string; puzzle: StoredPuzzle } {
-  const { rows, cols, daemonCount, maxDaemonLen, startRow = 0, timeLimit } = options;
-  const puzzle = generatePuzzle(rows, cols, daemonCount, startRow, maxDaemonLen);
-  const stored: StoredPuzzle = { ...puzzle, timeLimit };
+}): Promise<{ id: string; puzzle: StoredPuzzle }> {
+  const { difficulty, timeLimit } = options;
+  const puzzle = await generatePuzzleWithDifficulty(difficulty);
   const id = randomBytes(8).toString('hex');
-  puzzles.set(id, stored);
+  const stored: StoredPuzzle = {
+    ...puzzle,
+    timeLimit,
+    startTime: new Date().toISOString(),
+    difficulty,
+  };
+  await supabase.from('puzzles').insert([{ id, data: stored }]);
   return { id, puzzle: stored };
 }
 
-export function getPuzzle(id: string): StoredPuzzle | undefined {
-  return puzzles.get(id);
+export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
+  const { data, error } = await supabase
+    .from('puzzles')
+    .select('data')
+    .eq('id', id)
+    .single();
+  if (error || !data) return null;
+  return data.data as StoredPuzzle;
 }

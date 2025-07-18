@@ -1,9 +1,4 @@
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  useEffect,
-} from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import Head from "next/head";
 import { Container, Row, Col, Form } from "react-bootstrap";
 import cz from "classnames";
@@ -15,6 +10,7 @@ import Button from "../components/Button";
 import indexStyles from "../styles/Index.module.scss";
 import styles from "../styles/PuzzleGenerator.module.scss";
 import { Pos, Puzzle } from "../lib/puzzleGenerator";
+import { StoredPuzzle } from "../services/puzzleStore";
 const Separator = ({ className }: { className?: string }) => (
   <hr className={cz(indexStyles.separator, className)} />
 );
@@ -35,13 +31,10 @@ const ReportIssue = () => (
 
 export default function GMPage() {
   const startRow = 0;
-  const [rows, setRows] = useState("5");
-  const [cols, setCols] = useState("5");
-  const [daemonCount, setDaemonCount] = useState("3");
-  const [maxDaemonLen, setMaxDaemonLen] = useState("4");
+  const [difficulty, setDifficulty] = useState("Easy");
   const [timeLimit, setTimeLimit] = useState("60");
 
-  const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
+  const [puzzle, setPuzzle] = useState<StoredPuzzle | null>(null);
   const [puzzleId, setPuzzleId] = useState<string | null>(null);
   const [bufferSize, setBufferSize] = useState(0);
   const [selection, setSelection] = useState<Pos[]>([]);
@@ -58,7 +51,9 @@ export default function GMPage() {
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
   const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
 
-  const cellSize = Math.max(24, 60 - Math.max(0, parseInt(cols, 10) - 5) * 4);
+  const cellSize = puzzle
+    ? Math.max(24, 60 - Math.max(0, puzzle.grid[0].length - 5) * 4)
+    : 24;
 
   const parseNumber = (value: string): number | null => {
     const n = parseInt(value, 10);
@@ -66,32 +61,22 @@ export default function GMPage() {
   };
 
   const newPuzzle = useCallback(async () => {
-    const r = parseNumber(rows);
-    const c = parseNumber(cols);
-    const dc = parseNumber(daemonCount);
-    const ml = parseNumber(maxDaemonLen);
     const tl = parseNumber(timeLimit);
-
-    if (r === null || c === null || dc === null || ml === null || tl === null) {
+    if (tl === null) {
       return;
     }
 
-    const res = await fetch("/api/puzzle/new", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        rows: r,
-        cols: c,
-        daemonCount: dc,
-        maxDaemonLen: ml,
-        timeLimit: tl,
-      }),
-    });
-    if (!res.ok) {
-      setFeedback({ msg: "Failed to generate puzzle.", type: "error" });
-      return;
-    }
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/puzzle/new", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          difficulty,
+          timeLimit: tl,
+        }),
+      });
+      if (!res.ok) throw new Error('fail');
+      const data = await res.json();
     const p: Puzzle = data.puzzle;
     const id: string = data.id;
     const pathString = p.path.map((pos) => `(${pos.r},${pos.c})`).join(" -> ");
@@ -105,9 +90,14 @@ export default function GMPage() {
     setEnded(false);
     setSolutionPath(null);
     setSolutionSequence("");
-    setTimeRemaining(tl);
+    const start = new Date(p.startTime).getTime();
+    const remaining = Math.max(0, tl - Math.floor((Date.now() - start) / 1000));
+    setTimeRemaining(remaining);
     setDebugInfo(`Solution path: ${pathString}`);
-  }, [rows, cols, daemonCount, maxDaemonLen, timeLimit]);
+    } catch (e) {
+      setFeedback({ msg: 'Failed to generate puzzle.', type: 'error' });
+    }
+  }, [difficulty, timeLimit]);
 
   const resetSelection = useCallback(() => {
     setSelection([]);
@@ -116,31 +106,41 @@ export default function GMPage() {
     setEnded(false);
     setSolutionPath(null);
     setSolutionSequence("");
-    const tl = parseNumber(timeLimit);
-    if (tl !== null) {
-      setTimeRemaining(tl);
+    if (puzzle) {
+      const tl = parseNumber(timeLimit);
+      if (tl !== null) {
+        const start = new Date(puzzle.startTime).getTime();
+        const remaining = Math.max(
+          0,
+          tl - Math.floor((Date.now() - start) / 1000)
+        );
+        setTimeRemaining(remaining);
+      }
     }
-  }, [timeLimit]);
+  }, [timeLimit, puzzle]);
 
   useEffect(() => {
     newPuzzle();
-  }, [rows, cols, daemonCount, maxDaemonLen, timeLimit, newPuzzle]);
+  }, [difficulty, timeLimit, newPuzzle]);
 
   useEffect(() => {
-    if (ended) return;
+    if (ended || !puzzle) return;
     const id = setInterval(() => {
-      setTimeRemaining((t) => {
-        if (t <= 1) {
-          clearInterval(id);
-          setEnded(true);
-          setFeedback({ msg: "TIME UP", type: "error" });
-          return 0;
-        }
-        return t - 1;
-      });
+      const start = new Date(puzzle.startTime).getTime();
+      const tl = parseNumber(timeLimit) || puzzle.timeLimit;
+      const remaining = Math.max(
+        0,
+        tl - Math.floor((Date.now() - start) / 1000)
+      );
+      if (remaining <= 0) {
+        setEnded(true);
+        setFeedback({ msg: "TIME UP", type: "error" });
+        clearInterval(id);
+      }
+      setTimeRemaining(remaining);
     }, 1000);
     return () => clearInterval(id);
-  }, [ended, puzzle]);
+  }, [ended, puzzle, timeLimit]);
 
   const checkDaemons = useCallback(
     (sel: Pos[]) => {
@@ -339,41 +339,17 @@ export default function GMPage() {
         <Row className="mb-4">
           <Col lg={8}>
             <Form className="mb-3">
-              <Form.Group className="mb-2" controlId="rows">
-                <Form.Label>Rows</Form.Label>
-                <Form.Control
-                  type="number"
-                  min="1"
-                  value={rows}
-                  onChange={(e) => setRows(e.currentTarget.value)}
-                />
-              </Form.Group>
-              <Form.Group className="mb-2" controlId="cols">
-                <Form.Label>Columns</Form.Label>
-                <Form.Control
-                  type="number"
-                  min="1"
-                  value={cols}
-                  onChange={(e) => setCols(e.currentTarget.value)}
-                />
-              </Form.Group>
-              <Form.Group className="mb-2" controlId="daemonCount">
-                <Form.Label>Number of Daemons</Form.Label>
-                <Form.Control
-                  type="number"
-                  min="1"
-                  value={daemonCount}
-                  onChange={(e) => setDaemonCount(e.currentTarget.value)}
-                />
-              </Form.Group>
-              <Form.Group className="mb-2" controlId="maxLen">
-                <Form.Label>Max Daemon Length</Form.Label>
-                <Form.Control
-                  type="number"
-                  min="2"
-                  value={maxDaemonLen}
-                  onChange={(e) => setMaxDaemonLen(e.currentTarget.value)}
-                />
+              <Form.Group className="mb-2" controlId="difficulty">
+                <Form.Label>Difficulty</Form.Label>
+                <Form.Select
+                  value={difficulty}
+                  onChange={(e) => setDifficulty(e.currentTarget.value)}
+                >
+                  <option>Easy</option>
+                  <option>Medium</option>
+                  <option>Hard</option>
+                  <option>Impossible</option>
+                </Form.Select>
               </Form.Group>
               <Form.Group className="mb-2" controlId="timer">
                 <Form.Label>Timer (seconds)</Form.Label>
@@ -414,6 +390,9 @@ export default function GMPage() {
         <Row>
           <Col xs={12} lg={8}>
             <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
+            {puzzle && (
+              <p className={styles.description}>DIFFICULTY: {puzzle.difficulty}</p>
+            )}
             <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
