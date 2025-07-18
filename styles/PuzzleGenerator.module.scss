@@ -1,0 +1,158 @@
+@import "./common";
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main {
+  padding: 5rem 0;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.title {
+  margin: 0;
+  margin-bottom: 3rem;
+  line-height: 1.15;
+  color: $color-highlight;
+  font-size: 3rem;
+
+  @include media-breakpoint-up(sm) {
+    font-size: 4rem;
+  }
+}
+
+.description {
+  line-height: 1.5;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+  color: $color-highlight;
+  font-weight: 500;
+}
+
+.grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, 50px);
+  grid-gap: 5px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.path-lines {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+
+  line {
+    stroke: $color-highlight;
+    stroke-width: 2;
+    filter: drop-shadow(0 0 4px $color-highlight);
+  }
+}
+
+.cell {
+  border: 2px solid $color-highlight;
+  padding: 10px 0;
+  font-weight: bold;
+  font-size: 1.1em;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+  color: $color-highlight;
+  transition: box-shadow 0.2s, background 0.2s, color 0.2s;
+
+  &.active {
+    box-shadow: 0 0 10px $color-highlight, 0 0 20px $color-highlight;
+  }
+
+  &.dim {
+    opacity: 0.3;
+  }
+
+  &.selected {
+    background: $color-highlight;
+    color: $color-bg;
+  }
+
+  &:hover:not(.selected) {
+    box-shadow: 0 0 6px $color-highlight;
+  }
+
+  &.invalid {
+    animation: flash-red 0.3s;
+  }
+}
+
+@keyframes flash-red {
+  0% { background: $color-error; color: #fff; }
+  100% { background: transparent; color: $color-highlight; }
+}
+
+.daemons {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+
+  li {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 4px 6px;
+    border: 1px solid $color-highlight;
+    color: $color-highlight;
+    font-weight: bold;
+
+    &.solved {
+      border-color: $color-success;
+      color: $color-success;
+      animation: flash-success 0.5s;
+
+      &::after {
+        content: 'BREACHED';
+        display: block;
+        font-size: 0.8em;
+        color: $color-success;
+      }
+    }
+  }
+}
+
+@keyframes flash-success {
+  0% { box-shadow: 0 0 10px $color-success; }
+  100% { box-shadow: none; }
+}
+
+.sequence {
+  margin-top: 10px;
+}
+
+.feedback {
+  margin-top: 5px;
+
+  &.error {
+    color: $color-error;
+  }
+
+  &.success {
+    color: $color-success;
+  }
+}
+
+.buttons {
+  margin-top: 1rem;
+
+  :global(button) {
+    margin: 0 0.5rem;
+  }
+}
