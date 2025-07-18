@@ -29,5 +29,13 @@ const withWebWorkers = (nextConfig) => {
 };
 
 module.exports = (phase, { defaultConfig }) => {
-  return withWebWorkers(withBundleAnalyzer(defaultConfig));
+  return withWebWorkers(
+    withBundleAnalyzer({
+      ...defaultConfig,
+      env: {
+        NEXT_PUBLIC_SUPABASE_URL: process.env.REACT_APP_SUPABASE_URL,
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.REACT_APP_SUPABASE_KEY,
+      },
+    })
+  );
 };
