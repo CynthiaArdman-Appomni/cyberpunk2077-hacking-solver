@@ -410,14 +410,14 @@ export default function GMPage() {
                   <Form.Control
                     readOnly
                     type="text"
-                    value={`https://ncrpdive.com/netrun/${puzzleId}`}
+                    value={`${window.location.origin}/netrun/${puzzleId}`}
                     onFocus={(e) => e.currentTarget.select()}
                   />
                   <Button
                     className="ms-2"
                     onClick={() => {
                       navigator.clipboard.writeText(
-                        `https://ncrpdive.com/netrun/${puzzleId}`
+                        `${window.location.origin}/netrun/${puzzleId}`
                       );
                     }}
                   >
