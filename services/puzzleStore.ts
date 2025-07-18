@@ -12,6 +12,7 @@ export interface StoredPuzzle extends Puzzle {
   timeLimit: number;
   startTime: string;
   difficulty: Difficulty;
+  solutionCount: number;
 }
 
 function countSolutions(puzzle: Puzzle): number {
@@ -45,12 +46,14 @@ export async function createPuzzle(options: {
 }): Promise<{ id: string; puzzle: StoredPuzzle }> {
   const { difficulty, timeLimit } = options;
   const puzzle = await generatePuzzleWithDifficulty(difficulty);
+  const solutionCount = countSolutions(puzzle);
   const id = randomBytes(8).toString('hex');
   const stored: StoredPuzzle = {
     ...puzzle,
     timeLimit,
     startTime: new Date().toISOString(),
     difficulty,
+    solutionCount,
   };
   if (useSupabase) {
     await supabase!.from('puzzles').insert([{ id, data: stored }]);
