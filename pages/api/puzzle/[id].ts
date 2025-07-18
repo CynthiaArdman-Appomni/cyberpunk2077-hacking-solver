@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getPuzzle } from '../../../services/puzzleStore';
+import { log, logError } from '../../../services/logger';
 
 export default async function handler(
   req: NextApiRequest,
@@ -17,9 +18,10 @@ export default async function handler(
       return;
     }
     const { grid, daemons, bufferSize, timeLimit, startTime, difficulty } = puzzle;
+    log(`API /puzzle/${id} returned puzzle`);
     res.status(200).json({ grid, daemons, bufferSize, timeLimit, startTime, difficulty });
   } catch (e) {
-    console.error('Database error:', e);
+    logError('Database error on get puzzle', e);
     res.status(500).json({ error: 'database' });
   }
 }

@@ -2,6 +2,7 @@ import { randomBytes } from 'crypto';
 import { generatePuzzle, combineDaemons, Puzzle } from '../lib/puzzleGenerator';
 import { countSolutions as countSolutionsForMatrix } from '../lib/bruteCounter';
 import { sql, ensurePuzzleTable } from './neonClient';
+import { log, logError } from './logger';
 
 const puzzles = new Map<string, StoredPuzzle>();
 const useNeon = !!process.env.NETLIFY_DATABASE_URL;
@@ -57,6 +58,7 @@ export async function createPuzzle(options: {
     solutionCount,
   };
   puzzles.set(id, stored);
+  log(`Created puzzle ${id} (${difficulty})`);
   if (useNeon) {
     await ensurePuzzleTable();
     try {
@@ -64,7 +66,7 @@ export async function createPuzzle(options: {
         `INSERT INTO puzzles (id, grid, daemons, start_time, duration)
         VALUES (${id}, ${stored.grid}, ${stored.daemons}, ${stored.startTime}, ${timeLimit})`;
     } catch (e) {
-      console.error('Database error:', e);
+      logError('Database error on createPuzzle', e);
     }
   }
   return { id, puzzle: stored };
@@ -83,12 +85,17 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
         const startTime = row.start_time ? new Date(row.start_time).toISOString() : null;
         const solutionSeq = combineDaemons(daemons);
         const bufferSize = solutionSeq.length;
+        log(`Loaded puzzle ${id} from database`);
         return { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0 };
       }
     } catch (e) {
-      console.error('Database error:', e);
+      logError('Database error on getPuzzle', e);
     }
   }
-  return puzzles.get(id) || null;
+  const puzzle = puzzles.get(id) || null;
+  if (puzzle) {
+    log(`Loaded puzzle ${id} from memory`);
+  }
+  return puzzle;
 }
 

@@ -53,6 +53,9 @@ TSLint also has plugins to enable highlighting (and often automatically fixing) 
 - [WebStorm, IntelliJ, etc](https://www.jetbrains.com/help/webstorm/using-tslint-code-quality-tool.html)
 - [Atom](https://atom.io/packages/linter-tslint)
 
+### Logs
+While the application is running, server-side operations and errors are written to `app.log` in the project root. This file collects basic information about puzzle creation and retrieval as well as any encountered errors.
+
 ### Learn More
 
 To learn more about Next.js, take a look at the following resources:
