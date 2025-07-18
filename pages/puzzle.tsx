@@ -144,6 +144,7 @@ export default function PuzzlePage() {
         }
       });
       setSolved(solvedSet);
+      return solvedSet;
     },
     [puzzle, solved]
   );
@@ -202,13 +203,22 @@ export default function PuzzlePage() {
       newSel.push({ r, c });
       setSelection(newSel);
       setFeedback({ msg: "" });
-      checkDaemons(newSel);
-      if (solved.size + 1 === puzzle.daemons.length) {
+      const newSolved = checkDaemons(newSel);
+      if (newSolved.size === puzzle.daemons.length) {
         setEnded(true);
         setFeedback({ msg: "Puzzle solved!", type: "success" });
       } else if (newSel.length >= bufferSize) {
         setEnded(true);
-        setFeedback({ msg: "Puzzle failed. Try again.", type: "error" });
+        const solvedCount = newSolved.size;
+        const maxComplexity = solvedCount
+          ? Math.max(
+              ...Array.from(newSolved).map((idx) => puzzle.daemons[idx].length)
+            )
+          : 0;
+        setFeedback({
+          msg: `Breached ${solvedCount}/${puzzle.daemons.length} daemons. Complexity ${maxComplexity}.`,
+          type: "error",
+        });
       }
     },
     [ended, selection, startRow, checkDaemons, puzzle.daemons.length, solved.size]
