@@ -1,7 +1,7 @@
 @use "sass:color";
 @import "./common";
 
-$neon: #c6ff00;
+$neon: #d1ed57;
 $bgcolor: #0f0c17;
 $font-stack: "Orbitron", "Roboto", sans-serif;
 
@@ -189,11 +189,12 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 
   li {
     display: block;
-    margin: 0 0 10px 0;
+    margin: 0 0 1rem 0;
     padding: 4px 6px;
     border: 1px solid $neon;
     color: $neon;
     font-weight: bold;
+    font-size: 1rem;
     font-family: $font-stack;
     text-transform: uppercase;
 
@@ -201,6 +202,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
       border-color: $color-success;
       color: $color-success;
       animation: flash-success 0.5s;
+      text-decoration: line-through;
 
       &::after {
         content: 'BREACHED';

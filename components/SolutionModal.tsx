@@ -50,7 +50,7 @@ const renderSolution = (
   canvas.width = parentWidth;
   canvas.height = parentWidth;
   const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#d0ed57";
+  ctx.fillStyle = "#d1ed57";
   ctx.textBaseline = "top";
 
   let squareInternalPad = 3;
@@ -89,7 +89,7 @@ const renderSolution = (
   const square = byteSize.width;
   canvas.width = square * 2 * codeMatrix.length + square;
   canvas.height = canvas.width;
-  ctx.fillStyle = "#d0ed57";
+  ctx.fillStyle = "#d1ed57";
   ctx.textBaseline = "top";
   ctx.font = `500 ${fontSize}rem "Rajdhani Mod", Meno, Consolas, monospace`;
 
