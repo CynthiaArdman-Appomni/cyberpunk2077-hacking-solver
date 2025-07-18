@@ -263,6 +263,11 @@ export default function GMPage() {
     (r: number, c: number) => {
       if (ended || selection.length >= bufferSize) return;
 
+      if (selection.some((p) => p.r === r && p.c === c)) {
+        setFeedback({ msg: "Cell already selected.", type: "error" });
+        return;
+      }
+
       if (puzzle && !puzzle.startTime) {
         const start = new Date().toISOString();
         setPuzzle({ ...puzzle, startTime: start });
@@ -449,21 +454,22 @@ export default function GMPage() {
                     row.map((val, c) => {
                       if (!cellRefs.current[r]) cellRefs.current[r] = [];
                       const stepIdx = solutionPath ? solutionPath.findIndex((p) => p.r === r && p.c === c) : -1;
+                      const isSelected = selection.some((p) => p.r === r && p.c === c);
                       return (
                         <div
                           ref={(el) => (cellRefs.current[r][c] = el)}
                           key={`${r}-${c}`}
                           className={cz(styles.cell, {
-                            [styles.selected]: selection.some((p) => p.r === r && p.c === c),
+                            [styles.selected]: isSelected,
                             [styles.active]:
                               !ended &&
+                              !isSelected &&
                               ((selection.length === 0 && r === startRow) ||
                                 (selection.length > 0 &&
                                   ((selection.length % 2 === 1 && c === selection[selection.length - 1].c) ||
                                     (selection.length % 2 === 0 && r === selection[selection.length - 1].r)))),
                             [styles.dim]:
-                              !selection.some((p) => p.r === r && p.c === c) &&
-                              !(selection.length === 0 && r === startRow),
+                              !isSelected && !(selection.length === 0 && r === startRow),
                             [styles.solution]: stepIdx >= 0,
                           })}
                           data-step={stepIdx >= 0 ? stepIdx + 1 : undefined}

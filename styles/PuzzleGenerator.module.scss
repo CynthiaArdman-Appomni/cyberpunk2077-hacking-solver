@@ -184,6 +184,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     color: $bgcolor;
     box-shadow: 0 0 20px $neon;
     animation: glitch 0.3s;
+    pointer-events: none;
   }
 
   &.solution {
