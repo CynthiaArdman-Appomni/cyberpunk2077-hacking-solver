@@ -100,6 +100,52 @@ function shortestCommonSupersequence(seqs: string[][]): string[] {
   return best as string[];
 }
 
+function mergeWithOverlap(a: string[], b: string[]) {
+  let bestOverlap = 0;
+  let merged: string[] = a.concat(b);
+  const max = Math.min(a.length, b.length);
+  for (let i = 1; i <= max; i++) {
+    if (a.slice(-i).join() === b.slice(0, i).join()) {
+      if (i > bestOverlap) {
+        bestOverlap = i;
+        merged = a.concat(b.slice(i));
+      }
+    }
+    if (b.slice(-i).join() === a.slice(0, i).join()) {
+      if (i > bestOverlap) {
+        bestOverlap = i;
+        merged = b.concat(a.slice(i));
+      }
+    }
+  }
+  return merged;
+}
+
+function combineDaemons(daemons: string[][]) {
+  if (daemons.length === 0) return [] as string[];
+  let seqs = daemons.map((d) => d.slice());
+  while (seqs.length > 1) {
+    let bestI = 0;
+    let bestJ = 1;
+    let best = mergeWithOverlap(seqs[0], seqs[1]);
+    let bestLen = best.length;
+    for (let i = 0; i < seqs.length; i++) {
+      for (let j = i + 1; j < seqs.length; j++) {
+        const merged = mergeWithOverlap(seqs[i], seqs[j]);
+        if (merged.length < bestLen) {
+          bestLen = merged.length;
+          best = merged;
+          bestI = i;
+          bestJ = j;
+        }
+      }
+    }
+    const remain = seqs.filter((_, idx) => idx !== bestI && idx !== bestJ);
+    seqs = [best, ...remain];
+  }
+  return seqs[0];
+}
+
 function generatePathPositions(
   length: number,
   rows: number,
@@ -154,7 +200,7 @@ function generatePuzzle(
     daemons.push(generateDaemon(length));
   }
 
-  const solutionSeq = shortestCommonSupersequence(daemons);
+  const solutionSeq = combineDaemons(daemons);
   const bufferSize = solutionSeq.length;
 
   const grid: string[][] = [];
@@ -242,25 +288,45 @@ export default function GMPage() {
       return;
     }
 
-    const p = generatePuzzle(r, c, dc, startRow, ml);
-
+    let valid = false;
+    let p;
     const runSolver = (await import("../lib/bruter")).default;
     const hexToNum = (h: string) => parseInt(h, 16);
-    const matrix = p.grid.map((row) => row.map(hexToNum));
-    const seqs = p.daemons.map((d) => d.map(hexToNum));
-    const solvable = !!runSolver(matrix, seqs, p.bufferSize, {});
-    const pathString = p.path
-      .map((pos) => `(${pos.r},${pos.c})`)
-      .join(" -> ");
+    for (let attempt = 0; attempt < 10 && !valid; attempt++) {
+      p = generatePuzzle(r, c, dc, startRow, ml);
+      const matrix = p.grid.map((row) => row.map(hexToNum));
+      const seqs = p.daemons.map((d) => d.map(hexToNum));
+      const result = runSolver(matrix, seqs, p.bufferSize, {});
+      if (result && result.match.includes.length === seqs.length) {
+        const seq = result.solution.map(({ y, x }) => p.grid[y][x]);
+        const containsContiguous = (arr: string[], subseq: string[]) => {
+          for (let i = 0; i <= arr.length - subseq.length; i++) {
+            let match = true;
+            for (let j = 0; j < subseq.length; j++) {
+              if (arr[i + j] !== subseq[j]) {
+                match = false;
+                break;
+              }
+            }
+            if (match) return true;
+          }
+          return false;
+        };
+        if (p.daemons.every((d) => containsContiguous(seq, d))) {
+          valid = true;
+        }
+      }
+    }
 
-    if (!solvable) {
+    if (!valid || !p) {
       setFeedback({
-        msg:
-          "Puzzle unsolvable with current settings—please adjust daemon lengths, grid dimensions, or buffer size.",
+        msg: "Puzzle unsolvable with current settings—please adjust daemon configurations.",
         type: "error",
       });
       return;
     }
+
+    const pathString = p.path.map((pos) => `(${pos.r},${pos.c})`).join(" -> ");
 
     setPuzzle(p);
     setBufferSize(p.bufferSize);
