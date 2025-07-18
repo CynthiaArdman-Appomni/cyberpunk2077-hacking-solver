@@ -60,6 +60,53 @@ function scsTwo(a, b) {
 }
 
 // Compute the shortest common supersequence of multiple sequences.
+function mergeWithOverlap(a, b) {
+    let bestOverlap = 0;
+    let merged = a.concat(b);
+    const max = Math.min(a.length, b.length);
+    for (let i = 1; i <= max; i++) {
+        if (a.slice(-i).join() === b.slice(0, i).join()) {
+            if (i > bestOverlap) {
+                bestOverlap = i;
+                merged = a.concat(b.slice(i));
+            }
+        }
+        if (b.slice(-i).join() === a.slice(0, i).join()) {
+            if (i > bestOverlap) {
+                bestOverlap = i;
+                merged = b.concat(a.slice(i));
+            }
+        }
+    }
+    return merged;
+}
+
+function combineDaemons(seqs) {
+    if (seqs.length === 0)
+        return [];
+    let arr = seqs.map((s) => s.slice());
+    while (arr.length > 1) {
+        let bestI = 0;
+        let bestJ = 1;
+        let best = mergeWithOverlap(arr[0], arr[1]);
+        let bestLen = best.length;
+        for (let i = 0; i < arr.length; i++) {
+            for (let j = i + 1; j < arr.length; j++) {
+                const merged = mergeWithOverlap(arr[i], arr[j]);
+                if (merged.length < bestLen) {
+                    bestLen = merged.length;
+                    best = merged;
+                    bestI = i;
+                    bestJ = j;
+                }
+            }
+        }
+        const remain = arr.filter((_, idx) => idx !== bestI && idx !== bestJ);
+        arr = [best, ...remain];
+    }
+    return arr[0];
+}
+
 function shortestCommonSupersequence(seqs) {
     if (seqs.length === 0) return [];
 
@@ -132,7 +179,7 @@ function generatePuzzle(rows = 5, cols = 5, count = 3, startRow = 0) {
         daemons.push(generateDaemon(length));
     }
 
-    const solutionSeq = shortestCommonSupersequence(daemons);
+    const solutionSeq = combineDaemons(daemons);
     const bufferSize = solutionSeq.length;
 
     const grid = [];
