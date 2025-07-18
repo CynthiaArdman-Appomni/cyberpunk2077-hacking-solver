@@ -241,6 +241,7 @@ export default function PuzzlePage() {
   const [solved, setSolved] = useState<Set<number>>(new Set());
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
   const [ended, setEnded] = useState(false);
+  const [breachFlash, setBreachFlash] = useState(false);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
@@ -331,6 +332,8 @@ export default function PuzzlePage() {
       });
       if (solvedAny) {
         setFeedback({ msg: "DAEMON BREACHED!", type: "success" });
+        setBreachFlash(true);
+        setTimeout(() => setBreachFlash(false), 1500);
       } else if (interrupted) {
         setFeedback({ msg: "SEQUENCE INTERRUPTED", type: "error" });
       }
@@ -428,6 +431,9 @@ export default function PuzzlePage() {
         />
       </Head>
       <Container as="main" className={indexStyles.main}>
+        {breachFlash && (
+          <div className={`${styles['breach-notify']} ${styles.show}`}>DAEMON BREACHED</div>
+        )}
         <Row className="align-items-center">
           <Col>
             <MainTitle className={indexStyles.title} />
@@ -446,7 +452,7 @@ export default function PuzzlePage() {
             <p className={styles.description}>
               INITIATE BREACH PROTOCOL - TIME TO FLATLINE THESE DAEMONS, CHOOM.
             </p>
-            <div className={styles["grid-box"]}>
+            <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })}>
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
@@ -487,7 +493,7 @@ export default function PuzzlePage() {
             </div>
           </Col>
           <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={styles["daemon-box"]}>
+            <div className={cz(styles["daemon-box"], { [styles.pulse]: breachFlash })}>
               <div className={styles["daemon-box__header"]}>
                 <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
               </div>

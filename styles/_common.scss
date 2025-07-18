@@ -47,3 +47,18 @@ $color-success: #56f5a6;
     filter: none;
   }
 }
+
+@keyframes subtle-glitch {
+  0% {
+    transform: none;
+    filter: none;
+  }
+  50% {
+    transform: translateX(1px);
+    filter: drop-shadow(0 0 2px $color-success);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
