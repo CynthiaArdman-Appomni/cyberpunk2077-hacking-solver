@@ -14,213 +14,7 @@ import Button from "../components/Button";
 
 import indexStyles from "../styles/Index.module.scss";
 import styles from "../styles/PuzzleGenerator.module.scss";
-
-const HEX_VALUES = ["1C", "55", "BD", "E9", "7A", "FF"];
-
-type Pos = { r: number; c: number };
-
-function randomHex() {
-  return HEX_VALUES[Math.floor(Math.random() * HEX_VALUES.length)];
-}
-
-function generateDaemon(length: number): string[] {
-  const seq: string[] = [];
-  for (let i = 0; i < length; i++) {
-    seq.push(randomHex());
-  }
-  return seq;
-}
-
-function scsTwo(a: string[], b: string[]): string[] {
-  const m = a.length;
-  const n = b.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, () =>
-    Array(n + 1).fill(0)
-  );
-
-  for (let i = m; i >= 0; i--) {
-    for (let j = n; j >= 0; j--) {
-      if (i === m && j === n) {
-        dp[i][j] = 0;
-      } else if (i === m) {
-        dp[i][j] = n - j;
-      } else if (j === n) {
-        dp[i][j] = m - i;
-      } else if (a[i] === b[j]) {
-        dp[i][j] = 1 + dp[i + 1][j + 1];
-      } else {
-        dp[i][j] = 1 + Math.min(dp[i + 1][j], dp[i][j + 1]);
-      }
-    }
-  }
-
-  const result: string[] = [];
-  let i = 0;
-  let j = 0;
-  while (i < m || j < n) {
-    if (i === m) {
-      result.push(b[j++]);
-    } else if (j === n) {
-      result.push(a[i++]);
-    } else if (a[i] === b[j]) {
-      result.push(a[i]);
-      i++;
-      j++;
-    } else if (dp[i + 1][j] <= dp[i][j + 1]) {
-      result.push(a[i++]);
-    } else {
-      result.push(b[j++]);
-    }
-  }
-  return result;
-}
-
-function shortestCommonSupersequence(seqs: string[][]): string[] {
-  if (seqs.length === 0) return [];
-  const permutations = (arr: string[][]): string[][][] => {
-    if (arr.length <= 1) return [arr];
-    const res: string[][][] = [];
-    arr.forEach((item, idx) => {
-      const rest = arr.slice(0, idx).concat(arr.slice(idx + 1));
-      permutations(rest).forEach((perm) => res.push([item, ...perm]));
-    });
-    return res;
-  };
-
-  let best: string[] | null = null;
-  permutations(seqs).forEach((perm) => {
-    let current = perm[0];
-    for (let i = 1; i < perm.length; i++) {
-      current = scsTwo(current, perm[i]);
-    }
-    if (!best || current.length < best.length) {
-      best = current;
-    }
-  });
-  return best as string[];
-}
-
-function mergeWithOverlap(a: string[], b: string[]) {
-  let bestOverlap = 0;
-  let merged: string[] = a.concat(b);
-  const max = Math.min(a.length, b.length);
-  for (let i = 1; i <= max; i++) {
-    if (a.slice(-i).join() === b.slice(0, i).join()) {
-      if (i > bestOverlap) {
-        bestOverlap = i;
-        merged = a.concat(b.slice(i));
-      }
-    }
-    if (b.slice(-i).join() === a.slice(0, i).join()) {
-      if (i > bestOverlap) {
-        bestOverlap = i;
-        merged = b.concat(a.slice(i));
-      }
-    }
-  }
-  return merged;
-}
-
-function combineDaemons(daemons: string[][]) {
-  if (daemons.length === 0) return [] as string[];
-  let seqs = daemons.map((d) => d.slice());
-  while (seqs.length > 1) {
-    let bestI = 0;
-    let bestJ = 1;
-    let best = mergeWithOverlap(seqs[0], seqs[1]);
-    let bestLen = best.length;
-    for (let i = 0; i < seqs.length; i++) {
-      for (let j = i + 1; j < seqs.length; j++) {
-        const merged = mergeWithOverlap(seqs[i], seqs[j]);
-        if (merged.length < bestLen) {
-          bestLen = merged.length;
-          best = merged;
-          bestI = i;
-          bestJ = j;
-        }
-      }
-    }
-    const remain = seqs.filter((_, idx) => idx !== bestI && idx !== bestJ);
-    seqs = [best, ...remain];
-  }
-  return seqs[0];
-}
-
-function generatePathPositions(
-  length: number,
-  rows: number,
-  cols: number,
-  startRow: number
-): Pos[] {
-  const path: Pos[] = [];
-  let r = startRow;
-  let c = Math.floor(Math.random() * cols);
-  const used = new Set<string>();
-  path.push({ r, c });
-  used.add(`${r},${c}`);
-  for (let i = 1; i < length; i++) {
-    if (i % 2 === 1) {
-      let newR = Math.floor(Math.random() * rows);
-      if (rows > 1) {
-        while (newR === r) newR = Math.floor(Math.random() * rows);
-      }
-      r = newR;
-    } else {
-      let newC = Math.floor(Math.random() * cols);
-      if (cols > 1) {
-        while (newC === c) newC = Math.floor(Math.random() * cols);
-      }
-      c = newC;
-    }
-    let attempts = 0;
-    while (used.has(`${r},${c}`) && attempts < rows * cols) {
-      if (i % 2 === 1) {
-        r = Math.floor(Math.random() * rows);
-      } else {
-        c = Math.floor(Math.random() * cols);
-      }
-      attempts++;
-    }
-    path.push({ r, c });
-    used.add(`${r},${c}`);
-  }
-  return path;
-}
-
-function generatePuzzle(
-  rows = 5,
-  cols = 5,
-  count = 3,
-  startRow = 0,
-  maxLen = 4
-) {
-  const daemons: string[][] = [];
-  for (let i = 0; i < count; i++) {
-    const length = Math.floor(Math.random() * Math.max(1, maxLen - 1)) + 2;
-    daemons.push(generateDaemon(length));
-  }
-
-  const solutionSeq = combineDaemons(daemons);
-  const bufferSize = solutionSeq.length;
-
-  const grid: string[][] = [];
-  for (let r = 0; r < rows; r++) {
-    const row: string[] = [];
-    for (let c = 0; c < cols; c++) {
-      row.push(randomHex());
-    }
-    grid.push(row);
-  }
-
-  const path = generatePathPositions(bufferSize, rows, cols, startRow);
-  for (let i = 0; i < path.length; i++) {
-    const { r, c } = path[i];
-    grid[r][c] = solutionSeq[i];
-  }
-
-  return { grid, daemons, bufferSize, path };
-}
-
+import { Pos, Puzzle } from "../lib/puzzleGenerator";
 const Separator = ({ className }: { className?: string }) => (
   <hr className={cz(indexStyles.separator, className)} />
 );
@@ -247,16 +41,9 @@ export default function GMPage() {
   const [maxDaemonLen, setMaxDaemonLen] = useState("4");
   const [timeLimit, setTimeLimit] = useState("60");
 
-  const [puzzle, setPuzzle] = useState(() =>
-    generatePuzzle(
-      parseInt(rows, 10),
-      parseInt(cols, 10),
-      parseInt(daemonCount, 10),
-      startRow,
-      parseInt(maxDaemonLen, 10)
-    )
-  );
-  const [bufferSize, setBufferSize] = useState(() => puzzle.bufferSize);
+  const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
+  const [puzzleId, setPuzzleId] = useState<string | null>(null);
+  const [bufferSize, setBufferSize] = useState(0);
   const [selection, setSelection] = useState<Pos[]>([]);
   const [solved, setSolved] = useState<Set<number>>(new Set());
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
@@ -288,47 +75,28 @@ export default function GMPage() {
       return;
     }
 
-    let valid = false;
-    let p;
-    const runSolver = (await import("../lib/bruter")).default;
-    const hexToNum = (h: string) => parseInt(h, 16);
-    for (let attempt = 0; attempt < 10 && !valid; attempt++) {
-      p = generatePuzzle(r, c, dc, startRow, ml);
-      const matrix = p.grid.map((row) => row.map(hexToNum));
-      const seqs = p.daemons.map((d) => d.map(hexToNum));
-      const result = runSolver(matrix, seqs, p.bufferSize, {});
-      if (result && result.match.includes.length === seqs.length) {
-        const seq = result.solution.map(({ y, x }) => p.grid[y][x]);
-        const containsContiguous = (arr: string[], subseq: string[]) => {
-          for (let i = 0; i <= arr.length - subseq.length; i++) {
-            let match = true;
-            for (let j = 0; j < subseq.length; j++) {
-              if (arr[i + j] !== subseq[j]) {
-                match = false;
-                break;
-              }
-            }
-            if (match) return true;
-          }
-          return false;
-        };
-        if (p.daemons.every((d) => containsContiguous(seq, d))) {
-          valid = true;
-        }
-      }
-    }
-
-    if (!valid || !p) {
-      setFeedback({
-        msg: "Puzzle unsolvable with current settings—please adjust daemon configurations.",
-        type: "error",
-      });
+    const res = await fetch("/api/puzzle/new", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        rows: r,
+        cols: c,
+        daemonCount: dc,
+        maxDaemonLen: ml,
+        timeLimit: tl,
+      }),
+    });
+    if (!res.ok) {
+      setFeedback({ msg: "Failed to generate puzzle.", type: "error" });
       return;
     }
-
+    const data = await res.json();
+    const p: Puzzle = data.puzzle;
+    const id: string = data.id;
     const pathString = p.path.map((pos) => `(${pos.r},${pos.c})`).join(" -> ");
 
     setPuzzle(p);
+    setPuzzleId(id);
     setBufferSize(p.bufferSize);
     setSelection([]);
     setSolved(new Set());
@@ -338,7 +106,7 @@ export default function GMPage() {
     setSolutionSequence("");
     setTimeRemaining(tl);
     setDebugInfo(`Solution path: ${pathString}`);
-  }, [rows, cols, daemonCount, startRow, maxDaemonLen, timeLimit]);
+  }, [rows, cols, daemonCount, maxDaemonLen, timeLimit]);
 
   const resetSelection = useCallback(() => {
     setSelection([]);
@@ -521,6 +289,19 @@ export default function GMPage() {
     [ended, selection, startRow, checkDaemons, puzzle.daemons.length, solved.size]
   );
 
+  if (!puzzle) {
+    return (
+      <Layout>
+        <Head>
+          <title>GM Puzzle Generator</title>
+        </Head>
+        <Container as="main" className={indexStyles.main}>
+          <p className={styles.description}>Loading...</p>
+        </Container>
+      </Layout>
+    );
+  }
+
   const sequence = selection.map((p) => puzzle.grid[p.r][p.c]).join(" ");
   const gridStyle: React.CSSProperties = {
     "--cols": puzzle.grid[0].length.toString(),
@@ -599,6 +380,17 @@ export default function GMPage() {
               </Form.Group>
               <Button className="mt-2" onClick={newPuzzle}>Generate Puzzle</Button>
             </Form>
+            {puzzleId && (
+              <Form.Group className="mb-2" controlId="share">
+                <Form.Label>Share Link</Form.Label>
+                <Form.Control
+                  readOnly
+                  type="text"
+                  value={`https://ncrpdive.com/netrun/${puzzleId}`}
+                  onFocus={(e) => e.currentTarget.select()}
+                />
+              </Form.Group>
+            )}
           </Col>
         </Row>
         <Row>
