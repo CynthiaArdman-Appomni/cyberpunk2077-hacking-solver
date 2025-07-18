@@ -16,44 +16,24 @@ import indexStyles from "../styles/Index.module.scss";
 import styles from "../styles/PuzzleGenerator.module.scss";
 
 const HEX_VALUES = ["1C", "55", "BD", "E9", "7A", "FF"];
-const BUFFER_SIZE = 6;
+const BUFFER_MIN = 4;
+const BUFFER_MAX = 6;
 
 type Pos = { r: number; c: number };
-
-function containsSubsequence(sequence: string[], target: string[]) {
-  let idx = 0;
-  for (const val of sequence) {
-    if (val === target[idx]) {
-      idx++;
-      if (idx === target.length) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
 
 function randomHex() {
   return HEX_VALUES[Math.floor(Math.random() * HEX_VALUES.length)];
 }
 
-function generatePuzzle(
-  rows = 6,
-  cols = 6,
-  daemonCount = 3
-): { grid: string[][]; daemons: string[][] } {
-  // generate daemon sequences first
-  const daemons: string[][] = [];
-  for (let i = 0; i < daemonCount; i++) {
-    const length = Math.floor(Math.random() * 3) + 3; // 3-5
-    const seq: string[] = [];
-    for (let j = 0; j < length; j++) {
-      seq.push(randomHex());
-    }
-    daemons.push(seq);
+function generateDaemon(length: number): string[] {
+  const seq: string[] = [];
+  for (let i = 0; i < length; i++) {
+    seq.push(randomHex());
   }
+  return seq;
+}
 
-  // create grid filled with random hex values
+function generatePuzzle(rows = 5, cols = 5, count = 3) {
   const grid: string[][] = [];
   for (let r = 0; r < rows; r++) {
     const row: string[] = [];
@@ -63,23 +43,27 @@ function generatePuzzle(
     grid.push(row);
   }
 
-  // place daemon sequences into the grid horizontally or vertically
-  daemons.forEach((daemon) => {
+  const daemons: string[][] = [];
+  for (let i = 0; i < count; i++) {
+    const length = Math.floor(Math.random() * 3) + 2; // 2-4
+    const daemon = generateDaemon(length);
+    daemons.push(daemon);
+
     const horizontal = Math.random() < 0.5;
     if (horizontal) {
       const r = Math.floor(Math.random() * rows);
-      const cStart = Math.floor(Math.random() * (cols - daemon.length + 1));
-      for (let i = 0; i < daemon.length; i++) {
-        grid[r][cStart + i] = daemon[i];
+      const cStart = Math.floor(Math.random() * (cols - length + 1));
+      for (let j = 0; j < length; j++) {
+        grid[r][cStart + j] = daemon[j];
       }
     } else {
       const c = Math.floor(Math.random() * cols);
-      const rStart = Math.floor(Math.random() * (rows - daemon.length + 1));
-      for (let i = 0; i < daemon.length; i++) {
-        grid[rStart + i][c] = daemon[i];
+      const rStart = Math.floor(Math.random() * (rows - length + 1));
+      for (let j = 0; j < length; j++) {
+        grid[rStart + j][c] = daemon[j];
       }
     }
-  });
+  }
 
   return { grid, daemons };
 }
@@ -103,8 +87,11 @@ const ReportIssue = () => (
 );
 
 export default function PuzzlePage() {
-  const [{ grid, daemons }, setPuzzle] = useState(() => generatePuzzle());
-  const [startRow, setStartRow] = useState(0);
+  const [puzzle, setPuzzle] = useState(() => generatePuzzle());
+  const [bufferSize, setBufferSize] = useState(() =>
+    Math.floor(Math.random() * (BUFFER_MAX - BUFFER_MIN + 1)) + BUFFER_MIN
+  );
+  const startRow = 0;
   const [selection, setSelection] = useState<Pos[]>([]);
   const [solved, setSolved] = useState<Set<number>>(new Set());
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
@@ -115,8 +102,11 @@ export default function PuzzlePage() {
   const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
 
   const newPuzzle = useCallback(() => {
-    setPuzzle(generatePuzzle());
-    setStartRow(0);
+    const p = generatePuzzle();
+    setPuzzle(p);
+    setBufferSize(
+      Math.floor(Math.random() * (BUFFER_MAX - BUFFER_MIN + 1)) + BUFFER_MIN
+    );
     setSelection([]);
     setSolved(new Set());
     setFeedback({ msg: "" });
@@ -132,23 +122,30 @@ export default function PuzzlePage() {
 
   const checkDaemons = useCallback(
     (sel: Pos[]) => {
-      const seq = sel.map((p) => grid[p.r][p.c]);
+      const seq = sel.map((p) => puzzle.grid[p.r][p.c]);
       const solvedSet = new Set(solved);
-      let breached = false;
-      daemons.forEach((daemon, idx) => {
+
+      const containsSubsequence = (arr: string[], subseq: string[]) => {
+        let idx = 0;
+        for (const val of arr) {
+          if (val === subseq[idx]) {
+            idx++;
+            if (idx === subseq.length) return true;
+          }
+        }
+        return false;
+      };
+
+      puzzle.daemons.forEach((daemon, idx) => {
         if (solvedSet.has(idx)) return;
         if (containsSubsequence(seq, daemon)) {
           solvedSet.add(idx);
-          breached = true;
+          setFeedback({ msg: "DAEMON BREACHED!", type: "success" });
         }
       });
-      if (breached) {
-        setFeedback({ msg: "DAEMON BREACHED!", type: "success" });
-      }
       setSolved(solvedSet);
-      return solvedSet;
     },
-    [grid, daemons, solved]
+    [puzzle, solved]
   );
 
   const updateLines = useCallback(() => {
@@ -173,7 +170,7 @@ export default function PuzzlePage() {
 
   useLayoutEffect(() => {
     updateLines();
-  }, [updateLines, grid]);
+  }, [updateLines, puzzle]);
 
   useLayoutEffect(() => {
     window.addEventListener("resize", updateLines);
@@ -182,7 +179,7 @@ export default function PuzzlePage() {
 
   const handleCellClick = useCallback(
     (r: number, c: number) => {
-      if (ended || selection.length >= BUFFER_SIZE) return;
+      if (ended || selection.length >= bufferSize) return;
 
       const newSel = selection.slice();
       if (newSel.length === 0) {
@@ -205,19 +202,19 @@ export default function PuzzlePage() {
       newSel.push({ r, c });
       setSelection(newSel);
       setFeedback({ msg: "" });
-      const newSolved = checkDaemons(newSel);
-      if (newSolved.size === daemons.length) {
+      checkDaemons(newSel);
+      if (solved.size + 1 === puzzle.daemons.length) {
         setEnded(true);
         setFeedback({ msg: "Puzzle solved!", type: "success" });
-      } else if (newSel.length >= BUFFER_SIZE) {
+      } else if (newSel.length >= bufferSize) {
         setEnded(true);
         setFeedback({ msg: "Puzzle failed. Try again.", type: "error" });
       }
     },
-    [ended, selection, startRow, checkDaemons, daemons.length, solved.size]
+    [ended, selection, startRow, checkDaemons, puzzle.daemons.length, solved.size]
   );
 
-  const sequence = selection.map((p) => grid[p.r][p.c]).join(" ");
+  const sequence = selection.map((p) => puzzle.grid[p.r][p.c]).join(" ");
 
   return (
     <Layout>
@@ -254,7 +251,7 @@ export default function PuzzlePage() {
               </div>
               <div className={styles["grid-box__inside"]}>
                 <div className={styles.grid}>
-                  {grid.map((row, r) =>
+                  {puzzle.grid.map((row, r) =>
                     row.map((val, c) => {
                       const isSelected = selection.some(
                         (p) => p.r === r && p.c === c
@@ -295,7 +292,7 @@ export default function PuzzlePage() {
               </div>
               <div className={styles["daemon-box__inside"]}>
                 <ol className={styles.daemons}>
-                  {daemons.map((d, idx) => (
+                  {puzzle.daemons.map((d, idx) => (
                     <li
                       key={idx}
                       className={solved.has(idx) ? "solved" : undefined}
