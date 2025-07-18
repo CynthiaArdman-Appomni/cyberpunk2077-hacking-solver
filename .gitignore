@@ -40,3 +40,4 @@ yarn-error.log*
 
 # audio files
 public/*.mp3
+tsconfig.tsbuildinfo

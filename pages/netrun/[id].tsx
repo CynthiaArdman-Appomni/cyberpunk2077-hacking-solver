@@ -36,15 +36,24 @@ export default function PlayPuzzlePage() {
     if (!id) return;
     fetch(`/api/puzzle/${id}`)
       .then(async (res) => {
-        if (!res.ok) throw new Error('load failed');
+        if (res.status === 404) throw new Error('notfound');
+        if (!res.ok) throw new Error('dberr');
         const data = await res.json();
         setPuzzle(data);
         setTimeLimit(data.timeLimit);
         setBufferSize(data.bufferSize);
       })
-      .catch(() =>
-        setFeedback({ msg: 'Failed to load puzzle.', type: 'error' })
-      );
+      .catch((err) => {
+        if (err.message === 'notfound') {
+          setFeedback({ msg: 'Puzzle not found.', type: 'error' });
+        } else if (err.message === 'dberr') {
+          console.error('Database error:', err);
+          setFeedback({ msg: 'Failed to load puzzle due to database error.', type: 'error' });
+        } else {
+          console.error('Puzzle load failed:', err);
+          setFeedback({ msg: 'Failed to load puzzle.', type: 'error' });
+        }
+      });
   }, [id]);
 
   useEffect(() => {

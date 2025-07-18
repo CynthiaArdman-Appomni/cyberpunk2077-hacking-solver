@@ -10,11 +10,16 @@ export default async function handler(
     res.status(400).end();
     return;
   }
-  const puzzle = await getPuzzle(id);
-  if (!puzzle) {
-    res.status(404).end();
-    return;
+  try {
+    const puzzle = await getPuzzle(id);
+    if (!puzzle) {
+      res.status(404).json({ error: 'Puzzle not found' });
+      return;
+    }
+    const { grid, daemons, bufferSize, timeLimit, startTime, difficulty } = puzzle;
+    res.status(200).json({ grid, daemons, bufferSize, timeLimit, startTime, difficulty });
+  } catch (e) {
+    console.error('Database error:', e);
+    res.status(500).json({ error: 'database' });
   }
-  const { grid, daemons, bufferSize, timeLimit, startTime, difficulty } = puzzle;
-  res.status(200).json({ grid, daemons, bufferSize, timeLimit, startTime, difficulty });
 }
