@@ -6,7 +6,7 @@ import { sql, ensurePuzzleTable } from './neonClient';
 
 const puzzles = new Map<string, StoredPuzzle>();
 const useSupabase = !!supabase;
-const useNeon = !!sql;
+const useNeon = !!process.env.NETLIFY_DATABASE_URL;
 
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible' | 'Unknown';
 
