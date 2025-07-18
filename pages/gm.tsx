@@ -210,12 +210,14 @@ export default function GMPage() {
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
   const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
 
+  const cellSize = Math.max(24, 60 - Math.max(0, parseInt(cols, 10) - 5) * 4);
+
   const parseNumber = (value: string): number | null => {
     const n = parseInt(value, 10);
     return Number.isNaN(n) ? null : n;
   };
 
-  const newPuzzle = useCallback(() => {
+  const newPuzzle = useCallback(async () => {
     const r = parseNumber(rows);
     const c = parseNumber(cols);
     const dc = parseNumber(daemonCount);
@@ -227,6 +229,22 @@ export default function GMPage() {
     }
 
     const p = generatePuzzle(r, c, dc, startRow, ml);
+
+    const runSolver = (await import("../lib/bruter")).default;
+    const hexToNum = (h: string) => parseInt(h, 16);
+    const matrix = p.grid.map((row) => row.map(hexToNum));
+    const seqs = p.daemons.map((d) => d.map(hexToNum));
+    const solvable = !!runSolver(matrix, seqs, p.bufferSize, {});
+
+    if (!solvable) {
+      setFeedback({
+        msg:
+          "Puzzle unsolvable with current settings—please adjust daemon lengths, grid dimensions, or buffer size.",
+        type: "error",
+      });
+      return;
+    }
+
     setPuzzle(p);
     setBufferSize(p.bufferSize);
     setSelection([]);
@@ -372,6 +390,10 @@ export default function GMPage() {
   );
 
   const sequence = selection.map((p) => puzzle.grid[p.r][p.c]).join(" ");
+  const gridStyle: React.CSSProperties = {
+    "--cols": puzzle.grid[0].length.toString(),
+    "--cell-size": `${cellSize}px`,
+  };
 
   return (
     <Layout>
@@ -455,7 +477,7 @@ export default function GMPage() {
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
               <div className={styles["grid-box__inside"]}>
-                <div className={styles.grid}>
+                <div className={styles.grid} style={gridStyle}>
                   <svg className={styles["path-lines"]} viewBox="0 0 100 100" preserveAspectRatio="none">
                     {lines.map((line, idx) => (
                       <line key={idx} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />

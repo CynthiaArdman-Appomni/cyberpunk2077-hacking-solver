@@ -119,7 +119,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .grid {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(5, 60px);
+  grid-template-columns: repeat(var(--cols, 5), var(--cell-size, 60px));
   grid-gap: 10px;
   justify-content: center;
   margin-bottom: 2rem;
@@ -144,8 +144,8 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
-  height: 60px;
+  width: var(--cell-size, 60px);
+  height: var(--cell-size, 60px);
   border: 2px solid $neon;
   font-weight: bold;
   font-size: 1.5rem;
@@ -190,8 +190,9 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   margin: 10px 0;
 
   li {
-    display: block;
+    display: inline-block;
     margin: 0 0 1rem 0;
+    margin-right: 0.5rem;
     padding: 4px 6px;
     border: 1px solid $neon;
     color: $neon;
@@ -199,6 +200,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     font-size: 1rem;
     font-family: $font-stack;
     text-transform: uppercase;
+    white-space: nowrap;
 
     &.solved {
       border-color: $color-success;
