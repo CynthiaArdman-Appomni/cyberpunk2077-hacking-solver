@@ -1,11 +1,19 @@
 @import "./common";
+$neon: #c6ff00;
 
 .button {
   background: transparent;
-  border: 2px solid $color-highlight;
-  color: $color-highlight;
-  font-size: 1.5rem;
-  padding: 0.8rem 5rem;
+  border: 2px solid $neon;
+  color: $neon;
+  font-family: "Orbitron", "Roboto", sans-serif;
+  text-transform: uppercase;
+  font-size: 1rem;
+  padding: 12px 25px;
+  transition: box-shadow 0.2s;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 0 15px $neon;
+  }
 
   &:disabled {
     opacity: 0.5;
