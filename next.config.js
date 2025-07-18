@@ -28,6 +28,6 @@ const withWebWorkers = (nextConfig) => {
   };
 };
 
-module.exports = (phase, defaultConfig) => {
+module.exports = (phase, { defaultConfig }) => {
   return withWebWorkers(withBundleAnalyzer(defaultConfig));
 };

@@ -199,10 +199,10 @@ export default function PlayPuzzlePage() {
 
   const cellSize = Math.max(24, 60 - Math.max(0, puzzle.grid[0].length - 5) * 4);
   const sequence = selection.map((p) => puzzle.grid[p.r][p.c]).join(" ");
-  const gridStyle: React.CSSProperties = {
+  const gridStyle = {
     "--cols": puzzle.grid[0].length.toString(),
     "--cell-size": `${cellSize}px`,
-  };
+  } as React.CSSProperties;
 
   return (
     <Layout>
