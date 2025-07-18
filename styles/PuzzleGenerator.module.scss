@@ -83,6 +83,12 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   }
 }
 
+.debug {
+  color: $neon;
+  font-size: 0.8rem;
+  margin-top: 0.5rem;
+}
+
 .daemon-box {
   border: 2px solid $neon;
   background: transparent;

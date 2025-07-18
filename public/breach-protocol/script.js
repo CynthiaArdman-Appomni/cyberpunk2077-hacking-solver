@@ -91,7 +91,9 @@ function generatePathPositions(length, rows, cols, startRow) {
     const path = [];
     let r = startRow;
     let c = Math.floor(Math.random() * cols);
+    const used = new Set();
     path.push({ r, c });
+    used.add(`${r},${c}`);
     for (let i = 1; i < length; i++) {
         if (i % 2 === 1) {
             let newR = Math.floor(Math.random() * rows);
@@ -106,7 +108,18 @@ function generatePathPositions(length, rows, cols, startRow) {
             }
             c = newC;
         }
+        let attempts = 0;
+        while (used.has(`${r},${c}`) && attempts < rows * cols) {
+            if (i % 2 === 1) {
+                r = Math.floor(Math.random() * rows);
+            }
+            else {
+                c = Math.floor(Math.random() * cols);
+            }
+            attempts++;
+        }
         path.push({ r, c });
+        used.add(`${r},${c}`);
     }
     return path;
 }

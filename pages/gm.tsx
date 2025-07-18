@@ -109,7 +109,9 @@ function generatePathPositions(
   const path: Pos[] = [];
   let r = startRow;
   let c = Math.floor(Math.random() * cols);
+  const used = new Set<string>();
   path.push({ r, c });
+  used.add(`${r},${c}`);
   for (let i = 1; i < length; i++) {
     if (i % 2 === 1) {
       let newR = Math.floor(Math.random() * rows);
@@ -124,7 +126,17 @@ function generatePathPositions(
       }
       c = newC;
     }
+    let attempts = 0;
+    while (used.has(`${r},${c}`) && attempts < rows * cols) {
+      if (i % 2 === 1) {
+        r = Math.floor(Math.random() * rows);
+      } else {
+        c = Math.floor(Math.random() * cols);
+      }
+      attempts++;
+    }
     path.push({ r, c });
+    used.add(`${r},${c}`);
   }
   return path;
 }
@@ -206,6 +218,7 @@ export default function GMPage() {
   const [timeRemaining, setTimeRemaining] = useState(parseInt(timeLimit, 10));
   const [solutionPath, setSolutionPath] = useState<Pos[] | null>(null);
   const [solutionSequence, setSolutionSequence] = useState("");
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
@@ -236,6 +249,9 @@ export default function GMPage() {
     const matrix = p.grid.map((row) => row.map(hexToNum));
     const seqs = p.daemons.map((d) => d.map(hexToNum));
     const solvable = !!runSolver(matrix, seqs, p.bufferSize, {});
+    const pathString = p.path
+      .map((pos) => `(${pos.r},${pos.c})`)
+      .join(" -> ");
 
     if (!solvable) {
       setFeedback({
@@ -255,6 +271,7 @@ export default function GMPage() {
     setSolutionPath(null);
     setSolutionSequence("");
     setTimeRemaining(tl);
+    setDebugInfo(`Solution path: ${pathString}`);
   }, [rows, cols, daemonCount, startRow, maxDaemonLen, timeLimit]);
 
   const resetSelection = useCallback(() => {
@@ -345,9 +362,9 @@ export default function GMPage() {
     const matrix = puzzle.grid.map((row) => row.map(hexToNum));
     const seqs = puzzle.daemons.map((d) => d.map(hexToNum));
     const result = runSolver(matrix, seqs, puzzle.bufferSize, {});
-    if (!result) {
+    if (!result || result.match.includes.length < puzzle.daemons.length) {
       setFeedback({
-        msg: "No valid solution exists—please adjust your settings.",
+        msg: "Puzzle settings created an unsolvable combination. Please adjust settings.",
         type: "error",
       });
       setSolutionPath(null);
@@ -561,6 +578,9 @@ export default function GMPage() {
                 )}
                 {feedback.msg && (
                   <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
+                )}
+                {debugInfo && (
+                  <p className={styles.debug}>{debugInfo}</p>
                 )}
               </div>
             </div>
