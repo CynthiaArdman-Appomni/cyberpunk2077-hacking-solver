@@ -1,15 +1,127 @@
 // List of allowed hexadecimal values in the puzzle.
 const HEX_VALUES = ['1C', '55', 'BD', 'E9', '7A', 'FF'];
-// Limit on how many selections the player can make
-const MAX_STEPS = 8;
+// Limit on how many selections the player can make. This will be
+// overwritten by the generated puzzle's buffer size.
+let maxSteps = 8;
 
 // Returns a random element from HEX_VALUES.
 function randomHex() {
     return HEX_VALUES[Math.floor(Math.random() * HEX_VALUES.length)];
 }
 
-// Generate a rows x cols matrix filled with random hex values.
-function generateGrid(rows = 5, cols = 5) {
+// Generate a single daemon sequence.
+function generateDaemon(length) {
+    const seq = [];
+    for (let i = 0; i < length; i++) {
+        seq.push(randomHex());
+    }
+    return seq;
+}
+
+// Shortest common supersequence of two sequences.
+function scsTwo(a, b) {
+    const m = a.length;
+    const n = b.length;
+    const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+    for (let i = m; i >= 0; i--) {
+        for (let j = n; j >= 0; j--) {
+            if (i === m && j === n) {
+                dp[i][j] = 0;
+            } else if (i === m) {
+                dp[i][j] = n - j;
+            } else if (j === n) {
+                dp[i][j] = m - i;
+            } else if (a[i] === b[j]) {
+                dp[i][j] = 1 + dp[i + 1][j + 1];
+            } else {
+                dp[i][j] = 1 + Math.min(dp[i + 1][j], dp[i][j + 1]);
+            }
+        }
+    }
+    const result = [];
+    let i = 0;
+    let j = 0;
+    while (i < m || j < n) {
+        if (i === m) {
+            result.push(b[j++]);
+        } else if (j === n) {
+            result.push(a[i++]);
+        } else if (a[i] === b[j]) {
+            result.push(a[i]);
+            i++;
+            j++;
+        } else if (dp[i + 1][j] <= dp[i][j + 1]) {
+            result.push(a[i++]);
+        } else {
+            result.push(b[j++]);
+        }
+    }
+    return result;
+}
+
+// Compute the shortest common supersequence of multiple sequences.
+function shortestCommonSupersequence(seqs) {
+    if (seqs.length === 0) return [];
+
+    const permutations = (arr) => {
+        if (arr.length <= 1) return [arr];
+        const res = [];
+        arr.forEach((item, idx) => {
+            const rest = arr.slice(0, idx).concat(arr.slice(idx + 1));
+            permutations(rest).forEach((perm) => res.push([item, ...perm]));
+        });
+        return res;
+    };
+
+    let best = null;
+    permutations(seqs).forEach((perm) => {
+        let current = perm[0];
+        for (let i = 1; i < perm.length; i++) {
+            current = scsTwo(current, perm[i]);
+        }
+        if (!best || current.length < best.length) {
+            best = current;
+        }
+    });
+    return best;
+}
+
+// Generate random alternating path positions.
+function generatePathPositions(length, rows, cols, startRow) {
+    const path = [];
+    let r = startRow;
+    let c = Math.floor(Math.random() * cols);
+    path.push({ r, c });
+    for (let i = 1; i < length; i++) {
+        if (i % 2 === 1) {
+            let newR = Math.floor(Math.random() * rows);
+            if (rows > 1) {
+                while (newR === r) newR = Math.floor(Math.random() * rows);
+            }
+            r = newR;
+        } else {
+            let newC = Math.floor(Math.random() * cols);
+            if (cols > 1) {
+                while (newC === c) newC = Math.floor(Math.random() * cols);
+            }
+            c = newC;
+        }
+        path.push({ r, c });
+    }
+    return path;
+}
+
+// Generate a puzzle grid and daemon sequences with a guaranteed solution.
+function generatePuzzle(rows = 5, cols = 5, count = 3, startRow = 0) {
+    const daemons = [];
+    for (let i = 0; i < count; i++) {
+        const length = Math.floor(Math.random() * 3) + 2; // 2-4
+        daemons.push(generateDaemon(length));
+    }
+
+    const solutionSeq = shortestCommonSupersequence(daemons);
+    const bufferSize = solutionSeq.length;
+
     const grid = [];
     for (let r = 0; r < rows; r++) {
         const row = [];
@@ -18,46 +130,14 @@ function generateGrid(rows = 5, cols = 5) {
         }
         grid.push(row);
     }
-    return grid;
-}
 
-// Convert path coordinates to the actual hex values from the grid.
-function pathToSequence(grid, path) {
-    return path.map(p => grid[p.r][p.c]);
-}
-
-// Generate a random path of a given length consisting of adjacent cells.
-function generatePath(grid, length) {
-    const rows = grid.length;
-    const cols = grid[0].length;
-    // Pick a random starting cell.
-    let r = Math.floor(Math.random() * rows);
-    let c = Math.floor(Math.random() * cols);
-    const path = [{ r, c }];
-
-    while (path.length < length) {
-        const options = [];
-        if (r > 0) options.push({ r: r - 1, c });
-        if (r < rows - 1) options.push({ r: r + 1, c });
-        if (c > 0) options.push({ r, c: c - 1 });
-        if (c < cols - 1) options.push({ r, c: c + 1 });
-        const next = options[Math.floor(Math.random() * options.length)];
-        r = next.r;
-        c = next.c;
-        path.push(next);
+    const path = generatePathPositions(bufferSize, rows, cols, startRow);
+    for (let i = 0; i < path.length; i++) {
+        const { r, c } = path[i];
+        grid[r][c] = solutionSeq[i];
     }
-    return path;
-}
 
-// Create a specified number of daemon sequences from the grid.
-function generateDaemons(grid, count = 3) {
-    const daemons = [];
-    for (let i = 0; i < count; i++) {
-        const length = Math.random() < 0.5 ? 3 : 4;
-        const path = generatePath(grid, length);
-        daemons.push(pathToSequence(grid, path));
-    }
-    return daemons;
+    return { grid, daemons, bufferSize };
 }
 
 let currentGrid = [];
@@ -156,9 +236,10 @@ function displayDaemons(daemons) {
 
 // Generate a new puzzle and display it.
 function newPuzzle() {
-    currentGrid = generateGrid();
-    daemonSequences = generateDaemons(currentGrid);
-    startRow = Math.floor(Math.random() * currentGrid.length);
+    const puzzle = generatePuzzle(5, 5, 3, startRow);
+    currentGrid = puzzle.grid;
+    daemonSequences = puzzle.daemons;
+    maxSteps = puzzle.bufferSize;
     selection = [];
     solvedDaemons.clear();
     puzzleEnded = false;
@@ -196,7 +277,7 @@ function endPuzzle(success) {
 }
 
 function onCellClick(e) {
-    if (puzzleEnded || selection.length >= MAX_STEPS) {
+    if (puzzleEnded || selection.length >= maxSteps) {
         return;
     }
     const cell = e.currentTarget;
@@ -236,7 +317,7 @@ function onCellClick(e) {
     checkDaemons();
     if (solvedDaemons.size === daemonSequences.length) {
         endPuzzle(true);
-    } else if (selection.length >= MAX_STEPS) {
+    } else if (selection.length >= maxSteps) {
         endPuzzle(false);
     }
 }
