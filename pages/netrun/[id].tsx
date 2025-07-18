@@ -39,12 +39,16 @@ export default function PlayPuzzlePage() {
         const data = await res.json();
         setPuzzle(data);
         setTimeLimit(data.timeLimit);
-        const start = new Date(data.startTime).getTime();
-        const remaining = Math.max(
-          0,
-          data.timeLimit - Math.floor((Date.now() - start) / 1000)
-        );
-        setTimeRemaining(remaining);
+        if (data.startTime) {
+          const start = new Date(data.startTime).getTime();
+          const remaining = Math.max(
+            0,
+            data.timeLimit - Math.floor((Date.now() - start) / 1000)
+          );
+          setTimeRemaining(remaining);
+        } else {
+          setTimeRemaining(data.timeLimit);
+        }
         setBufferSize(data.bufferSize);
       })
       .catch(() =>
@@ -53,7 +57,7 @@ export default function PlayPuzzlePage() {
   }, [id]);
 
   useEffect(() => {
-    if (ended || !puzzle) return;
+    if (ended || !puzzle || !puzzle.startTime) return;
     const handle = setInterval(() => {
       const start = new Date(puzzle.startTime).getTime();
       const remaining = Math.max(
@@ -158,6 +162,12 @@ export default function PlayPuzzlePage() {
     (r: number, c: number) => {
       if (ended || selection.length >= bufferSize || !puzzle) return;
 
+      if (!puzzle.startTime) {
+        const start = new Date().toISOString();
+        setPuzzle({ ...puzzle, startTime: start });
+        setTimeRemaining(puzzle.timeLimit);
+      }
+
       const startRow = 0;
       const newSel = selection.slice();
       if (newSel.length === 0) {
@@ -242,9 +252,6 @@ export default function PlayPuzzlePage() {
         <Row>
           <Col xs={12} lg={8}>
             <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
-            {puzzle && (
-              <p className={styles.description}>DIFFICULTY: {puzzle.difficulty}</p>
-            )}
             <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
@@ -321,12 +328,17 @@ export default function PlayPuzzlePage() {
                   setFeedback({ msg: "" });
                   setEnded(false);
                   if (puzzle) {
-                    const start = new Date(puzzle.startTime).getTime();
-                    const remaining = Math.max(
-                      0,
-                      puzzle.timeLimit - Math.floor((Date.now() - start) / 1000)
-                    );
-                    setTimeRemaining(remaining);
+                    if (puzzle.startTime) {
+                      const start = new Date(puzzle.startTime).getTime();
+                      const remaining = Math.max(
+                        0,
+                        puzzle.timeLimit -
+                          Math.floor((Date.now() - start) / 1000)
+                      );
+                      setTimeRemaining(remaining);
+                    } else {
+                      setTimeRemaining(puzzle.timeLimit);
+                    }
                   }
                 }}
               >

@@ -9,7 +9,7 @@ export default async function handler(
     res.status(405).end();
     return;
   }
-  const { difficulty, timeLimit } = req.body || {};
+  const { difficulty, timeLimit, startOnFirstClick } = req.body || {};
   const tl = parseInt(timeLimit);
   if (!difficulty || Number.isNaN(tl)) {
     res.status(400).json({ error: 'Invalid parameters' });
@@ -19,6 +19,7 @@ export default async function handler(
     const { id, puzzle } = await createPuzzle({
       difficulty: difficulty as Difficulty,
       timeLimit: tl,
+      startOnFirstClick: !!startOnFirstClick,
     });
     res.status(200).json({ id, puzzle });
   } catch (e) {

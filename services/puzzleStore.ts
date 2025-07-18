@@ -10,7 +10,7 @@ export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible';
 
 export interface StoredPuzzle extends Puzzle {
   timeLimit: number;
-  startTime: string;
+  startTime: string | null;
   difficulty: Difficulty;
 }
 
@@ -42,14 +42,15 @@ async function generatePuzzleWithDifficulty(diff: Difficulty): Promise<Puzzle> {
 export async function createPuzzle(options: {
   difficulty: Difficulty;
   timeLimit: number;
+  startOnFirstClick?: boolean;
 }): Promise<{ id: string; puzzle: StoredPuzzle }> {
-  const { difficulty, timeLimit } = options;
+  const { difficulty, timeLimit, startOnFirstClick } = options;
   const puzzle = await generatePuzzleWithDifficulty(difficulty);
   const id = randomBytes(8).toString('hex');
   const stored: StoredPuzzle = {
     ...puzzle,
     timeLimit,
-    startTime: new Date().toISOString(),
+    startTime: startOnFirstClick ? null : new Date().toISOString(),
     difficulty,
   };
   if (useSupabase) {
