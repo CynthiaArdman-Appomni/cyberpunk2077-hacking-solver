@@ -385,6 +385,11 @@ export default function PuzzlePage() {
     (r: number, c: number) => {
       if (ended || selection.length >= bufferSize) return;
 
+      if (selection.some((p) => p.r === r && p.c === c)) {
+        setFeedback({ msg: "Cell already selected.", type: "error" });
+        return;
+      }
+
       const newSel = selection.slice();
       if (newSel.length === 0) {
         if (r !== startRow) {
@@ -477,6 +482,7 @@ export default function PuzzlePage() {
                       );
                       const selectable = (() => {
                         if (ended) return false;
+                        if (isSelected) return false;
                         if (selection.length === 0) {
                           return r === startRow;
                         }
