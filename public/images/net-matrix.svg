@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
   <style>
-    text { font-family: 'Oxanium', monospace; font-size: 14px; fill:#d1ed57; opacity:0.1; }
+    text { font-family: 'Oxanium', monospace; font-size: 14px; fill:#e0f28e; opacity:0.1; }
   </style>
   <rect width="400" height="400" fill="black" />
   <text x="0" y="16">BD E9 1C 55 7A BD 55 E9 1C 7A 55 1C BD E9 BD 55</text>
