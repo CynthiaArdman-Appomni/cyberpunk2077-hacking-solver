@@ -170,6 +170,29 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     box-shadow: 0 0 20px $neon;
   }
 
+  &.solution {
+    background: lighten($neon, 10%);
+    color: $bgcolor;
+    position: relative;
+
+    &::after {
+      content: attr(data-step);
+      position: absolute;
+      bottom: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: $color-success;
+      color: $bgcolor;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 4px $color-success;
+    }
+  }
+
   &:hover:not(.selected) {
     box-shadow: 0 0 6px $neon;
   }
@@ -225,6 +248,13 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 
 .sequence {
   margin-top: 10px;
+}
+
+.solution-sequence {
+  margin-top: 10px;
+  color: $color-success;
+  font-weight: bold;
+  text-transform: uppercase;
 }
 
 .feedback {

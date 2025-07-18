@@ -204,6 +204,8 @@ export default function GMPage() {
   const [feedback, setFeedback] = useState<{ msg: string; type?: "error" | "success" }>({ msg: "" });
   const [ended, setEnded] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(parseInt(timeLimit, 10));
+  const [solutionPath, setSolutionPath] = useState<Pos[] | null>(null);
+  const [solutionSequence, setSolutionSequence] = useState("");
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
@@ -250,6 +252,8 @@ export default function GMPage() {
     setSolved(new Set());
     setFeedback({ msg: "" });
     setEnded(false);
+    setSolutionPath(null);
+    setSolutionSequence("");
     setTimeRemaining(tl);
   }, [rows, cols, daemonCount, startRow, maxDaemonLen, timeLimit]);
 
@@ -258,6 +262,8 @@ export default function GMPage() {
     setSolved(new Set());
     setFeedback({ msg: "" });
     setEnded(false);
+    setSolutionPath(null);
+    setSolutionSequence("");
     const tl = parseNumber(timeLimit);
     if (tl !== null) {
       setTimeRemaining(tl);
@@ -332,6 +338,27 @@ export default function GMPage() {
     }
     setLines(newLines);
   }, [selection]);
+
+  const showSolutionPath = useCallback(async () => {
+    const runSolver = (await import("../lib/bruter")).default;
+    const hexToNum = (h: string) => parseInt(h, 16);
+    const matrix = puzzle.grid.map((row) => row.map(hexToNum));
+    const seqs = puzzle.daemons.map((d) => d.map(hexToNum));
+    const result = runSolver(matrix, seqs, puzzle.bufferSize, {});
+    if (!result) {
+      setFeedback({
+        msg: "No valid solution exists—please adjust your settings.",
+        type: "error",
+      });
+      setSolutionPath(null);
+      setSolutionSequence("");
+      return;
+    }
+    const path = result.solution.map(({ y, x }) => ({ r: y, c: x }));
+    setSolutionPath(path);
+    setSolutionSequence(path.map((p) => puzzle.grid[p.r][p.c]).join(" "));
+    setFeedback({ msg: "" });
+  }, [puzzle]);
 
   useEffect(() => {
     updateLines();
@@ -485,17 +512,25 @@ export default function GMPage() {
                   {puzzle.grid.map((row, r) =>
                     row.map((val, c) => {
                       if (!cellRefs.current[r]) cellRefs.current[r] = [];
+                      const stepIdx = solutionPath ? solutionPath.findIndex((p) => p.r === r && p.c === c) : -1;
                       return (
                         <div
                           ref={(el) => (cellRefs.current[r][c] = el)}
                           key={`${r}-${c}`}
                           className={cz(styles.cell, {
                             [styles.selected]: selection.some((p) => p.r === r && p.c === c),
-                            [styles.active]: !ended && ((selection.length === 0 && r === startRow) ||
-                              (selection.length > 0 && ((selection.length % 2 === 1 && c === selection[selection.length-1].c) ||
-                              (selection.length % 2 === 0 && r === selection[selection.length-1].r)))) ,
-                            [styles.dim]: !selection.some((p) => p.r === r && p.c === c) && !(selection.length === 0 && r === startRow),
+                            [styles.active]:
+                              !ended &&
+                              ((selection.length === 0 && r === startRow) ||
+                                (selection.length > 0 &&
+                                  ((selection.length % 2 === 1 && c === selection[selection.length - 1].c) ||
+                                    (selection.length % 2 === 0 && r === selection[selection.length - 1].r)))),
+                            [styles.dim]:
+                              !selection.some((p) => p.r === r && p.c === c) &&
+                              !(selection.length === 0 && r === startRow),
+                            [styles.solution]: stepIdx >= 0,
                           })}
+                          data-step={stepIdx >= 0 ? stepIdx + 1 : undefined}
                           onClick={() => handleCellClick(r, c)}
                         >
                           {val}
@@ -521,6 +556,9 @@ export default function GMPage() {
                   ))}
                 </ol>
                 <p className={styles.sequence}>{sequence}</p>
+                {solutionSequence && (
+                  <p className={styles["solution-sequence"]}>{solutionSequence}</p>
+                )}
                 {feedback.msg && (
                   <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
                 )}
@@ -532,6 +570,7 @@ export default function GMPage() {
           <Col lg={8}>
             <div className={styles.buttons}>
               <Button onClick={resetSelection}>Reset Puzzle</Button>
+              <Button onClick={showSolutionPath}>Show Solution Path</Button>
             </div>
           </Col>
         </Row>
