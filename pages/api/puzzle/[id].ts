@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getPuzzle, getPuzzleSecret } from '../../../services/puzzleStore';
+import { getPuzzle, getPuzzleSecret, getDaemonSecret } from '../../../services/puzzleStore';
 import { log, logError } from '../../../services/logger';
 
 export default async function handler(
@@ -21,6 +21,19 @@ export default async function handler(
         return;
       }
       log(`API /puzzle/${id}?secret=1 returned secret`);
+      res.status(200).json({ secretWord: secret });
+      return;
+    }
+
+    if (typeof req.query.daemon === 'string') {
+      const idx = parseInt(req.query.daemon, 10);
+      const secret = await getDaemonSecret(id, idx);
+      if (!secret) {
+        logError(`Secret for daemon ${idx} of puzzle ${id} not found`);
+        res.status(404).json({ error: 'Puzzle not found' });
+        return;
+      }
+      log(`API /puzzle/${id}?daemon=${idx} returned secret`);
       res.status(200).json({ secretWord: secret });
       return;
     }

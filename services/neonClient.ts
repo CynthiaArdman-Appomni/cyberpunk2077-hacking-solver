@@ -14,9 +14,11 @@ CREATE TABLE IF NOT EXISTS puzzles (
   daemons JSONB NOT NULL,
   start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   duration INTEGER DEFAULT 60,
-  secret_word TEXT
+  secret_word TEXT,
+  daemon_words JSONB
 );`;
   await sql`ALTER TABLE puzzles ADD COLUMN IF NOT EXISTS secret_word TEXT;`;
+  await sql`ALTER TABLE puzzles ADD COLUMN IF NOT EXISTS daemon_words JSONB;`;
   initialized = true;
 }
 

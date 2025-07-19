@@ -414,9 +414,14 @@ export default function GMPage() {
               </Form.Group>
             )}
             {puzzle && (
-              <p className="mt-2">
-                <strong>Secret Word:</strong> {puzzle.secretWord}
-              </p>
+              <div className="mt-2">
+                <p>
+                  <strong>Daemon Words:</strong> {puzzle.daemonWords.join(', ')}
+                </p>
+                <p>
+                  <strong>Final Word:</strong> {puzzle.secretWord}
+                </p>
+              </div>
             )}
           </Col>
         </Row>
@@ -508,7 +513,7 @@ export default function GMPage() {
                 <ol className={styles.daemons}>
                   {puzzle.daemons.map((d, idx) => (
                     <li key={idx} className={solved.has(idx) ? "solved" : undefined}>
-                      {d.join(" ")}
+                      {d.join(" ")} {solved.has(idx) ? `- ${puzzle.daemonWords[idx]}` : ''}
                     </li>
                   ))}
                 </ol>
