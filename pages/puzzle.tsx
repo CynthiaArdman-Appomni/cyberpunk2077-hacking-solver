@@ -281,6 +281,13 @@ export default function PuzzlePage() {
   }, []);
 
   const newPuzzle = useCallback(async () => {
+    // Close any result overlay immediately
+    setEnded(false);
+    setLogLines([]);
+    setSelection([]);
+    setSolved(new Set());
+    setFeedback({ msg: "" });
+
     const diff: Difficulty = DIFFICULTIES[Math.floor(Math.random() * DIFFICULTIES.length)];
     setDifficulty(diff);
     try {
