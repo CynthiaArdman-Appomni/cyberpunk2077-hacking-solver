@@ -491,13 +491,8 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
     );
   }
 
-  const cellSize = Math.max(24, 60 - Math.max(0, puzzle.grid[0].length - 5) * 4);
   const sequence = selection.map((p) => puzzle.grid[p.r][p.c]).join(" ");
   const failed = ended && solved.size !== (puzzle?.daemons.length || 0);
-  const gridStyle = {
-    "--cols": puzzle.grid[0].length.toString(),
-    "--cell-size": `${cellSize}px`,
-  } as React.CSSProperties;
 
   return (
     <Layout>
@@ -565,40 +560,37 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         </Row>
         <Row>
           <Col xs={12} lg={8}>
-            <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
+            <div
+              className={cz(styles["grid-box"], {
+                [styles.pulse]: breachFlash,
+                [styles["fade-out"]]: ended && solved.size === (puzzle?.daemons.length || 0),
+                [styles.failure]: failed,
+              })}
+            >
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
               <div className={styles["grid-box__inside"]}>
-                <div className={styles.grid} style={gridStyle}>
-                  <svg className={styles["path-lines"]} viewBox="0 0 100 100" preserveAspectRatio="none">
-                    {lines.map((line, idx) => (
-                      <line key={idx} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
-                    ))}
-                  </svg>
+                <div className={styles.grid}>
                   {puzzle.grid.map((row, r) =>
                     row.map((val, c) => {
-                      if (!cellRefs.current[r]) cellRefs.current[r] = [];
-                      const stepIdx = selection.findIndex((p) => p.r === r && p.c === c);
-                      const isSelected = stepIdx >= 0;
+                      const isSelected = selection.some((p) => p.r === r && p.c === c);
+                      const selectable = (() => {
+                        if (ended) return false;
+                        if (isSelected) return false;
+                        if (selection.length === 0) {
+                          return r === 0;
+                        }
+                        const last = selection[selection.length - 1];
+                        const expectColumn = selection.length % 2 === 1;
+                        return expectColumn ? c === last.c : r === last.r;
+                      })();
+                      const classes = [styles.cell];
+                      if (selectable) classes.push(styles.active);
+                      else if (!isSelected) classes.push(styles.dim);
+                      if (isSelected) classes.push(styles.selected);
                       return (
-                        <div
-                          ref={(el) => (cellRefs.current[r][c] = el)}
-                          key={`${r}-${c}`}
-                          className={cz(styles.cell, {
-                            [styles.selected]: isSelected,
-                            [styles.active]:
-                              !ended &&
-                              !isSelected &&
-                              ((selection.length === 0 && r === 0) ||
-                                (selection.length > 0 &&
-                                  ((selection.length % 2 === 1 && c === selection[selection.length - 1].c) ||
-                                    (selection.length % 2 === 0 && r === selection[selection.length - 1].r)))),
-                            [styles.dim]:
-                              !isSelected && !(selection.length === 0 && r === 0),
-                          })}
-                          onClick={() => handleCellClick(r, c)}
-                        >
+                        <div key={`${r}-${c}`} className={classes.join(" ")} onClick={() => handleCellClick(r, c)}>
                           {val}
                         </div>
                       );
@@ -609,7 +601,13 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
             </div>
           </Col>
           <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={cz(styles["daemon-box"], { [styles.pulse]: breachFlash })}>
+            <div
+              className={cz(styles["daemon-box"], {
+                [styles.pulse]: breachFlash,
+                [styles["fade-out"]]: ended && solved.size === (puzzle?.daemons.length || 0),
+                [styles.failure]: failed,
+              })}
+            >
               <div className={styles["daemon-box__header"]}>
                 <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
               </div>
