@@ -16,6 +16,24 @@ function randomHex() {
   return HEX_VALUES[Math.floor(Math.random() * HEX_VALUES.length)];
 }
 
+const CODE_WORDS = [
+  'ALPHA',
+  'BRAVO',
+  'CHARLIE',
+  'DELTA',
+  'ECHO',
+  'FOXTROT',
+  'GHOST',
+  'NOVA',
+  'OMEGA',
+  'PHANTOM',
+  'VORTEX',
+];
+
+function randomCodeWord() {
+  return CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)];
+}
+
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible' | 'Unknown';
 
 export interface StoredPuzzle extends Puzzle {
@@ -23,6 +41,7 @@ export interface StoredPuzzle extends Puzzle {
   startTime: string | null;
   difficulty: Difficulty;
   solutionCount: number;
+  secretWord: string;
 }
 
 function countSolutions(puzzle: Puzzle): number {
@@ -93,6 +112,7 @@ export async function createPuzzle(options: {
     startTime: startOnFirstClick ? null : new Date().toISOString(),
     difficulty,
     solutionCount,
+    secretWord: randomCodeWord(),
   };
   puzzles.set(id, stored);
   log(`Created puzzle ${id} (${difficulty})`);
@@ -130,7 +150,7 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
         const solutionSeq = combineDaemons(daemons);
         const bufferSize = solutionSeq.length;
         log(`Loaded puzzle ${id} from database`);
-        return { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0 };
+        return { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0, secretWord: '' };
       }
     } catch (e) {
       logError('Database error on getPuzzle', e);
@@ -143,5 +163,10 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
     logError(`Puzzle ${id} not found in memory`);
   }
   return puzzle;
+}
+
+export function getPuzzleSecret(id: string): string | null {
+  const puzzle = puzzles.get(id);
+  return puzzle ? puzzle.secretWord : null;
 }
 

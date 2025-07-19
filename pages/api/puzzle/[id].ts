@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getPuzzle } from '../../../services/puzzleStore';
+import { getPuzzle, getPuzzleSecret } from '../../../services/puzzleStore';
 import { log, logError } from '../../../services/logger';
 
 export default async function handler(
@@ -13,6 +13,18 @@ export default async function handler(
     return;
   }
   try {
+    if (req.query.secret === '1') {
+      const secret = getPuzzleSecret(id);
+      if (!secret) {
+        logError(`Secret for puzzle ${id} not found`);
+        res.status(404).json({ error: 'Puzzle not found' });
+        return;
+      }
+      log(`API /puzzle/${id}?secret=1 returned secret`);
+      res.status(200).json({ secretWord: secret });
+      return;
+    }
+
     const puzzle = await getPuzzle(id);
     if (!puzzle) {
       logError(`Puzzle ${id} not found`);

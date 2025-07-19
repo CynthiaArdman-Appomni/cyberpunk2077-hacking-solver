@@ -88,6 +88,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
   const [ended, setEnded] = useState(false);
   const [breachFlash, setBreachFlash] = useState(false);
   const [logLines, setLogLines] = useState<string[]>([]);
+  const [secretWord, setSecretWord] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [dive, setDive] = useState(true);
 
@@ -263,22 +264,35 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
 
   useEffect(() => {
     if (ended && puzzle && solved.size === puzzle.daemons.length) {
-      setLogLines([]);
-      let idx = 0;
-      const id = setInterval(() => {
-        setLogLines((l) => {
-          if (idx >= TERMINAL_LOGS.length) {
-            clearInterval(id);
-            return l;
+      let timer: NodeJS.Timeout;
+      (async () => {
+        try {
+          const res = await fetch(`/api/puzzle/${id}?secret=1`);
+          if (res.ok) {
+            const data = await res.json();
+            setSecretWord(data.secretWord);
+            const lines = [...TERMINAL_LOGS, `SECRET WORD: ${data.secretWord}`];
+            setLogLines([]);
+            let idx = 0;
+            timer = setInterval(() => {
+              setLogLines((l) => {
+                if (idx >= lines.length) {
+                  clearInterval(timer);
+                  return l;
+                }
+                const line = lines[idx];
+                idx += 1;
+                return [...l, line];
+              });
+            }, 300);
           }
-          const line = TERMINAL_LOGS[idx];
-          idx += 1;
-          return [...l, line];
-        });
-      }, 300);
-      return () => clearInterval(id);
+        } catch (e) {
+          console.error('Failed to fetch secret word', e);
+        }
+      })();
+      return () => clearInterval(timer);
     }
-  }, [ended, solved, puzzle]);
+  }, [ended, solved, puzzle, id]);
 
   useEffect(() => {
     if (ended && puzzle && solved.size !== puzzle.daemons.length) {
@@ -560,7 +574,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         {ended && solved.size === (puzzle?.daemons.length || 0) && (
           <div className={styles["terminal-overlay"]}>
             <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
-            {logLines.length === TERMINAL_LOGS.length && (
+            {logLines.length === (secretWord ? TERMINAL_LOGS.length + 1 : TERMINAL_LOGS.length) && (
               <button className={styles["exit-button"]} onClick={resetPuzzle}>
                 EXIT INTERFACE
               </button>
