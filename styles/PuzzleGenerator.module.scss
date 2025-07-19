@@ -25,6 +25,9 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   &.net-dive {
     animation: net-dive 0.8s ease-out;
   }
+  &.failure-bg {
+    background: color.adjust($color-error, $alpha: -0.6);
+  }
 }
 
 .title {
@@ -58,6 +61,20 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   border: 2px solid $neon;
   background: color.adjust($color-lighter-bg, $alpha: -0.3);
   margin-bottom: 2rem;
+
+  &.failed {
+    border-color: $color-error;
+
+    .grid-box__header {
+      background: $color-error;
+      color: $bgcolor;
+    }
+
+    .cell {
+      border-color: $color-error;
+      color: $color-error;
+    }
+  }
 
   &__header {
     font-size: 1.5rem;
@@ -99,6 +116,20 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   background: color.adjust($color-lighter-bg, $alpha: -0.3);
 
   margin-bottom: 2rem;
+
+  &.failed {
+    border-color: $color-error;
+
+    .daemon-box__header {
+      background: $color-error;
+      color: $bgcolor;
+    }
+
+    li {
+      border-color: $color-error;
+      color: $color-error;
+    }
+  }
 
   &__header {
     font-size: 1.5rem;
@@ -426,6 +457,13 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   font-family: monospace;
   padding: 20px;
   text-shadow: 0 0 5px $color-success;
+
+  &.failure {
+    background: rgba($color-error, 0.85);
+    color: $color-error;
+    text-shadow: 0 0 5px $color-error;
+    animation: glitch 0.4s infinite;
+  }
 }
 
 .terminal-log {
@@ -441,11 +479,21 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   color: $color-success;
   padding: 0.5rem 1rem;
   cursor: pointer;
+
+  .failure & {
+    border-color: $color-error;
+    color: $color-error;
+  }
 }
 
 .exit-button:hover {
   background: $color-success;
   color: $color-bg;
+
+  .failure & {
+    background: $color-error;
+    color: $color-bg;
+  }
 }
 
 @keyframes fade-out {
