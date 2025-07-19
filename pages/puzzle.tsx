@@ -19,41 +19,76 @@ const HEX_VALUES = ["1C", "55", "BD", "E9", "7A", "FF"];
 const DIFFICULTIES = ["Easy", "Medium", "Hard"] as const;
 type Difficulty = typeof DIFFICULTIES[number];
 
-const TERMINAL_LOGS = [
-  "//ROOT",
-  "//ACCESS_REQUEST",
-  "//ACCESS_REQUEST_SUCCESS",
-  "//COLLECTING_PACKET_1................COMPLETE",
-  "//COLLECTING_PACKET_2................COMPLETE",
-  "//COLLECTING_PACKET_3................COMPLETE",
-  "//LOGIN",
-  "//LOGIN_SUCCESS",
-  "",
-  "//UPLOAD_IN_PROGRESS",
-  "//UPLOAD_COMPLETE!",
-  "",
-  "ALL DAEMONS UPLOADED",
-];
+function generateSuccessLog(daemonCount: number): string[] {
+  const lines = [
+    "//INITIATE_BREACH_SEQUENCE",
+    "//NEURAL_INTERFACE_ESTABLISHED",
+    "//PINGING_TARGET_NODE...................SUCCESS",
+    "//FIREWALL_HANDSHAKE_INITIATED..........ACCEPTED",
+    "//AUTHENTICATING_ACCESS_PROTOCOLS.......COMPLETE",
+    "",
+    "//ACCESS_LEVEL: ROOT GRANTED",
+    "//EXTRACTING_DAEMON_SIGNATURES..........DONE",
+    "//PACKET_ANALYSIS: 0 ERRORS DETECTED",
+    "",
+    "//INJECTING_PAYLOAD",
+  ];
+  for (let i = 1; i <= daemonCount; i++) {
+    lines.push(`//UPLOADING_DAEMON_[${i}]..................SUCCESS`);
+  }
+  lines.push(
+    "//PAYLOAD_INTEGRITY_CHECK...............VERIFIED",
+    "",
+    "//FINALIZING_CONNECTION.................SECURE",
+    "//SCRUBBING_ACCESS_LOGS.................COMPLETE",
+    "//DISCONNECTING..........................NOW",
+    "",
+    "//UPLOAD COMPLETE – ALL DAEMONS INSTALLED",
+    "",
+    `[${daemonCount}/${daemonCount}] DAEMONS UPLOADED SUCCESSFULLY`,
+    "BREACH PROTOCOL SUCCESSFUL – ACCESS GRANTED"
+  );
+  return lines;
+}
 
 function generateFailureLog(solvedDaemons: number, totalDaemons: number): string[] {
   const failedDaemons = totalDaemons - solvedDaemons;
-  return [
-    "//ROOT",
-    "//ACCESS_REQUEST",
-    "//ACCESS_REQUEST_SUCCESS",
-    "//COLLECTING_PACKET_1................COMPLETE",
-    "//COLLECTING_PACKET_2................COMPLETE",
-    "//LOGIN",
-    "//LOGIN_SUCCESS",
+  const lines = [
+    "//INITIATE_BREACH_SEQUENCE",
+    "//NEURAL_INTERFACE_ESTABLISHED",
+    "//PINGING_TARGET_NODE...................SUCCESS",
+    "//FIREWALL_HANDSHAKE_INITIATED..........ACCEPTED",
+    "//AUTHENTICATING_ACCESS_PROTOCOLS.......COMPLETE",
     "",
-    "//UPLOAD_IN_PROGRESS",
-    "//UPLOAD_TERMINATED!",
+    "//ACCESS_LEVEL: LIMITED",
+    "//EXTRACTING_DAEMON_SIGNATURES..........DONE WITH ERRORS",
+    "//PACKET_ANALYSIS: CHECKSUM ERROR DETECTED",
     "",
-    `${solvedDaemons}/${totalDaemons} DAEMONS UPLOADED SUCCESSFULLY`,
-    `${failedDaemons} DAEMONS FAILED TO UPLOAD`,
-    "",
-    "BREACH PROTOCOL FAILED",
+    "//INJECTING_PAYLOAD",
   ];
+  for (let i = 1; i <= solvedDaemons; i++) {
+    lines.push(`//UPLOADING_DAEMON_[${i}]..................SUCCESS`);
+  }
+  for (let i = solvedDaemons + 1; i <= totalDaemons; i++) {
+    lines.push(`//UPLOADING_DAEMON_[${i}]..................FAILED`);
+  }
+  lines.push(
+    "//RETRYING_PACKET_TRANSMISSION..........TIMEOUT",
+    "//FIREWALL_COUNTERMEASURES_DETECTED.....ACTIVATED",
+    "",
+    "//SECURITY_ALERT: TRACE INITIATED",
+    "//PAYLOAD_CORRUPTION_DETECTED...........ABORTING",
+    "//LOG_ERASURE_ATTEMPT...................PARTIAL",
+    "//INITIATING_EMERGENCY_DISCONNECT.......NOW",
+    "",
+    "//CONNECTION TERMINATED – INCOMPLETE UPLOAD",
+    "",
+    `[${solvedDaemons}/${totalDaemons}] DAEMONS UPLOADED SUCCESSFULLY`,
+    `[${failedDaemons}] DAEMONS FAILED TO UPLOAD`,
+    "",
+    "BREACH PROTOCOL FAILED"
+  );
+  return lines;
 }
 
 type Pos = { r: number; c: number };
@@ -462,17 +497,18 @@ export default function PuzzlePage() {
     if (ended && solved.size === puzzle.daemons.length) {
       setLogLines([]);
       let idx = 0;
+      const successLines = generateSuccessLog(puzzle.daemons.length);
       const id = setInterval(() => {
         setLogLines((l) => {
-          if (idx >= TERMINAL_LOGS.length) {
+          if (idx >= successLines.length) {
             clearInterval(id);
             return l;
           }
-          const line = TERMINAL_LOGS[idx];
+          const line = successLines[idx];
           idx += 1;
           return [...l, line];
         });
-      }, 300);
+      }, 150);
       return () => clearInterval(id);
     }
   }, [ended, solved, puzzle.daemons.length]);
@@ -496,7 +532,7 @@ export default function PuzzlePage() {
           idx += 1;
           return [...l, line];
         });
-      }, 300);
+      }, 150);
       return () => clearInterval(id);
     }
   }, [ended, solved, puzzle.daemons.length]);
@@ -724,7 +760,7 @@ export default function PuzzlePage() {
         {ended && solved.size === puzzle.daemons.length && (
           <div className={styles["terminal-overlay"]}>
             <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
-            {logLines.length === TERMINAL_LOGS.length && (
+            {logLines.length === generateSuccessLog(puzzle.daemons.length).length && (
               <button className={styles["exit-button"]} onClick={newPuzzle}>
                 EXIT INTERFACE
               </button>
