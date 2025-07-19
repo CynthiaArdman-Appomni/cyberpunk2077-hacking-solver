@@ -95,7 +95,9 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
             0,
             timer.duration - Math.floor((Date.now() - start) / 1000)
           );
-          setPuzzle({ ...puzzle, startTime: timer.start_time });
+          if (puzzle.startTime !== timer.start_time) {
+            setPuzzle({ ...puzzle, startTime: timer.start_time });
+          }
           setTimeRemaining(remaining);
         } else {
           setTimeRemaining(timer.duration);
