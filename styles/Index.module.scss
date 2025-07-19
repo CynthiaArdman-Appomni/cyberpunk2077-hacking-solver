@@ -26,10 +26,28 @@
 }
 
 .main {
+  position: relative;
   padding: 9vh 1rem;
 
   &.failed {
     background: color.adjust($color-error, $alpha: -0.8);
+  }
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: repeating-linear-gradient(
+        0deg,
+        rgba(255, 255, 255, 0.05) 0 1px,
+        transparent 1px 20px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.05) 0 1px,
+        transparent 1px 20px
+      );
   }
 }
 
