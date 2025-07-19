@@ -33,6 +33,27 @@ const TERMINAL_LOGS = [
   "ALL DAEMONS UPLOADED",
 ];
 
+function generateFailureLog(solvedDaemons: number, totalDaemons: number): string[] {
+  const failedDaemons = totalDaemons - solvedDaemons;
+  return [
+    "//ROOT",
+    "//ACCESS_REQUEST",
+    "//ACCESS_REQUEST_SUCCESS",
+    "//COLLECTING_PACKET_1................COMPLETE",
+    "//COLLECTING_PACKET_2................COMPLETE",
+    "//LOGIN",
+    "//LOGIN_SUCCESS",
+    "",
+    "//UPLOAD_IN_PROGRESS",
+    "//UPLOAD_TERMINATED!",
+    "",
+    `${solvedDaemons}/${totalDaemons} DAEMONS UPLOADED SUCCESSFULLY`,
+    `${failedDaemons} DAEMONS FAILED TO UPLOAD`,
+    "",
+    "BREACH PROTOCOL FAILED",
+  ];
+}
+
 type Pos = { r: number; c: number };
 
 function randomHex() {
@@ -435,6 +456,30 @@ export default function PuzzlePage() {
     }
   }, [ended, solved, puzzle.daemons.length]);
 
+  // terminal log when some daemons remain unsolved
+  useEffect(() => {
+    if (ended && solved.size !== puzzle.daemons.length) {
+      const failureLines = generateFailureLog(
+        solved.size,
+        puzzle.daemons.length
+      );
+      setLogLines([]);
+      let idx = 0;
+      const id = setInterval(() => {
+        setLogLines((l) => {
+          if (idx >= failureLines.length) {
+            clearInterval(id);
+            return l;
+          }
+          const line = failureLines[idx];
+          idx += 1;
+          return [...l, line];
+        });
+      }, 300);
+      return () => clearInterval(id);
+    }
+  }, [ended, solved, puzzle.daemons.length]);
+
   const handleCellClick = useCallback(
     (r: number, c: number) => {
       if (ended || selection.length >= bufferSize) return;
@@ -637,6 +682,17 @@ export default function PuzzlePage() {
           <div className={styles["terminal-overlay"]}>
             <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
             {logLines.length === TERMINAL_LOGS.length && (
+              <button className={styles["exit-button"]} onClick={newPuzzle}>
+                EXIT INTERFACE
+              </button>
+            )}
+          </div>
+        )}
+        {ended && solved.size !== puzzle.daemons.length && (
+          <div className={styles["terminal-overlay"]}>
+            <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
+            {logLines.length ===
+              generateFailureLog(solved.size, puzzle.daemons.length).length && (
               <button className={styles["exit-button"]} onClick={newPuzzle}>
                 EXIT INTERFACE
               </button>
