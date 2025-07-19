@@ -33,6 +33,30 @@ const TERMINAL_LOGS = [
   "ALL DAEMONS UPLOADED",
 ];
 
+function generateFailureLog(
+  solvedDaemons: number,
+  totalDaemons: number
+): string[] {
+  const failedDaemons = totalDaemons - solvedDaemons;
+  return [
+    "//ROOT",
+    "//ACCESS_REQUEST",
+    "//ACCESS_REQUEST_SUCCESS",
+    "//COLLECTING_PACKET_1................COMPLETE",
+    "//COLLECTING_PACKET_2................COMPLETE",
+    "//LOGIN",
+    "//LOGIN_SUCCESS",
+    "",
+    "//UPLOAD_IN_PROGRESS",
+    "//UPLOAD_TERMINATED!",
+    "",
+    `${solvedDaemons}/${totalDaemons} DAEMONS UPLOADED SUCCESSFULLY`,
+    `${failedDaemons} DAEMONS FAILED TO UPLOAD`,
+    "",
+    "BREACH PROTOCOL FAILED",
+  ];
+}
+
 type Pos = { r: number; c: number };
 
 function randomHex() {
@@ -259,6 +283,7 @@ export default function PuzzlePage() {
   const [ended, setEnded] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [logLines, setLogLines] = useState<string[]>([]);
+  const [targetLogLines, setTargetLogLines] = useState<string[]>(TERMINAL_LOGS);
   const [breachFlash, setBreachFlash] = useState(false);
   const [dive, setDive] = useState(true);
   const breachAudio = useRef<HTMLAudioElement | null>(null);
@@ -415,24 +440,30 @@ export default function PuzzlePage() {
     }
   }, [timeLeft, ended]);
 
-  // terminal log when all daemons breached
+  // terminal log when puzzle ends
   useEffect(() => {
-    if (ended && solved.size === puzzle.daemons.length) {
-      setLogLines([]);
-      let idx = 0;
-      const id = setInterval(() => {
-        setLogLines((l) => {
-          if (idx >= TERMINAL_LOGS.length) {
-            clearInterval(id);
-            return l;
-          }
-          const line = TERMINAL_LOGS[idx];
-          idx += 1;
-          return [...l, line];
-        });
-      }, 300);
-      return () => clearInterval(id);
-    }
+    if (!ended) return;
+    const solvedCount = solved.size;
+    const totalDaemons = puzzle.daemons.length;
+    const lines =
+      solvedCount === totalDaemons
+        ? TERMINAL_LOGS
+        : generateFailureLog(solvedCount, totalDaemons);
+    setTargetLogLines(lines);
+    setLogLines([]);
+    let idx = 0;
+    const id = setInterval(() => {
+      setLogLines((l) => {
+        if (idx >= lines.length) {
+          clearInterval(id);
+          return l;
+        }
+        const line = lines[idx];
+        idx += 1;
+        return [...l, line];
+      });
+    }, 300);
+    return () => clearInterval(id);
   }, [ended, solved, puzzle.daemons.length]);
 
   const handleCellClick = useCallback(
@@ -633,10 +664,10 @@ export default function PuzzlePage() {
             </p>
           </Col>
         </Row>
-        {ended && solved.size === puzzle.daemons.length && (
+        {ended && (
           <div className={styles["terminal-overlay"]}>
             <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
-            {logLines.length === TERMINAL_LOGS.length && (
+            {logLines.length === targetLogLines.length && (
               <button className={styles["exit-button"]} onClick={newPuzzle}>
                 EXIT INTERFACE
               </button>
