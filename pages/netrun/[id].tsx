@@ -307,7 +307,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
       })();
       return () => clearInterval(timer);
     }
-  }, [ended, solved, puzzle, id]);
+  }, [ended, solved, id]);
 
   useEffect(() => {
     if (ended && puzzle && solved.size !== puzzle.daemons.length) {
