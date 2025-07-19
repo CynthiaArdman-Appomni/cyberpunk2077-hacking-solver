@@ -314,6 +314,8 @@ export default function PuzzlePage() {
     setSolved(new Set());
     setFeedback({ msg: "" });
     setEnded(false);
+    setTimeLeft(60);
+    setLogLines([]);
   }, []);
 
   const resetSelection = useCallback(() => {
