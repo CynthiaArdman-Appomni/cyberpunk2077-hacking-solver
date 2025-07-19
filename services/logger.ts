@@ -2,11 +2,22 @@ import fs from 'fs';
 import path from 'path';
 
 const logFile = path.resolve(process.cwd(), 'app.log');
-const logStream = fs.createWriteStream(logFile, { flags: 'a' });
+let logStream: fs.WriteStream | null = null;
+
+try {
+  logStream = fs.createWriteStream(logFile, { flags: 'a' });
+} catch (error) {
+  console.error(`Failed to open log file ${logFile}`, error);
+}
 
 function write(prefix: string, message: string) {
   const timestamp = new Date().toISOString();
-  logStream.write(`[${prefix}] ${timestamp} ${message}\n`);
+  const line = `[${prefix}] ${timestamp} ${message}\n`;
+  if (logStream) {
+    logStream.write(line);
+  } else {
+    console.log(line.trim());
+  }
 }
 
 export function log(message: string) {
