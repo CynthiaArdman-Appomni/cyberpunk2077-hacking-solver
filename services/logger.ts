@@ -6,8 +6,13 @@ let logStream: fs.WriteStream | null = null;
 
 try {
   logStream = fs.createWriteStream(logFile, { flags: 'a' });
+  logStream.on('error', (err) => {
+    console.error(`Failed to write to log file ${logFile}`, err);
+    logStream = null;
+  });
 } catch (error) {
   console.error(`Failed to open log file ${logFile}`, error);
+  logStream = null;
 }
 
 function write(prefix: string, message: string) {
