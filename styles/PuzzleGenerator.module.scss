@@ -310,7 +310,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 
 .timer-box {
   @include cyber-font;
-  border: 2px solid $color-highlight;
+  border: 3px solid $color-highlight;
   background-color: rgba(0, 0, 0, 0.9);
   color: $color-highlight;
   padding: 10px 15px;
@@ -319,7 +319,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 }
 
 .timer-box.pulse-glow {
-  animation: pulse-glow 1s infinite alternate;
+  animation: timer-pulse 1s infinite alternate;
 }
 
 .buffer-box {
@@ -402,7 +402,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .daemon-box.failure {
   border-color: $color-error;
   box-shadow: 0 0 10px $color-error;
-  background: color.adjust($color-error, $alpha: -0.7);
+  animation: failure-pulse 1s infinite alternate;
 }
 
 @keyframes breach-flash {
@@ -420,6 +420,16 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   0% { box-shadow: 0 0 0 $neon; }
   50% { box-shadow: 0 0 20px $neon; }
   100% { box-shadow: 0 0 0 $neon; }
+}
+
+@keyframes failure-pulse {
+  from { box-shadow: 0 0 10px $color-error; }
+  to { box-shadow: 0 0 20px $color-error; }
+}
+
+@keyframes timer-pulse {
+  from { box-shadow: 0 0 10px $color-highlight; }
+  to { box-shadow: 0 0 20px $color-highlight; }
 }
 
 @keyframes net-dive {
