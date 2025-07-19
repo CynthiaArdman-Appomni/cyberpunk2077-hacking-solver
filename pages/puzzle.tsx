@@ -16,6 +16,8 @@ import indexStyles from "../styles/Index.module.scss";
 import styles from "../styles/PuzzleGenerator.module.scss";
 
 const HEX_VALUES = ["1C", "55", "BD", "E9", "7A", "FF"];
+const DIFFICULTIES = ["Easy", "Medium", "Hard"] as const;
+type Difficulty = typeof DIFFICULTIES[number];
 
 const TERMINAL_LOGS = [
   "//ROOT",
@@ -269,6 +271,7 @@ export default function PuzzlePage() {
   const [logLines, setLogLines] = useState<string[]>([]);
   const [breachFlash, setBreachFlash] = useState(false);
   const [dive, setDive] = useState(true);
+  const [difficulty, setDifficulty] = useState<Difficulty | null>(null);
   const breachAudio = useRef<HTMLAudioElement | null>(null);
   const successAudio = useRef<HTMLAudioElement | null>(null);
 
@@ -277,11 +280,31 @@ export default function PuzzlePage() {
     return () => clearTimeout(t);
   }, []);
 
-  const gridRef = useRef<HTMLDivElement | null>(null);
-  const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
-  const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
+  const newPuzzle = useCallback(async () => {
+    const diff: Difficulty = DIFFICULTIES[Math.floor(Math.random() * DIFFICULTIES.length)];
+    setDifficulty(diff);
+    try {
+      const res = await fetch("/api/puzzle/new", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ difficulty: diff, timeLimit: 60 }),
+      });
+      if (!res.ok) throw new Error("fail");
+      const data = await res.json();
+      const p = data.puzzle as { grid: string[][]; daemons: string[][]; bufferSize: number; timeLimit: number };
+      setPuzzle(p);
+      setBufferSize(p.bufferSize);
+      setSelection([]);
+      setSolved(new Set());
+      setFeedback({ msg: "" });
+      setEnded(false);
+      setTimeLeft(p.timeLimit);
+      setLogLines([]);
+      return;
+    } catch (e) {
+      console.error("Failed to fetch puzzle from API, falling back to local generator", e);
+    }
 
-  const newPuzzle = useCallback(() => {
     let valid = false;
     let p: ReturnType<typeof generatePuzzle> | null = null;
     for (let attempt = 0; attempt < 10 && !valid; attempt++) {
@@ -317,6 +340,15 @@ export default function PuzzlePage() {
     setTimeLeft(60);
     setLogLines([]);
   }, []);
+
+  // load initial puzzle on mount
+  useEffect(() => {
+    newPuzzle();
+  }, [newPuzzle]);
+
+  const gridRef = useRef<HTMLDivElement | null>(null);
+  const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
+  const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
 
   const resetSelection = useCallback(() => {
     setSelection([]);
@@ -582,6 +614,11 @@ export default function PuzzlePage() {
                 </span>
               ))}
             </div>
+          </Col>
+        </Row>
+        <Row className="mb-3">
+          <Col>
+            <div className={styles["difficulty-box"]}>Difficulty: {difficulty ?? "?"}</div>
           </Col>
         </Row>
         <Row>
