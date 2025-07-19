@@ -14,6 +14,7 @@ import styles from "../../styles/PuzzleGenerator.module.scss";
 import { Pos } from "../../lib/puzzleGenerator";
 import { StoredPuzzle, getPuzzle } from "../../services/puzzleStore";
 import { getOrCreateTimer, setTimerStart } from "../../services/timerStore";
+import { logError } from "../../services/logger";
 
 interface NetrunProps {
   initialPuzzle: StoredPuzzle | null;
@@ -408,17 +409,19 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
 export const getServerSideProps: GetServerSideProps<NetrunProps> = async ({ params }) => {
   const id = typeof params?.id === 'string' ? params.id : '';
   if (!id) {
+    logError('Missing puzzle id in getServerSideProps');
     return { props: { initialPuzzle: null, hasError: true } };
   }
   try {
     const puzzle = await getPuzzle(id);
     if (!puzzle) {
+      logError(`Puzzle ${id} not found in getServerSideProps`);
       return { props: { initialPuzzle: null, hasError: true } };
     }
     const { grid, daemons, bufferSize, timeLimit, startTime } = puzzle;
     return { props: { initialPuzzle: { grid, daemons, bufferSize, timeLimit, startTime, path: [], solutionSeq: [], difficulty: 'Unknown', solutionCount: 0 }, hasError: false } };
   } catch (e) {
-    console.error('Error fetching puzzle:', e);
+    logError('Error fetching puzzle in getServerSideProps', e);
     return { props: { initialPuzzle: null, hasError: true } };
   }
 };
