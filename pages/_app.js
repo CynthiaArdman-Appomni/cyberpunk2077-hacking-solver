@@ -1,7 +1,30 @@
 import Head from "next/head";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { log } from "../services/logger";
 import "../styles/globals.scss";
 
 function MyApp({ Component, pageProps }) {
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleRouteChange = (url) => {
+      if (url.startsWith("/netrun/")) {
+        log(`Navigating to ${url}`);
+      }
+    };
+
+    router.events.on("routeChangeStart", handleRouteChange);
+
+    if (router.asPath.startsWith("/netrun/")) {
+      log(`Navigating to ${router.asPath}`);
+    }
+
+    return () => {
+      router.events.off("routeChangeStart", handleRouteChange);
+    };
+  }, [router]);
+
   return (
     <>
       <Head>

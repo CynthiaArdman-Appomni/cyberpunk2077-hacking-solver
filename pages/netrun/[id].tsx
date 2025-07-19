@@ -14,6 +14,7 @@ import styles from "../../styles/PuzzleGenerator.module.scss";
 import { Pos } from "../../lib/puzzleGenerator";
 import { StoredPuzzle, getPuzzle } from "../../services/puzzleStore";
 import { getOrCreateTimer, setTimerStart } from "../../services/timerStore";
+import { log } from "../../services/logger";
 
 interface NetrunProps {
   initialPuzzle: StoredPuzzle | null;
@@ -23,6 +24,12 @@ interface NetrunProps {
 export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps) {
   const router = useRouter();
   const { id } = router.query;
+
+  useEffect(() => {
+    if (id) {
+      log(`Opened /netrun/${id}`);
+    }
+  }, [id]);
 
   const [puzzle, setPuzzle] = useState<StoredPuzzle | null>(initialPuzzle);
   const [timeLimit, setTimeLimit] = useState(0);
@@ -42,6 +49,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
 
   useEffect(() => {
     if (!id || initialPuzzle || hasError) return;
+    log(`Fetching puzzle ${id} from API`);
     fetch(`/api/puzzle/${id}`)
       .then(async (res) => {
         if (res.status === 404) throw new Error('notfound');
@@ -50,6 +58,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         setPuzzle(data);
         setTimeLimit(data.timeLimit);
         setBufferSize(data.bufferSize);
+        log(`Puzzle ${id} fetched successfully`);
       })
       .catch((err) => {
         if (err.message === 'notfound') {
@@ -61,6 +70,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
           console.error('Puzzle load failed:', err);
           setFeedback({ msg: 'Failed to load puzzle.', type: 'error' });
         }
+        log(`Puzzle ${id} fetch failed: ${err}`);
       });
   }, [id, initialPuzzle, hasError]);
 
@@ -429,19 +439,21 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
 }
 
 export const getServerSideProps: GetServerSideProps<NetrunProps> = async ({ params }) => {
-  const { logError } = await import('../../services/logger');
+  const { log: serverLog, logError } = await import('../../services/logger');
   const id = typeof params?.id === 'string' ? params.id : '';
   if (!id) {
     logError('Missing puzzle id in getServerSideProps');
     return { props: { initialPuzzle: null, hasError: true } };
   }
   try {
+    serverLog(`getServerSideProps fetching puzzle ${id}`);
     const puzzle = await getPuzzle(id);
     if (!puzzle) {
       logError(`Puzzle ${id} not found in getServerSideProps`);
       return { props: { initialPuzzle: null, hasError: true } };
     }
     const { grid, daemons, bufferSize, timeLimit, startTime } = puzzle;
+    serverLog(`getServerSideProps sending puzzle ${id}`);
     return { props: { initialPuzzle: { grid, daemons, bufferSize, timeLimit, startTime, path: [], solutionSeq: [], difficulty: 'Unknown', solutionCount: 0 }, hasError: false } };
   } catch (e) {
     logError('Error fetching puzzle in getServerSideProps', e);
