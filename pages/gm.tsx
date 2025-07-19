@@ -33,7 +33,6 @@ export default function GMPage() {
   const [timeRemaining, setTimeRemaining] = useState(parseInt(timeLimit, 10));
   const [solutionPath, setSolutionPath] = useState<Pos[] | null>(null);
   const [solutionSequence, setSolutionSequence] = useState("");
-  const [debugInfo, setDebugInfo] = useState<string | null>(null);
   const [solutionCount, setSolutionCount] = useState<number | null>(null);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
@@ -89,7 +88,6 @@ export default function GMPage() {
         )
       : tl;
     setTimeRemaining(remaining);
-    setDebugInfo(`Solution path: ${pathString} | Solutions: ${p.solutionCount}`);
     } catch (e) {
       setFeedback({ msg: 'Failed to generate puzzle.', type: 'error' });
     }
@@ -526,9 +524,6 @@ export default function GMPage() {
                 )}
                 {feedback.msg && (
                   <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
-                )}
-                {debugInfo && (
-                  <p className={styles.debug}>{debugInfo}</p>
                 )}
               </div>
             </div>

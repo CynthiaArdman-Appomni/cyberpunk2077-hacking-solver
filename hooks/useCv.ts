@@ -29,10 +29,8 @@ const loadWorkers = async (
     [" ", ...uniqChars(["1C", "55", "7A", "BD", "E9", "FF"])].join("");
 
   const cv = await CvService.createWorker();
-  cv.worker.addEventListener("message", (e) => console.log("onmessage", e));
   cv.worker.addEventListener("error", (e) => console.error("onerror", e));
   await cv.load();
-  console.log("CV worker loaded ");
   cvWorkerRef.current = cv;
 
   const { createWorker, PSM } = await import("tesseract.js");
@@ -41,21 +39,16 @@ const loadWorkers = async (
     langPath: "/ocr",
     gzip: true,
     logger: (msg) => {
-      console.log("[tesseract] ", msg);
       if (msg?.userJobId?.startsWith("code_matrix-")) {
         const matrixProgress = msg.progress;
-        // 50->80
         const progress = 50 + (80 - 50) * matrixProgress;
-        console.log("codematrix", progress);
         setOcrStatus({
           progress,
           text: "Reading code matrix...",
         });
       } else if (msg?.userJobId?.startsWith("sequences-")) {
         const sequenceProgress = msg.progress;
-        // 80->99
         const progress = 80 + (99 - 80) * sequenceProgress;
-        console.log("sequence", progress);
         setOcrStatus({
           progress,
           text: "Reading sequences...",
@@ -67,11 +60,8 @@ const loadWorkers = async (
     },
   });
 
-  console.log("loading worker");
   await ocrWorker.load();
-  console.log("loading OCR language data");
   await ocrWorker.loadLanguage("eng");
-  console.log("initializing OCR language data");
   await ocrWorker.initialize("eng");
   await ocrWorker.setParameters({
     tessedit_char_whitelist: getOcrWhitelist(),
@@ -79,7 +69,6 @@ const loadWorkers = async (
     tessedit_pageseg_mode: PSM.SINGLE_BLOCK, // if block doesn't work well enough, slice grids into columns
   });
   ocrWorkerRef.current = ocrWorker;
-  console.log("OCR worker loaded");
 };
 
 const useCv = (setModalVisible: (visible: boolean) => void) => {
@@ -129,7 +118,6 @@ const useCv = (setModalVisible: (visible: boolean) => void) => {
     };
 
     async function processImage(imageData: ImageData) {
-      console.log("processing screenshot");
       setOcrStatus({
         text: "Processing screenshot...",
         progress: 20,
@@ -147,8 +135,6 @@ const useCv = (setModalVisible: (visible: boolean) => void) => {
         text: "Running OCR...",
         progress: 60,
       });
-      console.log("running OCR");
-      console.log("OCRing code matrix");
       if (outputCanvasContainerRef.current) {
         outputCanvasContainerRef.current.style.display = "block";
       }
@@ -158,18 +144,13 @@ const useCv = (setModalVisible: (visible: boolean) => void) => {
         undefined,
         "code_matrix-" + Math.random().toString(36).substr(2, 5)
       );
-      console.log("%cCODE MATRIX OCR RESULT:", "color:#00ff00");
-      console.log(codeMatrix.data);
 
-      console.log("OCRing sequences");
       putImage(output.sequences);
       const sequences = await ocrWorkerRef.current.recognize(
         outputCanvasRef.current,
         undefined,
         "sequences-" + Math.random().toString(36).substr(2, 5)
       );
-      console.log("%cSEQUENCES OCR RESULT:", "color:#00ff00");
-      console.log(sequences.data);
 
       setOcrStatus({
         progress: 100,
@@ -195,19 +176,12 @@ const useCv = (setModalVisible: (visible: boolean) => void) => {
           continue;
         }
 
-        console.log({
-          i,
-          kind: item.kind,
-          type: item.type,
-        });
-
-        console.log("reading clipboard file");
+        
         setOcrStatus({
           text: "Reading image...",
           progress: 0,
         });
         const file = item.getAsFile();
-        console.log("getting file image data");
         const imageData = await getFileImageData(file);
 
         if (

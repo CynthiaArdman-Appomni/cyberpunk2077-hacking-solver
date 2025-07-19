@@ -169,7 +169,6 @@ const SolutionRenderer = ({ codeMatrix, solution }: SolutionRendererProps) => {
   const canvasRef = useRef<HTMLCanvasElement>();
 
   useEffect(() => {
-    console.log("rendering solution");
     renderSolution(parentRef.current, canvasRef.current, codeMatrix, solution);
 
     const debounced = debounce(() => {
