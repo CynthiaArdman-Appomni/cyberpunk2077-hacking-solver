@@ -644,6 +644,7 @@ export const getServerSideProps: GetServerSideProps<NetrunProps> = async ({ para
           difficulty: 'Unknown',
           solutionCount: 0,
           secretWord: '',
+          daemonWords: daemons.map(() => ''),
         },
         hasError: false,
       },
