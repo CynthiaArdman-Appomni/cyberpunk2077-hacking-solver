@@ -27,6 +27,10 @@
 
 .main {
   padding: 9vh 1rem;
+
+  &.failed {
+    background: color.adjust($color-error, $alpha: -0.8);
+  }
 }
 
 .hackbox {

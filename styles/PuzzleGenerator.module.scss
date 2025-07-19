@@ -398,6 +398,13 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   animation: pulse-neon 1s;
 }
 
+.grid-box.failure,
+.daemon-box.failure {
+  border-color: $color-error;
+  box-shadow: 0 0 10px $color-error;
+  background: color.adjust($color-error, $alpha: -0.7);
+}
+
 @keyframes breach-flash {
   0% { opacity: 1; }
   80% { opacity: 1; }
@@ -454,6 +461,12 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   font-family: monospace;
   padding: 20px;
   text-shadow: 0 0 5px $color-success;
+
+  &.failure {
+    color: $color-error;
+    text-shadow: 0 0 5px $color-error;
+    animation: glitch 0.6s infinite;
+  }
 }
 
 .terminal-log {
@@ -469,10 +482,20 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   color: $color-success;
   padding: 0.5rem 1rem;
   cursor: pointer;
+
+  &.failure {
+    border-color: $color-error;
+    color: $color-error;
+  }
 }
 
 .exit-button:hover {
   background: $color-success;
+  color: $color-bg;
+}
+
+.exit-button.failure:hover {
+  background: $color-error;
   color: $color-bg;
 }
 

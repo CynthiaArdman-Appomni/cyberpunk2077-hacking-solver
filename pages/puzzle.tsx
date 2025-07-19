@@ -520,6 +520,7 @@ export default function PuzzlePage() {
   );
 
   const sequence = selection.map((p) => puzzle.grid[p.r][p.c]).join(" ");
+  const failed = ended && solved.size !== puzzle.daemons.length;
 
   return (
     <Layout>
@@ -531,7 +532,14 @@ export default function PuzzlePage() {
           rel="stylesheet"
         />
       </Head>
-      <Container as="main" className={cz(indexStyles.main, dive && styles['net-dive'])}>
+      <Container
+        as="main"
+        className={cz(
+          indexStyles.main,
+          dive && styles['net-dive'],
+          failed && indexStyles.failed
+        )}
+      >
         <audio ref={breachAudio} src="/beep.mp3" />
         <audio ref={successAudio} src="/success.mp3" />
         {breachFlash && (
@@ -579,10 +587,13 @@ export default function PuzzlePage() {
             <p className={styles.description}>
               INITIATE BREACH PROTOCOL - TIME TO FLATLINE THESE DAEMONS, CHOOM.
             </p>
-            <div className={cz(styles["grid-box"], {
-              [styles.pulse]: breachFlash,
-              [styles["fade-out"]]: ended && solved.size === puzzle.daemons.length,
-            })}>
+            <div
+              className={cz(styles["grid-box"], {
+                [styles.pulse]: breachFlash,
+                [styles["fade-out"]]: ended && solved.size === puzzle.daemons.length,
+                [styles.failure]: failed,
+              })}
+            >
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
@@ -624,10 +635,13 @@ export default function PuzzlePage() {
             </div>
           </Col>
           <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={cz(styles["daemon-box"], {
-              [styles.pulse]: breachFlash,
-              [styles["fade-out"]]: ended && solved.size === puzzle.daemons.length,
-            })}>
+            <div
+              className={cz(styles["daemon-box"], {
+                [styles.pulse]: breachFlash,
+                [styles["fade-out"]]: ended && solved.size === puzzle.daemons.length,
+                [styles.failure]: failed,
+              })}
+            >
               <div className={styles["daemon-box__header"]}>
                 <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
               </div>
@@ -678,12 +692,15 @@ export default function PuzzlePage() {
             )}
           </div>
         )}
-        {ended && solved.size !== puzzle.daemons.length && (
-          <div className={styles["terminal-overlay"]}>
+        {failed && (
+          <div className={`${styles["terminal-overlay"]} ${styles.failure}`}>
             <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
             {logLines.length ===
               generateFailureLog(solved.size, puzzle.daemons.length).length && (
-              <button className={styles["exit-button"]} onClick={newPuzzle}>
+              <button
+                className={`${styles["exit-button"]} ${styles.failure}`}
+                onClick={newPuzzle}
+              >
                 EXIT INTERFACE
               </button>
             )}
