@@ -315,22 +315,26 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         solved.size,
         puzzle.daemons.length
       );
+      const wordLines = daemonWords
+        .map((w, i) => (solved.has(i) && w ? `DAEMON ${i + 1} WORD: ${w}` : null))
+        .filter(Boolean) as string[];
+      const lines = [...failureLines, ...wordLines];
       setLogLines([]);
       let idx = 0;
       const id = setInterval(() => {
         setLogLines((l) => {
-          if (idx >= failureLines.length) {
+          if (idx >= lines.length) {
             clearInterval(id);
             return l;
           }
-          const line = failureLines[idx];
+          const line = lines[idx];
           idx += 1;
           return [...l, line];
         });
       }, 300);
       return () => clearInterval(id);
     }
-  }, [ended, solved, puzzle]);
+  }, [ended, solved, puzzle, daemonWords]);
 
   const handleCellClick = useCallback(
     (r: number, c: number) => {
@@ -375,6 +379,9 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         setEnded(true);
         setFeedback({ msg: "Puzzle solved!", type: "success" });
         successAudio.current?.play();
+        if (puzzle) {
+          setPuzzle({ ...puzzle, startTime: null });
+        }
       } else if (newSel.length >= bufferSize) {
         setEnded(true);
         const solvedCount = newSolved.size;
