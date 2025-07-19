@@ -413,6 +413,11 @@ export default function GMPage() {
                 </div>
               </Form.Group>
             )}
+            {puzzle && (
+              <p className="mt-2">
+                <strong>Secret Word:</strong> {puzzle.secretWord}
+              </p>
+            )}
           </Col>
         </Row>
         <Row className="mb-3">
