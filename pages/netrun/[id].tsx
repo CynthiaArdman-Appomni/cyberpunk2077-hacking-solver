@@ -14,7 +14,6 @@ import styles from "../../styles/PuzzleGenerator.module.scss";
 import { Pos } from "../../lib/puzzleGenerator";
 import { StoredPuzzle, getPuzzle } from "../../services/puzzleStore";
 import { getOrCreateTimer, setTimerStart } from "../../services/timerStore";
-import { logError } from "../../services/logger";
 
 interface NetrunProps {
   initialPuzzle: StoredPuzzle | null;
@@ -407,6 +406,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
 }
 
 export const getServerSideProps: GetServerSideProps<NetrunProps> = async ({ params }) => {
+  const { logError } = await import('../../services/logger');
   const id = typeof params?.id === 'string' ? params.id : '';
   if (!id) {
     logError('Missing puzzle id in getServerSideProps');
