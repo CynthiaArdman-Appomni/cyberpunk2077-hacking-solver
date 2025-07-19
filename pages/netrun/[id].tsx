@@ -89,6 +89,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
   const [breachFlash, setBreachFlash] = useState(false);
   const [logLines, setLogLines] = useState<string[]>([]);
   const [secretWord, setSecretWord] = useState<string | null>(null);
+  const [daemonWords, setDaemonWords] = useState<string[]>([]);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [dive, setDive] = useState(true);
 
@@ -209,11 +210,13 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
       };
 
       let interrupted = false;
+      const newlySolved: number[] = [];
       let solvedAny = false;
       puzzle.daemons.forEach((daemon, idx) => {
         if (solvedSet.has(idx)) return;
         if (containsContiguous(seq, daemon)) {
           solvedSet.add(idx);
+          newlySolved.push(idx);
           solvedAny = true;
         } else if (containsSubsequence(seq, daemon)) {
           interrupted = true;
@@ -224,6 +227,18 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         breachAudio.current?.play();
         setBreachFlash(true);
         setTimeout(() => setBreachFlash(false), 1500);
+        newlySolved.forEach((i) => {
+          fetch(`/api/puzzle/${id as string}?daemon=${i}`)
+            .then((res) => res.json())
+            .then((data) => {
+              setDaemonWords((w) => {
+                const arr = [...w];
+                arr[i] = data.secretWord;
+                return arr;
+              });
+            })
+            .catch(() => {});
+        });
       } else if (interrupted) {
         setFeedback({ msg: "SEQUENCE INTERRUPTED", type: "error" });
       }
@@ -548,7 +563,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
                 <ol className={styles.daemons}>
                   {puzzle.daemons.map((d, idx) => (
                     <li key={idx} className={solved.has(idx) ? "solved" : undefined}>
-                      {d.join(" ")}
+                      {d.join(" ")} {solved.has(idx) && daemonWords[idx] ? `- ${daemonWords[idx]}` : ''}
                     </li>
                   ))}
                 </ol>

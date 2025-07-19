@@ -42,6 +42,7 @@ export interface StoredPuzzle extends Puzzle {
   difficulty: Difficulty;
   solutionCount: number;
   secretWord: string;
+  daemonWords: string[];
 }
 
 function countSolutions(puzzle: Puzzle): number {
@@ -113,6 +114,7 @@ export async function createPuzzle(options: {
     difficulty,
     solutionCount,
     secretWord: randomCodeWord(),
+    daemonWords: puzzle.daemons.map(() => randomCodeWord()),
   };
   puzzles.set(id, stored);
   log(`Created puzzle ${id} (${difficulty})`);
@@ -120,14 +122,15 @@ export async function createPuzzle(options: {
     await ensurePuzzleTable();
     try {
       await sql!
-        `INSERT INTO puzzles (id, grid, daemons, start_time, duration, secret_word)
+        `INSERT INTO puzzles (id, grid, daemons, start_time, duration, secret_word, daemon_words)
         VALUES (
           ${id},
           ${JSON.stringify(stored.grid)},
           ${JSON.stringify(stored.daemons)},
           ${stored.startTime},
           ${timeLimit},
-          ${stored.secretWord}
+          ${stored.secretWord},
+          ${JSON.stringify(stored.daemonWords)}
         )`;
       log(`Stored puzzle ${id} in database`);
     } catch (e) {
@@ -141,7 +144,7 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
   if (useNeon) {
     await ensurePuzzleTable();
     try {
-      const rows = await sql!`SELECT grid, daemons, start_time, duration, secret_word FROM puzzles WHERE id = ${id}`;
+      const rows = await sql!`SELECT grid, daemons, start_time, duration, secret_word, daemon_words FROM puzzles WHERE id = ${id}`;
       if (rows.length > 0) {
         const row = rows[0] as any;
         const grid = row.grid as string[][];
@@ -149,10 +152,11 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
         const timeLimit = row.duration as number;
         const startTime = row.start_time ? new Date(row.start_time).toISOString() : null;
         const secretWord = row.secret_word as string | null;
+        const daemonWords = (row.daemon_words as string[] | null) || [];
         const solutionSeq = combineDaemons(daemons);
         const bufferSize = solutionSeq.length;
         log(`Loaded puzzle ${id} from database`);
-        const stored: StoredPuzzle = { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0, secretWord: secretWord || '' };
+        const stored: StoredPuzzle = { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0, secretWord: secretWord || '', daemonWords };
         puzzles.set(id, stored);
         return stored;
       }
@@ -182,6 +186,24 @@ export async function getPuzzleSecret(id: string): Promise<string | null> {
       }
     } catch (e) {
       logError('Database error on getPuzzleSecret', e);
+    }
+  }
+  return null;
+}
+
+export async function getDaemonSecret(id: string, idx: number): Promise<string | null> {
+  const puzzle = puzzles.get(id);
+  if (puzzle) return puzzle.daemonWords[idx] || null;
+  if (useNeon) {
+    await ensurePuzzleTable();
+    try {
+      const rows = await sql!`SELECT daemon_words FROM puzzles WHERE id = ${id}`;
+      if (rows.length > 0) {
+        const words = rows[0].daemon_words as string[] | null;
+        return words && words[idx] ? words[idx] : null;
+      }
+    } catch (e) {
+      logError('Database error on getDaemonSecret', e);
     }
   }
   return null;
