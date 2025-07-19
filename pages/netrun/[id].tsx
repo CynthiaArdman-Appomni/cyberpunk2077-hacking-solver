@@ -616,7 +616,23 @@ export const getServerSideProps: GetServerSideProps<NetrunProps> = async ({ para
     }
     const { grid, daemons, bufferSize, timeLimit, startTime } = puzzle;
     serverLog(`getServerSideProps sending puzzle ${id}`);
-    return { props: { initialPuzzle: { grid, daemons, bufferSize, timeLimit, startTime, path: [], solutionSeq: [], difficulty: 'Unknown', solutionCount: 0 }, hasError: false } };
+    return {
+      props: {
+        initialPuzzle: {
+          grid,
+          daemons,
+          bufferSize,
+          timeLimit,
+          startTime,
+          path: [],
+          solutionSeq: [],
+          difficulty: 'Unknown',
+          solutionCount: 0,
+          secretWord: '',
+        },
+        hasError: false,
+      },
+    };
   } catch (e) {
     logError('Error fetching puzzle in getServerSideProps', e);
     return { props: { initialPuzzle: null, hasError: true } };
