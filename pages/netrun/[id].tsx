@@ -244,7 +244,11 @@ export default function PlayPuzzlePage() {
         <Head>
           <title>Puzzle</title>
         </Head>
-        <Container as="main" className={indexStyles.main}>
+        <Container
+          fluid
+          as="main"
+          className={cz(indexStyles.main, timeRemaining <= 10 && styles.warning, timeRemaining <= 5 && styles.critical)}
+        >
           {feedback.msg ? (
             <p
               className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ''}`}
@@ -271,7 +275,11 @@ export default function PlayPuzzlePage() {
       <Head>
         <title>Breach Protocol Puzzle</title>
       </Head>
-      <Container as="main" className={indexStyles.main}>
+      <Container
+        fluid
+        as="main"
+        className={cz(indexStyles.main, timeRemaining <= 10 && styles.warning, timeRemaining <= 5 && styles.critical)}
+      >
         {breachFlash && (
           <div className={`${styles['breach-notify']} ${styles.show}`}>DAEMON BREACHED</div>
         )}
@@ -288,7 +296,16 @@ export default function PlayPuzzlePage() {
         </Row>
         <Row>
           <Col xs={12} lg={8}>
-            <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
+            <div
+              className={cz(
+                styles['timer-box'],
+                timeRemaining <= 10 && styles.warning,
+                timeRemaining <= 5 && styles.critical
+              )}
+            >
+              TIME REMAINING:
+              <span className={styles.seconds}>{timeRemaining}s</span>
+            </div>
             <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
@@ -345,10 +362,6 @@ export default function PlayPuzzlePage() {
                     </li>
                   ))}
                 </ol>
-                <p className={styles.sequence}>
-                  <span className={styles['sequence-label']}>Completed Sequence:</span>
-                  {sequence}
-                </p>
                 {feedback.msg && (
                   <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
                 )}

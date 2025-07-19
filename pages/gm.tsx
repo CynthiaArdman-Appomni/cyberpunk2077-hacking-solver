@@ -323,7 +323,11 @@ export default function GMPage() {
         <Head>
           <title>GM Puzzle Generator</title>
         </Head>
-        <Container as="main" className={indexStyles.main}>
+        <Container
+          fluid
+          as="main"
+          className={cz(indexStyles.main, timeRemaining <= 10 && styles.warning, timeRemaining <= 5 && styles.critical)}
+        >
           {feedback.msg ? (
             <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ''}`}>{feedback.msg}</p>
           ) : (
@@ -350,7 +354,11 @@ export default function GMPage() {
           rel="stylesheet"
         />
       </Head>
-      <Container as="main" className={indexStyles.main}>
+      <Container
+        fluid
+        as="main"
+        className={cz(indexStyles.main, timeRemaining <= 10 && styles.warning, timeRemaining <= 5 && styles.critical)}
+      >
         {breachFlash && (
           <div className={`${styles['breach-notify']} ${styles.show}`}>DAEMON BREACHED</div>
         )}
@@ -430,7 +438,16 @@ export default function GMPage() {
         </Row>
         <Row>
           <Col xs={12} lg={8}>
-            <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
+            <div
+              className={cz(
+                styles['timer-box'],
+                timeRemaining <= 10 && styles.warning,
+                timeRemaining <= 5 && styles.critical
+              )}
+            >
+              TIME REMAINING:
+              <span className={styles.seconds}>{timeRemaining}s</span>
+            </div>
             {puzzle && (
               <>
                 <p className={styles.description}>DIFFICULTY: {puzzle.difficulty}</p>
@@ -497,10 +514,6 @@ export default function GMPage() {
                     </li>
                   ))}
                 </ol>
-                <p className={styles.sequence}>
-                  <span className={styles['sequence-label']}>Completed Sequence:</span>
-                  {sequence}
-                </p>
                 {solutionSequence && (
                   <p className={styles["solution-sequence"]}>{solutionSequence}</p>
                 )}

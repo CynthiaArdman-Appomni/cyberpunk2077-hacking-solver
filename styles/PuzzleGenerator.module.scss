@@ -309,6 +309,48 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   color: $color-highlight;
   padding: 0.5rem 1rem;
   margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .seconds {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-left: 0.5rem;
+  }
+}
+
+.warning {
+  .timer-box {
+    border-color: $color-error;
+    color: $color-error;
+    animation: glitch 0.3s;
+  }
+  .grid-box,
+  .daemon-box {
+    border-color: $color-error;
+  }
+  .grid-box__header,
+  .daemon-box__header {
+    background: $color-error;
+  }
+}
+
+.critical {
+  .timer-box {
+    border-color: $color-error;
+    color: $color-error;
+    animation: glitch 0.3s infinite;
+  }
+  .grid-box,
+  .daemon-box {
+    border-color: $color-error;
+    animation: flash-red 0.3s;
+  }
+  .grid-box__header,
+  .daemon-box__header {
+    background: $color-error;
+  }
 }
 
 .buffer-box {
