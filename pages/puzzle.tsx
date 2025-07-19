@@ -499,7 +499,7 @@ export default function PuzzlePage() {
           rel="stylesheet"
         />
       </Head>
-      <Container as="main" className={cz(indexStyles.main, dive && styles['net-dive'])}>
+      <Container as="main" fluid className={cz(indexStyles.main, dive && styles['net-dive'], timeLeft <= 5 ? styles['time-critical'] : timeLeft <= 15 ? styles['time-warning'] : undefined)}>
         <audio ref={breachAudio} src="/beep.mp3" />
         <audio ref={successAudio} src="/success.mp3" />
         {breachFlash && (
@@ -520,7 +520,19 @@ export default function PuzzlePage() {
         </Row>
         <Row className="mb-3">
           <Col xs={6} lg={4}>
-            <div className={styles["timer-box"]}>BREACH TIME REMAINING: {timeLeft}s</div>
+            <div
+              className={cz(
+                styles["timer-box"],
+                timeLeft <= 5
+                  ? styles.critical
+                  : timeLeft <= 15
+                  ? styles.warning
+                  : undefined
+              )}
+            >
+              BREACH TIME REMAINING:
+              <span className={styles["time-left"]}>{timeLeft}</span>s
+            </div>
           </Col>
           <Col xs={6} lg={{ span: 4, offset: 4 }} className="text-lg-right">
             <div className={styles["buffer-box"]}>BUFFER: {sequence}</div>
@@ -594,10 +606,6 @@ export default function PuzzlePage() {
                     </li>
                   ))}
                 </ol>
-                <p className={styles.sequence}>
-                  <span className={styles['sequence-label']}>Completed Sequence:</span>
-                  {sequence}
-                </p>
                 {feedback.msg && (
                   <p
                     className={`${styles.feedback} ${

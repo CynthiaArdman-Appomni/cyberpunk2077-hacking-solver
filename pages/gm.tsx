@@ -323,7 +323,7 @@ export default function GMPage() {
         <Head>
           <title>GM Puzzle Generator</title>
         </Head>
-        <Container as="main" className={indexStyles.main}>
+        <Container as="main" fluid className={indexStyles.main}>
           {feedback.msg ? (
             <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ''}`}>{feedback.msg}</p>
           ) : (
@@ -350,7 +350,7 @@ export default function GMPage() {
           rel="stylesheet"
         />
       </Head>
-      <Container as="main" className={indexStyles.main}>
+      <Container as="main" fluid className={indexStyles.main}>
         {breachFlash && (
           <div className={`${styles['breach-notify']} ${styles.show}`}>DAEMON BREACHED</div>
         )}
@@ -430,7 +430,19 @@ export default function GMPage() {
         </Row>
         <Row>
           <Col xs={12} lg={8}>
-            <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
+            <div
+              className={cz(
+                styles["timer-box"],
+                timeRemaining <= 5
+                  ? styles.critical
+                  : timeRemaining <= 15
+                  ? styles.warning
+                  : undefined
+              )}
+            >
+              TIME REMAINING:
+              <span className={styles["time-left"]}>{timeRemaining}</span>s
+            </div>
             {puzzle && (
               <>
                 <p className={styles.description}>DIFFICULTY: {puzzle.difficulty}</p>
@@ -497,10 +509,6 @@ export default function GMPage() {
                     </li>
                   ))}
                 </ol>
-                <p className={styles.sequence}>
-                  <span className={styles['sequence-label']}>Completed Sequence:</span>
-                  {sequence}
-                </p>
                 {solutionSequence && (
                   <p className={styles["solution-sequence"]}>{solutionSequence}</p>
                 )}

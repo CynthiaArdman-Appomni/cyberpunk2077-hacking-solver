@@ -8,7 +8,7 @@ const Home = () => (
       <title>Welcome to Night City</title>
     </Head>
     <Layout>
-      <Container as="main" className="d-flex align-items-center justify-content-center" style={{ minHeight: "70vh" }}>
+      <Container as="main" fluid className="d-flex align-items-center justify-content-center" style={{ minHeight: "70vh" }}>
         <h1>Welcome to Night City</h1>
       </Container>
     </Layout>

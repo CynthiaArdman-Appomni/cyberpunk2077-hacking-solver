@@ -309,6 +309,26 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   color: $color-highlight;
   padding: 0.5rem 1rem;
   margin-bottom: 1rem;
+  font-size: 1.4rem;
+  font-weight: bold;
+
+  .time-left {
+    font-size: 2rem;
+    margin: 0 0.25rem;
+  }
+
+  &.warning {
+    border-color: $color-error;
+    color: $color-error;
+    animation: glitch 0.6s infinite;
+  }
+
+  &.critical {
+    border-color: $color-error;
+    color: $color-error;
+    background: rgba(100, 0, 0, 0.5);
+    animation: flash-red 0.5s infinite, glitch 0.4s infinite;
+  }
 }
 
 .buffer-box {
@@ -450,4 +470,23 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 
 @keyframes fade-out {
   to { opacity: 0; pointer-events: none; }
+}
+
+.time-warning {
+  .grid-box,
+  .daemon-box,
+  .buffer-box {
+    border-color: $color-error;
+    color: $color-error;
+  }
+}
+
+.time-critical {
+  .grid-box,
+  .daemon-box,
+  .buffer-box {
+    border-color: $color-error;
+    color: $color-error;
+    animation: glitch 0.4s infinite;
+  }
 }

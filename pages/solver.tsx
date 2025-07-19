@@ -133,7 +133,7 @@ const Index = ({
         codeMatrix={codeMatrix}
       />
 
-      <Container as="main" className={styles.main}>
+      <Container as="main" fluid className={styles.main}>
         <Row>
           <Col>
             <MainTitle className={styles.title} />
