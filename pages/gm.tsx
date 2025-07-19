@@ -15,19 +15,6 @@ const Separator = ({ className }: { className?: string }) => (
   <hr className={cz(indexStyles.separator, className)} />
 );
 
-const ReportIssue = () => (
-  <p className={indexStyles["report-issue"]}>
-    Having issues? Solver not working?{' '}
-    <a
-      href="https://github.com/cxcorp/cyberpunk2077-hacking-solver/issues"
-      rel="noopener"
-      target="_blank"
-    >
-      Report an issue
-    </a>
-    .
-  </p>
-);
 
 export default function GMPage() {
   const startRow = 0;
@@ -520,19 +507,6 @@ export default function GMPage() {
               <Button onClick={resetSelection}>Reset Puzzle</Button>
               <Button onClick={showSolutionPath}>Show Solution Path</Button>
             </div>
-          </Col>
-        </Row>
-        <Separator className="mt-5" />
-        <Row>
-          <Col>
-            <ReportIssue />
-          </Col>
-        </Row>
-        <Row className="mt-5">
-          <Col lg={8}>
-            <p>
-              THIS APP IS NOT AFFILIATED WITH CD PROJEKT RED OR CYBERPUNK 2077. TRADEMARK "CYBERPUNK 2077" IS OWNED BY CD PROJEKT <span>S.A.</span>
-            </p>
           </Col>
         </Row>
       </Container>
