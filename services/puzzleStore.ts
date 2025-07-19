@@ -1,4 +1,6 @@
 import { randomBytes } from 'crypto';
+import fs from 'fs';
+import path from 'path';
 import {
   generatePuzzle,
   combineDaemons,
@@ -11,6 +13,33 @@ import { log, logError } from './logger';
 
 const puzzles = new Map<string, StoredPuzzle>();
 const useNeon = !!process.env.NETLIFY_DATABASE_URL;
+const filePath = path.join(process.cwd(), 'puzzles.json');
+
+function loadFromFile() {
+  if (useNeon) return;
+  try {
+    if (fs.existsSync(filePath)) {
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      const obj = JSON.parse(raw) as Record<string, StoredPuzzle>;
+      Object.entries(obj).forEach(([id, puzzle]) => puzzles.set(id, puzzle));
+      log(`Loaded ${Object.keys(obj).length} puzzles from disk`);
+    }
+  } catch (e) {
+    logError('Failed to read puzzles from disk', e);
+  }
+}
+
+function saveToFile() {
+  if (useNeon) return;
+  try {
+    const obj = Object.fromEntries(puzzles);
+    fs.writeFileSync(filePath, JSON.stringify(obj));
+  } catch (e) {
+    logError('Failed to write puzzles to disk', e);
+  }
+}
+
+loadFromFile();
 
 function randomHex() {
   return HEX_VALUES[Math.floor(Math.random() * HEX_VALUES.length)];
@@ -95,6 +124,7 @@ export async function createPuzzle(options: {
     solutionCount,
   };
   puzzles.set(id, stored);
+  saveToFile();
   log(`Created puzzle ${id} (${difficulty})`);
   if (useNeon) {
     await ensurePuzzleTable();
@@ -136,7 +166,11 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
       logError('Database error on getPuzzle', e);
     }
   }
-  const puzzle = puzzles.get(id) || null;
+  let puzzle = puzzles.get(id) || null;
+  if (!puzzle) {
+    loadFromFile();
+    puzzle = puzzles.get(id) || null;
+  }
   if (puzzle) {
     log(`Loaded puzzle ${id} from memory`);
   } else {
