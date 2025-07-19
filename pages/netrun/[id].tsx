@@ -565,17 +565,19 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         </Row>
         <Row>
           <Col xs={12} lg={8}>
-            <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
+            <div
+              className={cz(styles["grid-box"], {
+                [styles.pulse]: breachFlash,
+                [styles["fade-out"]]: ended && solved.size === (puzzle?.daemons.length || 0),
+                [styles.failure]: failed,
+              })}
+              ref={gridRef}
+            >
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
               <div className={styles["grid-box__inside"]}>
                 <div className={styles.grid} style={gridStyle}>
-                  <svg className={styles["path-lines"]} viewBox="0 0 100 100" preserveAspectRatio="none">
-                    {lines.map((line, idx) => (
-                      <line key={idx} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
-                    ))}
-                  </svg>
                   {puzzle.grid.map((row, r) =>
                     row.map((val, c) => {
                       if (!cellRefs.current[r]) cellRefs.current[r] = [];
@@ -609,7 +611,13 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
             </div>
           </Col>
           <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={cz(styles["daemon-box"], { [styles.pulse]: breachFlash })}>
+            <div
+              className={cz(styles["daemon-box"], {
+                [styles.pulse]: breachFlash,
+                [styles["fade-out"]]: ended && solved.size === (puzzle?.daemons.length || 0),
+                [styles.failure]: failed,
+              })}
+            >
               <div className={styles["daemon-box__header"]}>
                 <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
               </div>
