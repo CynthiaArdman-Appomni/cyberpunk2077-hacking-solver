@@ -120,13 +120,14 @@ export async function createPuzzle(options: {
     await ensurePuzzleTable();
     try {
       await sql!
-        `INSERT INTO puzzles (id, grid, daemons, start_time, duration)
+        `INSERT INTO puzzles (id, grid, daemons, start_time, duration, secret_word)
         VALUES (
           ${id},
           ${JSON.stringify(stored.grid)},
           ${JSON.stringify(stored.daemons)},
           ${stored.startTime},
-          ${timeLimit}
+          ${timeLimit},
+          ${stored.secretWord}
         )`;
       log(`Stored puzzle ${id} in database`);
     } catch (e) {
@@ -140,17 +141,20 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
   if (useNeon) {
     await ensurePuzzleTable();
     try {
-      const rows = await sql!`SELECT grid, daemons, start_time, duration FROM puzzles WHERE id = ${id}`;
+      const rows = await sql!`SELECT grid, daemons, start_time, duration, secret_word FROM puzzles WHERE id = ${id}`;
       if (rows.length > 0) {
         const row = rows[0] as any;
         const grid = row.grid as string[][];
         const daemons = row.daemons as string[][];
         const timeLimit = row.duration as number;
         const startTime = row.start_time ? new Date(row.start_time).toISOString() : null;
+        const secretWord = row.secret_word as string | null;
         const solutionSeq = combineDaemons(daemons);
         const bufferSize = solutionSeq.length;
         log(`Loaded puzzle ${id} from database`);
-        return { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0, secretWord: '' };
+        const stored: StoredPuzzle = { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0, secretWord: secretWord || '' };
+        puzzles.set(id, stored);
+        return stored;
       }
     } catch (e) {
       logError('Database error on getPuzzle', e);
@@ -165,8 +169,21 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
   return puzzle;
 }
 
-export function getPuzzleSecret(id: string): string | null {
+export async function getPuzzleSecret(id: string): Promise<string | null> {
   const puzzle = puzzles.get(id);
-  return puzzle ? puzzle.secretWord : null;
+  if (puzzle) return puzzle.secretWord;
+  if (useNeon) {
+    await ensurePuzzleTable();
+    try {
+      const rows = await sql!`SELECT secret_word FROM puzzles WHERE id = ${id}`;
+      if (rows.length > 0) {
+        const word = rows[0].secret_word as string | null;
+        return word || null;
+      }
+    } catch (e) {
+      logError('Database error on getPuzzleSecret', e);
+    }
+  }
+  return null;
 }
 

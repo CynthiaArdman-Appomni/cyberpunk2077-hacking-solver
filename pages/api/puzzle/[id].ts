@@ -14,7 +14,7 @@ export default async function handler(
   }
   try {
     if (req.query.secret === '1') {
-      const secret = getPuzzleSecret(id);
+      const secret = await getPuzzleSecret(id);
       if (!secret) {
         logError(`Secret for puzzle ${id} not found`);
         res.status(404).json({ error: 'Puzzle not found' });
