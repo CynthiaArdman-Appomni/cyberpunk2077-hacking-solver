@@ -94,10 +94,12 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   margin-top: 0.5rem;
 }
 
-.daemon-box {
-  border: 2px solid $neon;
-  background: color.adjust($color-lighter-bg, $alpha: -0.3);
 
+.daemon-box {
+  padding: 10px;
+  border: 2px solid $color-highlight;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: $color-highlight;
   margin-bottom: 2rem;
 
   &__header {
@@ -172,7 +174,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   &.active {
     border-color: $color-active;
     box-shadow: 0 0 10px $color-active;
-    animation: pulse-glow 1.5s infinite alternate;
+    animation: cyan-pulse-glow 1.5s infinite alternate;
   }
 
   &.dim {
@@ -217,7 +219,9 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   }
 
   &.invalid {
-    animation: flash-red 0.3s;
+    border-color: $color-error;
+    box-shadow: 0 0 10px $color-error;
+    animation: failure-pulse 1s infinite alternate;
   }
 }
 
@@ -238,10 +242,10 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     display: block;
     margin: 0 0 1.2rem 0;
     padding: 6px 8px;
-    border: 1px solid $neon;
-    color: $neon;
+    border: 1px solid $color-highlight;
+    color: $color-highlight;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-family: $font-stack;
     text-transform: uppercase;
     text-align: center;
@@ -267,6 +271,11 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 @keyframes flash-success {
   0% { box-shadow: 0 0 10px $color-success; }
   100% { box-shadow: none; }
+}
+
+@keyframes failure-pulse {
+  from { box-shadow: 0 0 10px $color-error; }
+  to { box-shadow: 0 0 20px $color-error; }
 }
 
 .sequence {
@@ -305,20 +314,39 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .timer-box {
   @include cyber-font;
   border: 2px solid $color-highlight;
-  background: rgba(0, 0, 0, 0.75);
+  padding: 10px 15px;
+  background-color: rgba(0, 0, 0, 0.9);
+  color: $color-highlight;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.timer-box.pulse-glow {
+  animation: pulse-glow 1s infinite alternate;
+}
+
+.buffer-box {
+  @include cyber-font;
+  display: flex;
+  justify-content: center;
+  border: 2px solid $color-highlight;
+  background-color: rgba(0, 0, 0, 0.75);
   color: $color-highlight;
   padding: 0.5rem 1rem;
   margin-bottom: 1rem;
 }
 
-.buffer-box {
-  @include cyber-font;
-  border: 2px solid $color-highlight;
-  background: rgba(0, 0, 0, 0.75);
-  color: $color-highlight;
-  padding: 0.5rem 1rem;
+.buffer-slot {
+  display: inline-block;
+  border: 1px solid $color-highlight;
+  width: 40px;
+  height: 40px;
+  margin-right: 5px;
+  background-color: rgba(0, 0, 0, 0.85);
   text-align: center;
-  margin-bottom: 1rem;
+  line-height: 40px;
+  color: $color-highlight;
+  font-size: 1.2rem;
 }
 
 .buttons {
@@ -376,9 +404,14 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   100% { opacity: 0; }
 }
 
-@keyframes pulse-glow {
+@keyframes cyan-pulse-glow {
   from { box-shadow: 0 0 5px $color-active; }
   to { box-shadow: 0 0 15px $color-active; }
+}
+
+@keyframes pulse-glow {
+  from { box-shadow: 0 0 10px $color-highlight; }
+  to { box-shadow: 0 0 20px $color-highlight; }
 }
 
 @keyframes pulse-neon {
