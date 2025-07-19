@@ -132,9 +132,6 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
   const breachAudio = useRef<HTMLAudioElement | null>(null);
   const successAudio = useRef<HTMLAudioElement | null>(null);
 
-  const gridRef = useRef<HTMLDivElement | null>(null);
-  const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
-  const [lines, setLines] = useState<{ x1: number; y1: number; x2: number; y2: number }[]>([]);
 
   useEffect(() => {
     if (!id || initialPuzzle || hasError) return;
@@ -285,34 +282,6 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
     [puzzle, solved]
   );
 
-  const updateLines = useCallback(() => {
-    if (!gridRef.current || !puzzle) return;
-    const containerRect = gridRef.current.getBoundingClientRect();
-    const newLines: { x1: number; y1: number; x2: number; y2: number }[] = [];
-    for (let i = 0; i < selection.length - 1; i++) {
-      const from = cellRefs.current[selection[i].r]?.[selection[i].c];
-      const to = cellRefs.current[selection[i + 1].r]?.[selection[i + 1].c];
-      if (!from || !to) continue;
-      const r1 = from.getBoundingClientRect();
-      const r2 = to.getBoundingClientRect();
-      newLines.push({
-        x1: r1.left - containerRect.left + r1.width / 2,
-        y1: r1.top - containerRect.top + r1.height / 2,
-        x2: r2.left - containerRect.left + r2.width / 2,
-        y2: r2.top - containerRect.top + r2.height / 2,
-      });
-    }
-    setLines(newLines);
-  }, [selection, puzzle]);
-
-  useEffect(() => {
-    updateLines();
-  }, [updateLines, puzzle]);
-
-  useEffect(() => {
-    window.addEventListener("resize", updateLines);
-    return () => window.removeEventListener("resize", updateLines);
-  }, [updateLines]);
 
   useEffect(() => {
     if (ended && puzzle && solved.size === puzzle.daemons.length) {
@@ -491,13 +460,8 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
     );
   }
 
-  const cellSize = Math.max(24, 60 - Math.max(0, puzzle.grid[0].length - 5) * 4);
   const sequence = selection.map((p) => puzzle.grid[p.r][p.c]).join(" ");
   const failed = ended && solved.size !== (puzzle?.daemons.length || 0);
-  const gridStyle = {
-    "--cols": puzzle.grid[0].length.toString(),
-    "--cell-size": `${cellSize}px`,
-  } as React.CSSProperties;
 
   return (
     <Layout>
@@ -565,25 +529,18 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         </Row>
         <Row>
           <Col xs={12} lg={8}>
-            <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
+            <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })}>
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
               <div className={styles["grid-box__inside"]}>
-                <div className={styles.grid} style={gridStyle}>
-                  <svg className={styles["path-lines"]} viewBox="0 0 100 100" preserveAspectRatio="none">
-                    {lines.map((line, idx) => (
-                      <line key={idx} x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2} />
-                    ))}
-                  </svg>
+                <div className={styles.grid}>
                   {puzzle.grid.map((row, r) =>
                     row.map((val, c) => {
-                      if (!cellRefs.current[r]) cellRefs.current[r] = [];
                       const stepIdx = selection.findIndex((p) => p.r === r && p.c === c);
                       const isSelected = stepIdx >= 0;
                       return (
                         <div
-                          ref={(el) => (cellRefs.current[r][c] = el)}
                           key={`${r}-${c}`}
                           className={cz(styles.cell, {
                             [styles.selected]: isSelected,
