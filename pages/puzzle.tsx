@@ -316,6 +316,15 @@ export default function PuzzlePage() {
   }, []);
 
   const newPuzzle = useCallback(async () => {
+    // Close any result overlay immediately
+    setEnded(false);
+    setLogLines([]);
+    setSelection([]);
+    setSolved(new Set());
+    setFeedback({ msg: "" });
+    // Reset timer so the timeout effect doesn't immediately trigger
+    setTimeLeft(60);
+
     const diff: Difficulty = DIFFICULTIES[Math.floor(Math.random() * DIFFICULTIES.length)];
     setDifficulty(diff);
     try {
