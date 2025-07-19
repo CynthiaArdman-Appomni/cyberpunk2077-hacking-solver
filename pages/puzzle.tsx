@@ -20,34 +20,57 @@ const DIFFICULTIES = ["Easy", "Medium", "Hard"] as const;
 type Difficulty = typeof DIFFICULTIES[number];
 
 const TERMINAL_LOGS = [
-  "//ROOT",
-  "//ACCESS_REQUEST",
-  "//ACCESS_REQUEST_SUCCESS",
-  "//COLLECTING_PACKET_1................COMPLETE",
-  "//COLLECTING_PACKET_2................COMPLETE",
-  "//COLLECTING_PACKET_3................COMPLETE",
-  "//LOGIN",
-  "//LOGIN_SUCCESS",
+  "//INITIATE_BREACH_SEQUENCE",
+  "//NEURAL_INTERFACE_ESTABLISHED",
+  "//PINGING_TARGET_NODE...................SUCCESS",
+  "//FIREWALL_HANDSHAKE_INITIATED..........ACCEPTED",
+  "//AUTHENTICATING_ACCESS_PROTOCOLS.......COMPLETE",
   "",
-  "//UPLOAD_IN_PROGRESS",
-  "//UPLOAD_COMPLETE!",
+  "//ACCESS_LEVEL: ROOT GRANTED",
+  "//EXTRACTING_DAEMON_SIGNATURES..........DONE",
+  "//PACKET_ANALYSIS: 0 ERRORS DETECTED",
   "",
-  "ALL DAEMONS UPLOADED",
+  "//INJECTING_PAYLOAD",
+  "//UPLOADING_DAEMON_[1]..................SUCCESS",
+  "//UPLOADING_DAEMON_[2]..................SUCCESS",
+  "//UPLOADING_DAEMON_[3]..................SUCCESS",
+  "//PAYLOAD_INTEGRITY_CHECK...............VERIFIED",
+  "",
+  "//FINALIZING_CONNECTION.................SECURE",
+  "//SCRUBBING_ACCESS_LOGS.................COMPLETE",
+  "//DISCONNECTING..........................NOW",
+  "",
+  "//UPLOAD COMPLETE – ALL DAEMONS INSTALLED",
+  "",
+  "[3/3] DAEMONS UPLOADED SUCCESSFULLY",
+  "BREACH PROTOCOL SUCCESSFUL – ACCESS GRANTED",
 ];
 
 function generateFailureLog(solvedDaemons: number, totalDaemons: number): string[] {
   const failedDaemons = totalDaemons - solvedDaemons;
   return [
-    "//ROOT",
-    "//ACCESS_REQUEST",
-    "//ACCESS_REQUEST_SUCCESS",
-    "//COLLECTING_PACKET_1................COMPLETE",
-    "//COLLECTING_PACKET_2................COMPLETE",
-    "//LOGIN",
-    "//LOGIN_SUCCESS",
+    "//INITIATE_BREACH_SEQUENCE",
+    "//NEURAL_INTERFACE_ESTABLISHED",
+    "//PINGING_TARGET_NODE...................SUCCESS",
+    "//FIREWALL_HANDSHAKE_INITIATED..........ACCEPTED",
+    "//AUTHENTICATING_ACCESS_PROTOCOLS.......COMPLETE",
     "",
-    "//UPLOAD_IN_PROGRESS",
-    "//UPLOAD_TERMINATED!",
+    "//ACCESS_LEVEL: LIMITED",
+    "//EXTRACTING_DAEMON_SIGNATURES..........DONE WITH ERRORS",
+    "//PACKET_ANALYSIS: CHECKSUM ERROR DETECTED",
+    "",
+    "//INJECTING_PAYLOAD",
+    "//UPLOADING_DAEMON_[1]..................SUCCESS",
+    "//UPLOADING_DAEMON_[2]..................FAILED",
+    "//RETRYING_PACKET_TRANSMISSION..........TIMEOUT",
+    "//FIREWALL_COUNTERMEASURES_DETECTED.....ACTIVATED",
+    "",
+    "//SECURITY_ALERT: TRACE INITIATED",
+    "//PAYLOAD_CORRUPTION_DETECTED...........ABORTING",
+    "//LOG_ERASURE_ATTEMPT...................PARTIAL",
+    "//INITIATING_EMERGENCY_DISCONNECT.......NOW",
+    "",
+    "//CONNECTION TERMINATED – INCOMPLETE UPLOAD",
     "",
     `${solvedDaemons}/${totalDaemons} DAEMONS UPLOADED SUCCESSFULLY`,
     `${failedDaemons} DAEMONS FAILED TO UPLOAD`,
@@ -472,7 +495,7 @@ export default function PuzzlePage() {
           idx += 1;
           return [...l, line];
         });
-      }, 300);
+      }, 150);
       return () => clearInterval(id);
     }
   }, [ended, solved, puzzle.daemons.length]);
@@ -496,7 +519,7 @@ export default function PuzzlePage() {
           idx += 1;
           return [...l, line];
         });
-      }, 300);
+      }, 150);
       return () => clearInterval(id);
     }
   }, [ended, solved, puzzle.daemons.length]);
