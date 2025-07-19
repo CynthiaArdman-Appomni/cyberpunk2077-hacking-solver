@@ -31,6 +31,11 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
     }
   }, [id]);
 
+  useEffect(() => {
+    const t = setTimeout(() => setDive(false), 800);
+    return () => clearTimeout(t);
+  }, []);
+
   const [puzzle, setPuzzle] = useState<StoredPuzzle | null>(initialPuzzle);
   const [timeLimit, setTimeLimit] = useState(0);
   const [bufferSize, setBufferSize] = useState(0);
@@ -42,6 +47,10 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
   const [ended, setEnded] = useState(false);
   const [breachFlash, setBreachFlash] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [dive, setDive] = useState(true);
+
+  const breachAudio = useRef<HTMLAudioElement | null>(null);
+  const successAudio = useRef<HTMLAudioElement | null>(null);
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
@@ -166,6 +175,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
       });
       if (solvedAny) {
         setFeedback({ msg: "DAEMON BREACHED!", type: "success" });
+        breachAudio.current?.play();
         setBreachFlash(true);
         setTimeout(() => setBreachFlash(false), 1500);
       } else if (interrupted) {
@@ -248,6 +258,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
       if (newSolved.size === (puzzle?.daemons.length || 0)) {
         setEnded(true);
         setFeedback({ msg: "Puzzle solved!", type: "success" });
+        successAudio.current?.play();
       } else if (newSel.length >= bufferSize) {
         setEnded(true);
         const solvedCount = newSolved.size;
@@ -268,8 +279,15 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
       <Layout>
         <Head>
           <title>Puzzle</title>
+          <link
+            href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@700&display=swap"
+            rel="stylesheet"
+          />
         </Head>
-        <Container as="main" className={indexStyles.main}>
+        <Container
+          as="main"
+          className={cz(indexStyles.main, dive && styles['net-dive'])}
+        >
           {feedback.msg ? (
             <p
               className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ''}`}
@@ -286,6 +304,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
 
   const cellSize = Math.max(24, 60 - Math.max(0, puzzle.grid[0].length - 5) * 4);
   const sequence = selection.map((p) => puzzle.grid[p.r][p.c]).join(" ");
+  const failed = ended && solved.size !== (puzzle?.daemons.length || 0);
   const gridStyle = {
     "--cols": puzzle.grid[0].length.toString(),
     "--cell-size": `${cellSize}px`,
@@ -295,8 +314,21 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
     <Layout>
       <Head>
         <title>Breach Protocol Puzzle</title>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@700&display=swap"
+          rel="stylesheet"
+        />
       </Head>
-      <Container as="main" className={indexStyles.main}>
+      <Container
+        as="main"
+        className={cz(
+          indexStyles.main,
+          dive && styles['net-dive'],
+          failed && indexStyles.failed
+        )}
+      >
+        <audio ref={breachAudio} src="/beep.mp3" />
+        <audio ref={successAudio} src="/success.mp3" />
         {breachFlash && (
           <div className={`${styles['breach-notify']} ${styles.show}`}>DAEMON BREACHED</div>
         )}
