@@ -121,6 +121,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
     hasError ? { msg: "Failed to load puzzle.", type: "error" } : { msg: "" }
   );
   const [ended, setEnded] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
   const [breachFlash, setBreachFlash] = useState(false);
   const [logLines, setLogLines] = useState<string[]>([]);
   const [secretWord, setSecretWord] = useState<string | null>(null);
@@ -205,6 +206,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
       );
       if (remaining <= 0) {
         setEnded(true);
+        setShowOverlay(true);
         setFeedback({ msg: "TIME UP", type: "error" });
         clearInterval(handle);
       }
@@ -345,7 +347,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
       })();
       return () => clearInterval(timer);
     }
-  }, [ended, solved, puzzle, id]);
+  }, [ended, solved, id]);
 
   useEffect(() => {
     if (ended && puzzle && solved.size !== puzzle.daemons.length) {
@@ -353,22 +355,26 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         solved.size,
         puzzle.daemons.length
       );
+      const wordLines = daemonWords
+        .map((w, i) => (solved.has(i) && w ? `DAEMON ${i + 1} WORD: ${w}` : null))
+        .filter(Boolean) as string[];
+      const lines = [...failureLines, ...wordLines];
       setLogLines([]);
       let idx = 0;
       const id = setInterval(() => {
         setLogLines((l) => {
-          if (idx >= failureLines.length) {
+          if (idx >= lines.length) {
             clearInterval(id);
             return l;
           }
-          const line = failureLines[idx];
+          const line = lines[idx];
           idx += 1;
           return [...l, line];
         });
       }, 150);
       return () => clearInterval(id);
     }
-  }, [ended, solved, puzzle]);
+  }, [ended, solved, puzzle, daemonWords]);
 
   const handleCellClick = useCallback(
     (r: number, c: number) => {
@@ -411,10 +417,15 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
       const newSolved = checkDaemons(newSel);
       if (newSolved.size === (puzzle?.daemons.length || 0)) {
         setEnded(true);
+        setShowOverlay(true);
         setFeedback({ msg: "Puzzle solved!", type: "success" });
         successAudio.current?.play();
+        if (puzzle) {
+          setPuzzle({ ...puzzle, startTime: null });
+        }
       } else if (newSel.length >= bufferSize) {
         setEnded(true);
+        setShowOverlay(true);
         const solvedCount = newSolved.size;
         const maxComplexity = solvedCount
           ? Math.max(...Array.from(newSolved).map((idx) => puzzle!.daemons[idx].length))
@@ -433,6 +444,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
     setSolved(new Set());
     setFeedback({ msg: "" });
     setEnded(false);
+    setShowOverlay(false);
     if (puzzle) {
       if (puzzle.startTime) {
         const start = new Date(puzzle.startTime).getTime();
@@ -446,6 +458,10 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
       }
     }
   }, [puzzle]);
+
+  const closeOverlay = useCallback(() => {
+    setShowOverlay(false);
+  }, []);
 
   if (!puzzle) {
     return (
@@ -624,7 +640,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
           </Col>
         </Row>
         <Separator className="mt-5" />
-        {ended && solved.size === (puzzle?.daemons.length || 0) && (
+        {showOverlay && ended && solved.size === (puzzle?.daemons.length || 0) && (
           <div className={styles["terminal-overlay"]}>
             <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
             {logLines.length ===
@@ -637,14 +653,15 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
             )}
           </div>
         )}
-        {failed && puzzle && (
+        {showOverlay && failed && puzzle && (
           <div className={`${styles["terminal-overlay"]} ${styles.failure}`}>
             <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
             {logLines.length ===
-              generateFailureLog(solved.size, puzzle.daemons.length).length && (
+              (generateFailureLog(solved.size, puzzle.daemons.length).length +
+                daemonWords.filter((w, i) => solved.has(i) && w).length) && (
               <button
                 className={`${styles["exit-button"]} ${styles.failure}`}
-                onClick={resetPuzzle}
+                onClick={closeOverlay}
               >
                 EXIT INTERFACE
               </button>
