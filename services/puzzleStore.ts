@@ -1,11 +1,9 @@
 import { randomBytes } from 'crypto';
 import { generatePuzzle, combineDaemons, Puzzle } from '../lib/puzzleGenerator';
 import { countSolutions as countSolutionsForMatrix } from '../lib/bruteCounter';
-import { sql, ensurePuzzleTable } from './neonClient';
 import { log, logError } from './logger';
 
 const puzzles = new Map<string, StoredPuzzle>();
-const useNeon = !!process.env.NETLIFY_DATABASE_URL;
 
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible' | 'Unknown';
 
@@ -38,6 +36,9 @@ async function generatePuzzleWithDifficulty(diff: Difficulty): Promise<Puzzle> {
     }
   }
   // fallback random puzzle
+  logError(
+    `Failed to generate puzzle with difficulty ${diff} after 50 attempts, using random puzzle`
+  );
   return generatePuzzle();
 }
 
@@ -59,45 +60,10 @@ export async function createPuzzle(options: {
   };
   puzzles.set(id, stored);
   log(`Created puzzle ${id} (${difficulty})`);
-  if (useNeon) {
-    await ensurePuzzleTable();
-    try {
-      await sql!
-        `INSERT INTO puzzles (id, grid, daemons, start_time, duration)
-        VALUES (
-          ${id},
-          ${JSON.stringify(stored.grid)},
-          ${JSON.stringify(stored.daemons)},
-          ${stored.startTime},
-          ${timeLimit}
-        )`;
-    } catch (e) {
-      logError('Database error on createPuzzle', e);
-    }
-  }
   return { id, puzzle: stored };
 }
 
 export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
-  if (useNeon) {
-    await ensurePuzzleTable();
-    try {
-      const rows = await sql!`SELECT grid, daemons, start_time, duration FROM puzzles WHERE id = ${id}`;
-      if (rows.length > 0) {
-        const row = rows[0] as any;
-        const grid = row.grid as string[][];
-        const daemons = row.daemons as string[][];
-        const timeLimit = row.duration as number;
-        const startTime = row.start_time ? new Date(row.start_time).toISOString() : null;
-        const solutionSeq = combineDaemons(daemons);
-        const bufferSize = solutionSeq.length;
-        log(`Loaded puzzle ${id} from database`);
-        return { grid, daemons, bufferSize, path: [], solutionSeq, timeLimit, startTime, difficulty: 'Unknown', solutionCount: 0 };
-      }
-    } catch (e) {
-      logError('Database error on getPuzzle', e);
-    }
-  }
   const puzzle = puzzles.get(id) || null;
   if (puzzle) {
     log(`Loaded puzzle ${id} from memory`);
