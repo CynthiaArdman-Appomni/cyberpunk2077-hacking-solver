@@ -100,6 +100,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   background: color.adjust($color-lighter-bg, $alpha: -0.3);
   margin-bottom: 2rem;
   width: 100%;
+  min-height: 12rem;
 
   &__header {
     font-size: 1.5rem;
@@ -224,6 +225,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   &.failure-state {
     border: 2px solid #ff4444;
     box-shadow: 0 0 10px #ff4444;
+    animation: failure-pulse 1s infinite alternate;
   }
 }
 
@@ -247,7 +249,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     border: 1px solid $neon;
     color: $neon;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-family: $font-stack;
     text-transform: uppercase;
     text-align: center;
@@ -402,7 +404,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .daemon-box.failure {
   border-color: $color-error;
   box-shadow: 0 0 10px $color-error;
-  background: color.adjust($color-error, $alpha: -0.7);
+  animation: failure-pulse 1s infinite alternate;
 }
 
 @keyframes breach-flash {
@@ -414,6 +416,11 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 @keyframes pulse-glow {
   from { box-shadow: 0 0 5px $color-active; }
   to { box-shadow: 0 0 15px $color-active; }
+}
+
+@keyframes failure-pulse {
+  from { box-shadow: 0 0 5px $color-error; }
+  to { box-shadow: 0 0 20px $color-error; }
 }
 
 @keyframes pulse-neon {
