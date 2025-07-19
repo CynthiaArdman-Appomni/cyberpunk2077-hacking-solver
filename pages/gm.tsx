@@ -20,7 +20,7 @@ export default function GMPage() {
   const startRow = 0;
   const [difficulty, setDifficulty] = useState("Easy");
   const [timeLimit, setTimeLimit] = useState("60");
-  const [startOnFirstClick, setStartOnFirstClick] = useState(false);
+  const [startOnFirstClick, setStartOnFirstClick] = useState(true);
 
   const [puzzle, setPuzzle] = useState<StoredPuzzle | null>(null);
   const [puzzleId, setPuzzleId] = useState<string | null>(null);

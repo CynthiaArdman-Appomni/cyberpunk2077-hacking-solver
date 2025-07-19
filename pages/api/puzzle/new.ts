@@ -24,7 +24,7 @@ export default async function handler(
     const { id, puzzle } = await createPuzzle({
       difficulty: difficulty as Difficulty,
       timeLimit: tl,
-      startOnFirstClick: !!startOnFirstClick,
+      startOnFirstClick: startOnFirstClick !== false,
     });
     log(`API /puzzle/new created puzzle ${id}`);
     res.status(200).json({ id, puzzle });
