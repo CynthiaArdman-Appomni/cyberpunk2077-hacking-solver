@@ -647,7 +647,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
               (secretWord
                 ? generateSuccessLog(puzzle.daemons.length).length + 1
                 : generateSuccessLog(puzzle.daemons.length).length) && (
-              <button className={styles["exit-button"]} onClick={resetPuzzle}>
+              <button className={styles["exit-button"]} onClick={closeOverlay}>
                 EXIT INTERFACE
               </button>
             )}
