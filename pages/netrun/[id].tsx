@@ -16,6 +16,47 @@ import { StoredPuzzle, getPuzzle } from "../../services/puzzleStore";
 import { getOrCreateTimer, setTimerStart } from "../../services/timerStore";
 import { log } from "../../services/logger";
 
+const TERMINAL_LOGS = [
+  "//ROOT",
+  "//ACCESS_REQUEST",
+  "//ACCESS_REQUEST_SUCCESS",
+  "//COLLECTING_PACKET_1................COMPLETE",
+  "//COLLECTING_PACKET_2................COMPLETE",
+  "//COLLECTING_PACKET_3................COMPLETE",
+  "//LOGIN",
+  "//LOGIN_SUCCESS",
+  "",
+  "//UPLOAD_IN_PROGRESS",
+  "//UPLOAD_COMPLETE!",
+  "",
+  "ALL DAEMONS UPLOADED",
+];
+
+function generateFailureLog(solvedDaemons: number, totalDaemons: number): string[] {
+  const failedDaemons = totalDaemons - solvedDaemons;
+  return [
+    "//ROOT",
+    "//ACCESS_REQUEST",
+    "//ACCESS_REQUEST_SUCCESS",
+    "//COLLECTING_PACKET_1................COMPLETE",
+    "//COLLECTING_PACKET_2................COMPLETE",
+    "//LOGIN",
+    "//LOGIN_SUCCESS",
+    "",
+    "//UPLOAD_IN_PROGRESS",
+    "//UPLOAD_TERMINATED!",
+    "",
+    `${solvedDaemons}/${totalDaemons} DAEMONS UPLOADED SUCCESSFULLY`,
+    `${failedDaemons} DAEMONS FAILED TO UPLOAD`,
+    "",
+    "BREACH PROTOCOL FAILED",
+  ];
+}
+
+const Separator = ({ className }: { className?: string }) => (
+  <hr className={cz(indexStyles.separator, className)} />
+);
+
 interface NetrunProps {
   initialPuzzle: StoredPuzzle | null;
   hasError?: boolean;
@@ -46,6 +87,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
   );
   const [ended, setEnded] = useState(false);
   const [breachFlash, setBreachFlash] = useState(false);
+  const [logLines, setLogLines] = useState<string[]>([]);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [dive, setDive] = useState(true);
 
@@ -219,6 +261,48 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
     return () => window.removeEventListener("resize", updateLines);
   }, [updateLines]);
 
+  useEffect(() => {
+    if (ended && puzzle && solved.size === puzzle.daemons.length) {
+      setLogLines([]);
+      let idx = 0;
+      const id = setInterval(() => {
+        setLogLines((l) => {
+          if (idx >= TERMINAL_LOGS.length) {
+            clearInterval(id);
+            return l;
+          }
+          const line = TERMINAL_LOGS[idx];
+          idx += 1;
+          return [...l, line];
+        });
+      }, 300);
+      return () => clearInterval(id);
+    }
+  }, [ended, solved, puzzle]);
+
+  useEffect(() => {
+    if (ended && puzzle && solved.size !== puzzle.daemons.length) {
+      const failureLines = generateFailureLog(
+        solved.size,
+        puzzle.daemons.length
+      );
+      setLogLines([]);
+      let idx = 0;
+      const id = setInterval(() => {
+        setLogLines((l) => {
+          if (idx >= failureLines.length) {
+            clearInterval(id);
+            return l;
+          }
+          const line = failureLines[idx];
+          idx += 1;
+          return [...l, line];
+        });
+      }, 300);
+      return () => clearInterval(id);
+    }
+  }, [ended, solved, puzzle]);
+
   const handleCellClick = useCallback(
     (r: number, c: number) => {
       if (ended || selection.length >= bufferSize || !puzzle) return;
@@ -276,6 +360,25 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
     },
     [ended, selection, bufferSize, puzzle, checkDaemons]
   );
+
+  const resetPuzzle = useCallback(() => {
+    setSelection([]);
+    setSolved(new Set());
+    setFeedback({ msg: "" });
+    setEnded(false);
+    if (puzzle) {
+      if (puzzle.startTime) {
+        const start = new Date(puzzle.startTime).getTime();
+        const remaining = Math.max(
+          0,
+          puzzle.timeLimit - Math.floor((Date.now() - start) / 1000)
+        );
+        setTimeRemaining(remaining);
+      } else {
+        setTimeRemaining(puzzle.timeLimit);
+      }
+    }
+  }, [puzzle]);
 
   if (!puzzle) {
     return (
@@ -338,7 +441,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         <Row className="align-items-center">
           <Col>
             <MainTitle className={indexStyles.title} />
-            <h2 className={indexStyles.description}>Solve the Breach Protocol puzzle.</h2>
+            <h2 className={indexStyles.description}>Practice the Breach Protocol puzzle.</h2>
           </Col>
         </Row>
         <Row>
@@ -354,7 +457,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
                 timeRemaining <= 10 && styles["pulse-glow"]
               )}
             >
-              TIME REMAINING: {timeRemaining}s
+              BREACH TIME REMAINING: {timeRemaining}s
             </div>
           </Col>
           <Col xs={6} lg={{ span: 4, offset: 4 }} className="text-lg-right">
@@ -368,6 +471,13 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
                 </span>
               ))}
             </div>
+          </Col>
+        </Row>
+        <Row>
+          <Col xs={12} lg={8}>
+            <p className={styles.description}>
+              INITIATE BREACH PROTOCOL - TIME TO FLATLINE THESE DAEMONS, CHOOM.
+            </p>
           </Col>
         </Row>
         <Row>
@@ -442,32 +552,35 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         <Row>
           <Col lg={8}>
             <div className={styles.buttons}>
-              <Button
-                onClick={() => {
-                  setSelection([]);
-                  setSolved(new Set());
-                  setFeedback({ msg: "" });
-                  setEnded(false);
-                  if (puzzle) {
-                    if (puzzle.startTime) {
-                      const start = new Date(puzzle.startTime).getTime();
-                      const remaining = Math.max(
-                        0,
-                        puzzle.timeLimit -
-                          Math.floor((Date.now() - start) / 1000)
-                      );
-                      setTimeRemaining(remaining);
-                    } else {
-                      setTimeRemaining(puzzle.timeLimit);
-                    }
-                  }
-                }}
-              >
-                Reset Puzzle
-              </Button>
+              <Button onClick={resetPuzzle}>Reset Puzzle</Button>
             </div>
           </Col>
         </Row>
+        <Separator className="mt-5" />
+        {ended && solved.size === (puzzle?.daemons.length || 0) && (
+          <div className={styles["terminal-overlay"]}>
+            <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
+            {logLines.length === TERMINAL_LOGS.length && (
+              <button className={styles["exit-button"]} onClick={resetPuzzle}>
+                EXIT INTERFACE
+              </button>
+            )}
+          </div>
+        )}
+        {failed && puzzle && (
+          <div className={`${styles["terminal-overlay"]} ${styles.failure}`}>
+            <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
+            {logLines.length ===
+              generateFailureLog(solved.size, puzzle.daemons.length).length && (
+              <button
+                className={`${styles["exit-button"]} ${styles.failure}`}
+                onClick={resetPuzzle}
+              >
+                EXIT INTERFACE
+              </button>
+            )}
+          </div>
+        )}
       </Container>
     </Layout>
   );
