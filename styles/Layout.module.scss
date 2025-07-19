@@ -69,6 +69,11 @@
   @extend .footer-link;
 }
 
+.disclaimer {
+  margin-top: 1rem;
+  text-align: center;
+}
+
 @keyframes matrix-move {
   from { transform: translateY(0); }
   to { transform: translateY(-400px); }

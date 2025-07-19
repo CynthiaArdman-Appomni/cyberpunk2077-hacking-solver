@@ -24,6 +24,15 @@ function GitHubLink() {
   );
 }
 
+function TrademarkNotice() {
+  return (
+    <p className={styles.disclaimer}>
+      THIS APP IS NOT AFFILIATED WITH CD PROJEKT RED OR CYBERPUNK 2077. TRADEMARK
+      "CYBERPUNK 2077" IS OWNED BY CD PROJEKT S.A.
+    </p>
+  );
+}
+
 function DiscordLink() {
   return (
     <a
@@ -55,6 +64,11 @@ const Layout: FC = ({ children }) => {
                 <GitHubLink />
                 <PrivacyLink />
                 <Copyright className={styles.copyright} />
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <TrademarkNotice />
               </Col>
             </Row>
           </Container>

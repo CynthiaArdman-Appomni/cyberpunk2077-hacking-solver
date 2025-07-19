@@ -49,21 +49,6 @@ const Separator = ({ className }: { className?: string }) => (
   <hr className={cz(styles.separator, className)} />
 );
 
-const ReportIssue = () => {
-  return (
-    <p className={styles["report-issue"]}>
-      Having issues? Solver not working?{" "}
-      <a
-        href="https://github.com/cxcorp/cyberpunk2077-hacking-solver/issues"
-        rel="noopener"
-        target="_blank"
-      >
-        Report an issue
-      </a>
-      .
-    </p>
-  );
-};
 
 interface IndexProps {
   codeMatrix: number[][];
@@ -203,34 +188,6 @@ const Index = ({
         </form>
         <Separator className="mt-5" />
 
-        <Row>
-          <Col>
-            <ReportIssue />
-          </Col>
-        </Row>
-        <Row className="mt-5">
-          <Col lg={8}>
-            <p>
-              THIS APP IS NOT AFFILIATED WITH CD PROJEKT RED OR CYBERPUNK 2077.
-              TRADEMARK "CYBERPUNK 2077" IS OWNED BY CD PROJEKT{" "}
-              <span
-                onClick={() => {
-                  onSequencesChanged(`BD E9 1C
-BD 7A BD
-BD 1C BD 55`);
-                  onMatrixChanged(`7A 55 E9 E9 1C 55
-55 7A 1C 7A E9 55
-55 1C 1C 55 E9 BD
-BD 1C 7A 1C 55 BD
-BD 55 BD 7A 1C 1C
-1C 55 55 7A 55 7A`);
-                }}
-              >
-                S.A.
-              </span>
-            </p>
-          </Col>
-        </Row>
       </Container>
     </Layout>
   );
