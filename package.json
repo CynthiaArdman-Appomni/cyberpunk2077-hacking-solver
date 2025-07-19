@@ -13,7 +13,6 @@
     "lint": "tslint --project ."
   },
   "dependencies": {
-    "@netlify/neon": "^0.1.0",
     "bootstrap": "^5.3.3",
     "classnames": "^2.3.2",
     "lodash": "^4.17.21",
