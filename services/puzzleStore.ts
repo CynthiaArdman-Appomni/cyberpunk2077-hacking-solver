@@ -83,7 +83,7 @@ export async function createPuzzle(options: {
   timeLimit: number;
   startOnFirstClick?: boolean;
 }): Promise<{ id: string; puzzle: StoredPuzzle }> {
-  const { difficulty, timeLimit, startOnFirstClick } = options;
+  const { difficulty, timeLimit, startOnFirstClick = true } = options;
   const puzzle = await generatePuzzleWithDifficulty(difficulty);
   const solutionCount = countSolutions(puzzle);
   const id = randomBytes(8).toString('hex');
