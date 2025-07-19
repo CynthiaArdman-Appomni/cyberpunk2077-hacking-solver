@@ -261,6 +261,8 @@ export default function PuzzlePage() {
   const [logLines, setLogLines] = useState<string[]>([]);
   const [breachFlash, setBreachFlash] = useState(false);
   const [dive, setDive] = useState(true);
+  const timerClass =
+    timeLeft <= 5 ? styles.critical : timeLeft <= 15 ? styles.warning : undefined;
   const breachAudio = useRef<HTMLAudioElement | null>(null);
   const successAudio = useRef<HTMLAudioElement | null>(null);
 
@@ -499,7 +501,7 @@ export default function PuzzlePage() {
           rel="stylesheet"
         />
       </Head>
-      <Container as="main" className={cz(indexStyles.main, dive && styles['net-dive'])}>
+      <Container as="main" fluid className={cz(indexStyles.main, dive && styles['net-dive'])}>
         <audio ref={breachAudio} src="/beep.mp3" />
         <audio ref={successAudio} src="/success.mp3" />
         {breachFlash && (
@@ -520,7 +522,9 @@ export default function PuzzlePage() {
         </Row>
         <Row className="mb-3">
           <Col xs={6} lg={4}>
-            <div className={styles["timer-box"]}>BREACH TIME REMAINING: {timeLeft}s</div>
+            <div className={cz(styles["timer-box"], timerClass)}>
+              BREACH TIME REMAINING: <span className={styles['timer-seconds']}>{timeLeft}</span>s
+            </div>
           </Col>
           <Col xs={6} lg={{ span: 4, offset: 4 }} className="text-lg-right">
             <div className={styles["buffer-box"]}>BUFFER: {sequence}</div>
@@ -531,10 +535,12 @@ export default function PuzzlePage() {
             <p className={styles.description}>
               INITIATE BREACH PROTOCOL - TIME TO FLATLINE THESE DAEMONS, CHOOM.
             </p>
-            <div className={cz(styles["grid-box"], {
-              [styles.pulse]: breachFlash,
-              [styles["fade-out"]]: ended && solved.size === puzzle.daemons.length,
-            })}>
+            <div
+              className={cz(styles["grid-box"], timerClass, {
+                [styles.pulse]: breachFlash,
+                [styles["fade-out"]]: ended && solved.size === puzzle.daemons.length,
+              })}
+            >
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
@@ -576,10 +582,12 @@ export default function PuzzlePage() {
             </div>
           </Col>
           <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={cz(styles["daemon-box"], {
-              [styles.pulse]: breachFlash,
-              [styles["fade-out"]]: ended && solved.size === puzzle.daemons.length,
-            })}>
+            <div
+              className={cz(styles["daemon-box"], timerClass, {
+                [styles.pulse]: breachFlash,
+                [styles["fade-out"]]: ended && solved.size === puzzle.daemons.length,
+              })}
+            >
               <div className={styles["daemon-box__header"]}>
                 <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
               </div>
@@ -594,10 +602,6 @@ export default function PuzzlePage() {
                     </li>
                   ))}
                 </ol>
-                <p className={styles.sequence}>
-                  <span className={styles['sequence-label']}>Completed Sequence:</span>
-                  {sequence}
-                </p>
                 {feedback.msg && (
                   <p
                     className={`${styles.feedback} ${

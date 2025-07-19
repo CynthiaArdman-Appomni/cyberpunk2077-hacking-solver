@@ -27,6 +27,12 @@ export default function PlayPuzzlePage() {
   const [ended, setEnded] = useState(false);
   const [breachFlash, setBreachFlash] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const timerClass =
+    timeRemaining <= 5
+      ? styles.critical
+      : timeRemaining <= 15
+      ? styles.warning
+      : undefined;
 
   const gridRef = useRef<HTMLDivElement | null>(null);
   const cellRefs = useRef<(HTMLDivElement | null)[][]>([]);
@@ -244,7 +250,7 @@ export default function PlayPuzzlePage() {
         <Head>
           <title>Puzzle</title>
         </Head>
-        <Container as="main" className={indexStyles.main}>
+        <Container as="main" fluid className={indexStyles.main}>
           {feedback.msg ? (
             <p
               className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ''}`}
@@ -271,7 +277,7 @@ export default function PlayPuzzlePage() {
       <Head>
         <title>Breach Protocol Puzzle</title>
       </Head>
-      <Container as="main" className={indexStyles.main}>
+      <Container as="main" fluid className={indexStyles.main}>
         {breachFlash && (
           <div className={`${styles['breach-notify']} ${styles.show}`}>DAEMON BREACHED</div>
         )}
@@ -288,8 +294,13 @@ export default function PlayPuzzlePage() {
         </Row>
         <Row>
           <Col xs={12} lg={8}>
-            <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
-            <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
+            <div className={cz(styles["timer-box"], timerClass)}>
+              BREACH TIME REMAINING: <span className={styles['timer-seconds']}>{timeRemaining}</span>s
+            </div>
+            <div
+              className={cz(styles["grid-box"], timerClass, { [styles.pulse]: breachFlash })}
+              ref={gridRef}
+            >
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
@@ -333,7 +344,9 @@ export default function PlayPuzzlePage() {
             </div>
           </Col>
           <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={cz(styles["daemon-box"], { [styles.pulse]: breachFlash })}>
+            <div
+              className={cz(styles["daemon-box"], timerClass, { [styles.pulse]: breachFlash })}
+            >
               <div className={styles["daemon-box__header"]}>
                 <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
               </div>
@@ -345,10 +358,6 @@ export default function PlayPuzzlePage() {
                     </li>
                   ))}
                 </ol>
-                <p className={styles.sequence}>
-                  <span className={styles['sequence-label']}>Completed Sequence:</span>
-                  {sequence}
-                </p>
                 {feedback.msg && (
                   <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ""}`}>{feedback.msg}</p>
                 )}
