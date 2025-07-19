@@ -618,6 +618,7 @@ export default function PuzzlePage() {
                       if (selectable) classes.push(styles.active);
                       else if (!isSelected) classes.push(styles.dim);
                       if (isSelected) classes.push(styles.selected);
+                      if (failed) classes.push(styles["failure-state"]);
                       return (
                         <div
                           key={`${r}-${c}`}

@@ -224,6 +224,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   &.failure-state {
     border: 2px solid #ff4444;
     box-shadow: 0 0 10px #ff4444;
+    animation: pulse-red 1s infinite alternate;
   }
 }
 
@@ -247,7 +248,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     border: 1px solid $neon;
     color: $neon;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-family: $font-stack;
     text-transform: uppercase;
     text-align: center;
@@ -402,7 +403,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .daemon-box.failure {
   border-color: $color-error;
   box-shadow: 0 0 10px $color-error;
-  background: color.adjust($color-error, $alpha: -0.7);
+  animation: pulse-red 1s infinite alternate;
 }
 
 @keyframes breach-flash {
@@ -420,6 +421,11 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   0% { box-shadow: 0 0 0 $neon; }
   50% { box-shadow: 0 0 20px $neon; }
   100% { box-shadow: 0 0 0 $neon; }
+}
+
+@keyframes pulse-red {
+  from { box-shadow: 0 0 5px #ff4444; }
+  to { box-shadow: 0 0 15px #ff4444; }
 }
 
 @keyframes net-dive {
