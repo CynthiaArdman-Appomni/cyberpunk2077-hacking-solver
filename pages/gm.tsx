@@ -323,7 +323,7 @@ export default function GMPage() {
         <Head>
           <title>GM Puzzle Generator</title>
         </Head>
-        <Container as="main" className={indexStyles.main}>
+        <Container as="main" fluid className={indexStyles.main}>
           {feedback.msg ? (
             <p className={`${styles.feedback} ${feedback.type ? styles[feedback.type] : ''}`}>{feedback.msg}</p>
           ) : (
@@ -350,7 +350,7 @@ export default function GMPage() {
           rel="stylesheet"
         />
       </Head>
-      <Container as="main" className={indexStyles.main}>
+      <Container as="main" fluid className={indexStyles.main}>
         {breachFlash && (
           <div className={`${styles['breach-notify']} ${styles.show}`}>DAEMON BREACHED</div>
         )}
@@ -430,7 +430,14 @@ export default function GMPage() {
         </Row>
         <Row>
           <Col xs={12} lg={8}>
-            <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
+            <p
+              className={cz(styles.description, {
+                [styles.warning]: timeRemaining <= 15 && timeRemaining > 5,
+                [styles.critical]: timeRemaining <= 5,
+              })}
+            >
+              TIME REMAINING: <span className={styles['timer-number']}>{timeRemaining}</span>s
+            </p>
             {puzzle && (
               <>
                 <p className={styles.description}>DIFFICULTY: {puzzle.difficulty}</p>
@@ -439,7 +446,14 @@ export default function GMPage() {
                 )}
               </>
             )}
-            <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
+            <div
+              className={cz(styles["grid-box"], {
+                [styles.pulse]: breachFlash,
+                [styles.warning]: timeRemaining <= 15 && timeRemaining > 5,
+                [styles.critical]: timeRemaining <= 5,
+              })}
+              ref={gridRef}
+            >
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
@@ -485,7 +499,13 @@ export default function GMPage() {
             </div>
           </Col>
           <Col xs={12} lg={4} className="d-flex justify-content-center">
-            <div className={cz(styles["daemon-box"], { [styles.pulse]: breachFlash })}>
+            <div
+              className={cz(styles["daemon-box"], {
+                [styles.pulse]: breachFlash,
+                [styles.warning]: timeRemaining <= 15 && timeRemaining > 5,
+                [styles.critical]: timeRemaining <= 5,
+              })}
+            >
               <div className={styles["daemon-box__header"]}>
                 <h3 className={styles["daemon-box__header_text"]}>DAEMONS</h3>
               </div>
@@ -497,10 +517,6 @@ export default function GMPage() {
                     </li>
                   ))}
                 </ol>
-                <p className={styles.sequence}>
-                  <span className={styles['sequence-label']}>Completed Sequence:</span>
-                  {sequence}
-                </p>
                 {solutionSequence && (
                   <p className={styles["solution-sequence"]}>{solutionSequence}</p>
                 )}
