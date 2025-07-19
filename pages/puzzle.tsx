@@ -533,6 +533,9 @@ export default function PuzzlePage() {
   );
 
   const sequence = selection.map((p) => puzzle.grid[p.r][p.c]).join(" ");
+  const bufferValues = Array.from({ length: bufferSize }).map((_, idx) =>
+    selection[idx] ? puzzle.grid[selection[idx].r][selection[idx].c] : ""
+  );
 
   return (
     <Layout>
@@ -565,10 +568,14 @@ export default function PuzzlePage() {
         </Row>
         <Row className="mb-3">
           <Col xs={6} lg={4}>
-            <div className={styles["timer-box"]}>BREACH TIME REMAINING: {timeLeft}s</div>
+            <div className={cz(styles["timer-box"], timeLeft < 10 && styles["pulse-glow"])}>BREACH TIME REMAINING: {timeLeft}s</div>
           </Col>
           <Col xs={6} lg={{ span: 4, offset: 4 }} className="text-lg-right">
-            <div className={styles["buffer-box"]}>BUFFER: {sequence}</div>
+            <div className={styles["buffer-box"]}>
+              {bufferValues.map((val, idx) => (
+                <span key={idx} className={styles["buffer-slot"]}>{val}</span>
+              ))}
+            </div>
           </Col>
         </Row>
         <Row>

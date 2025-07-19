@@ -96,9 +96,11 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 
 .daemon-box {
   border: 2px solid $neon;
-  background: color.adjust($color-lighter-bg, $alpha: -0.3);
-
+  background: rgba(0, 0, 0, 0.9);
+  color: $neon;
+  padding: 10px;
   margin-bottom: 2rem;
+  width: 100%;
 
   &__header {
     font-size: 1.5rem;
@@ -241,7 +243,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     border: 1px solid $neon;
     color: $neon;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-family: $font-stack;
     text-transform: uppercase;
     text-align: center;
@@ -305,20 +307,42 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .timer-box {
   @include cyber-font;
   border: 2px solid $color-highlight;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.9);
   color: $color-highlight;
-  padding: 0.5rem 1rem;
+  padding: 10px 15px;
+  font-size: 1.5rem;
   margin-bottom: 1rem;
+}
+
+.timer-box.pulse-glow {
+  animation: timer-pulse-glow 1s infinite alternate;
+}
+
+@keyframes timer-pulse-glow {
+  from { box-shadow: 0 0 10px $color-highlight; }
+  to { box-shadow: 0 0 20px $color-highlight; }
 }
 
 .buffer-box {
   @include cyber-font;
   border: 2px solid $color-highlight;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.85);
   color: $color-highlight;
   padding: 0.5rem 1rem;
   text-align: center;
   margin-bottom: 1rem;
+}
+
+.buffer-slot {
+  display: inline-block;
+  border: 1px solid $color-highlight;
+  width: 40px;
+  height: 40px;
+  margin-right: 5px;
+  background-color: rgba(0, 0, 0, 0.85);
+  text-align: center;
+  line-height: 40px;
+  color: $color-highlight;
 }
 
 .buttons {
