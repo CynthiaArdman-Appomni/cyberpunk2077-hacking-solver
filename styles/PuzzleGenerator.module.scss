@@ -94,11 +94,12 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   margin-top: 0.5rem;
 }
 
+
 .daemon-box {
   border: 2px solid $neon;
   background: color.adjust($color-lighter-bg, $alpha: -0.3);
-
   margin-bottom: 2rem;
+  width: 100%;
 
   &__header {
     font-size: 1.5rem;
@@ -219,6 +220,11 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   &.invalid {
     animation: flash-red 0.3s;
   }
+
+  &.failure-state {
+    border: 2px solid #ff4444;
+    box-shadow: 0 0 10px #ff4444;
+  }
 }
 
 @keyframes flash-red {
@@ -305,20 +311,42 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .timer-box {
   @include cyber-font;
   border: 2px solid $color-highlight;
-  background: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.9);
   color: $color-highlight;
-  padding: 0.5rem 1rem;
+  padding: 10px 15px;
+  font-size: 1.5rem;
   margin-bottom: 1rem;
+}
+
+.timer-box.pulse-glow {
+  animation: pulse-glow 1s infinite alternate;
 }
 
 .buffer-box {
   @include cyber-font;
+  display: flex;
+  align-items: center;
   border: 2px solid $color-highlight;
-  background: rgba(0, 0, 0, 0.75);
+  background-color: rgba(0, 0, 0, 0.85);
   color: $color-highlight;
-  padding: 0.5rem 1rem;
-  text-align: center;
+  padding: 10px 15px;
   margin-bottom: 1rem;
+}
+
+.buffer-label {
+  margin-right: 0.5rem;
+}
+
+.buffer-slot {
+  display: inline-block;
+  border: 1px solid $color-highlight;
+  width: 40px;
+  height: 40px;
+  margin-right: 5px;
+  background-color: rgba(0, 0, 0, 0.85);
+  text-align: center;
+  line-height: 40px;
+  color: $color-highlight;
 }
 
 .buttons {
