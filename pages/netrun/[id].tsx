@@ -301,9 +301,32 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
             <div className={indexStyles["description-separator"]}></div>
           </Col>
         </Row>
+        <Row className="mb-3">
+          <Col xs={6} lg={4}>
+            <div
+              className={cz(
+                styles["timer-box"],
+                timeRemaining <= 10 && styles["pulse-glow"]
+              )}
+            >
+              TIME REMAINING: {timeRemaining}s
+            </div>
+          </Col>
+          <Col xs={6} lg={{ span: 4, offset: 4 }} className="text-lg-right">
+            <div className={styles["buffer-box"]}>
+              <span className={styles["buffer-label"]}>BUFFER:</span>
+              {Array.from({ length: bufferSize }).map((_, idx) => (
+                <span key={idx} className={styles["buffer-slot"]}>
+                  {selection[idx]
+                    ? puzzle.grid[selection[idx].r][selection[idx].c]
+                    : ""}
+                </span>
+              ))}
+            </div>
+          </Col>
+        </Row>
         <Row>
           <Col xs={12} lg={8}>
-            <p className={styles.description}>TIME REMAINING: {timeRemaining}s</p>
             <div className={cz(styles["grid-box"], { [styles.pulse]: breachFlash })} ref={gridRef}>
               <div className={styles["grid-box__header"]}>
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
