@@ -689,7 +689,7 @@ export default function PuzzlePage() {
           </div>
         )}
         {ended && solved.size !== puzzle.daemons.length && (
-          <div className={styles["terminal-overlay"]}>
+          <div className={`${styles["terminal-overlay"]} ${styles["terminal-overlay--failure"]}`}>
             <pre className={styles["terminal-log"]}>{logLines.join("\n")}</pre>
             {logLines.length ===
               generateFailureLog(solved.size, puzzle.daemons.length).length && (

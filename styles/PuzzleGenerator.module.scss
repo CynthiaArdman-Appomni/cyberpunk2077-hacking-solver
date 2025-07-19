@@ -428,6 +428,23 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   text-shadow: 0 0 5px $color-success;
 }
 
+.terminal-overlay--failure {
+  background: rgba(90, 0, 0, 0.85);
+  color: $color-error;
+  text-shadow: 0 0 5px $color-error;
+  animation: glitch 0.5s infinite;
+
+  .exit-button {
+    border-color: $color-error;
+    color: $color-error;
+  }
+
+  .exit-button:hover {
+    background: $color-error;
+    color: $color-bg;
+  }
+}
+
 .terminal-log {
   white-space: pre-wrap;
   margin-bottom: 1rem;
