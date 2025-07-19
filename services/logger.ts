@@ -1,18 +1,16 @@
-import fs from 'fs';
-import path from 'path';
+let fs: typeof import('fs') | null = null;
+let path: typeof import('path') | null = null;
+let logStream: import('fs').WriteStream | null = null;
 
-const logFile = path.resolve(process.cwd(), 'app.log');
-let logStream: fs.WriteStream | null = null;
-
-try {
-  logStream = fs.createWriteStream(logFile, { flags: 'a' });
-  logStream.on('error', (err) => {
-    console.error(`Failed to write to log file ${logFile}`, err);
-    logStream = null;
-  });
-} catch (error) {
-  console.error(`Failed to open log file ${logFile}`, error);
-  logStream = null;
+if (typeof process !== 'undefined' && !(process as any).browser) {
+  try {
+    fs = require('fs');
+    path = require('path');
+    const logFile = path.resolve(process.cwd(), 'app.log');
+    logStream = fs.createWriteStream(logFile, { flags: 'a' });
+  } catch (error) {
+    console.error(`Failed to open log file`, error);
+  }
 }
 
 function write(prefix: string, message: string) {

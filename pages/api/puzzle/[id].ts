@@ -8,12 +8,14 @@ export default async function handler(
 ) {
   const { id } = req.query;
   if (typeof id !== 'string') {
+    logError(`Invalid id parameter on /api/puzzle - value: ${String(id)}`);
     res.status(400).end();
     return;
   }
   try {
     const puzzle = await getPuzzle(id);
     if (!puzzle) {
+      logError(`Puzzle ${id} not found`);
       res.status(404).json({ error: 'Puzzle not found' });
       return;
     }

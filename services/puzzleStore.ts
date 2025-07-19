@@ -36,6 +36,9 @@ async function generatePuzzleWithDifficulty(diff: Difficulty): Promise<Puzzle> {
     }
   }
   // fallback random puzzle
+  logError(
+    `Failed to generate puzzle with difficulty ${diff} after 50 attempts, using random puzzle`
+  );
   return generatePuzzle();
 }
 
@@ -64,6 +67,8 @@ export async function getPuzzle(id: string): Promise<StoredPuzzle | null> {
   const puzzle = puzzles.get(id) || null;
   if (puzzle) {
     log(`Loaded puzzle ${id} from memory`);
+  } else {
+    logError(`Puzzle ${id} not found in memory`);
   }
   return puzzle;
 }

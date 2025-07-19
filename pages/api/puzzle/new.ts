@@ -7,12 +7,16 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method !== 'POST') {
+    logError(`Invalid method ${req.method} on /api/puzzle/new`);
     res.status(405).end();
     return;
   }
   const { difficulty, timeLimit, startOnFirstClick } = req.body || {};
   const tl = parseInt(timeLimit);
   if (!difficulty || Number.isNaN(tl)) {
+    logError(
+      `Invalid parameters: difficulty="${difficulty}" timeLimit="${timeLimit}"`
+    );
     res.status(400).json({ error: 'Invalid parameters' });
     return;
   }

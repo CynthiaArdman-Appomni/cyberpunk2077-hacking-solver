@@ -55,7 +55,7 @@ TSLint also has plugins to enable highlighting (and often automatically fixing) 
 - [Atom](https://atom.io/packages/linter-tslint)
 
 ### Logs
-While the application is running, server-side operations and errors are written to `app.log` in the project root when possible. If the file cannot be created (for example, when running in a read‑only environment) logs are printed to the console instead. The log output collects basic information about puzzle creation and retrieval as well as any encountered errors.
+While the application is running, server-side operations and errors are written to `app.log` in the project root when possible. If the file cannot be created (for example, when running in a read‑only environment such as a Netlify function) logs are printed to the console instead. The logger is loaded only on the server so browser bundles remain small and free of Node.js dependencies. The log output now includes additional details about invalid API requests, puzzle generation failures and timer updates so that issues can be diagnosed from Netlify function logs or the local console.
 
 ### Learn More
 

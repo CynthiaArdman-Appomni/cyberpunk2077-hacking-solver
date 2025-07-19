@@ -406,19 +406,22 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
 }
 
 export const getServerSideProps: GetServerSideProps<NetrunProps> = async ({ params }) => {
+  const { logError } = await import('../../services/logger');
   const id = typeof params?.id === 'string' ? params.id : '';
   if (!id) {
+    logError('Missing puzzle id in getServerSideProps');
     return { props: { initialPuzzle: null, hasError: true } };
   }
   try {
     const puzzle = await getPuzzle(id);
     if (!puzzle) {
+      logError(`Puzzle ${id} not found in getServerSideProps`);
       return { props: { initialPuzzle: null, hasError: true } };
     }
     const { grid, daemons, bufferSize, timeLimit, startTime } = puzzle;
     return { props: { initialPuzzle: { grid, daemons, bufferSize, timeLimit, startTime, path: [], solutionSeq: [], difficulty: 'Unknown', solutionCount: 0 }, hasError: false } };
   } catch (e) {
-    console.error('Error fetching puzzle:', e);
+    logError('Error fetching puzzle in getServerSideProps', e);
     return { props: { initialPuzzle: null, hasError: true } };
   }
 };
