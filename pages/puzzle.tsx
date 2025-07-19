@@ -291,7 +291,7 @@ export default function PuzzlePage() {
       });
       if (!res.ok) throw new Error("fail");
       const data = await res.json();
-      const p = data.puzzle as { grid: string[][]; daemons: string[][]; bufferSize: number; timeLimit: number };
+      const p = data.puzzle as ReturnType<typeof generatePuzzle> & { timeLimit: number };
       setPuzzle(p);
       setBufferSize(p.bufferSize);
       setSelection([]);
