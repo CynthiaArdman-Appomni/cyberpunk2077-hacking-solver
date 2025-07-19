@@ -1,11 +1,20 @@
 import { randomBytes } from 'crypto';
-import { generatePuzzle, combineDaemons, Puzzle } from '../lib/puzzleGenerator';
+import {
+  generatePuzzle,
+  combineDaemons,
+  Puzzle,
+  HEX_VALUES,
+} from '../lib/puzzleGenerator';
 import { countSolutions as countSolutionsForMatrix } from '../lib/bruteCounter';
 import { sql, ensurePuzzleTable } from './neonClient';
 import { log, logError } from './logger';
 
 const puzzles = new Map<string, StoredPuzzle>();
 const useNeon = !!process.env.NETLIFY_DATABASE_URL;
+
+function randomHex() {
+  return HEX_VALUES[Math.floor(Math.random() * HEX_VALUES.length)];
+}
 
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible' | 'Unknown';
 
@@ -26,7 +35,21 @@ function countSolutions(puzzle: Puzzle): number {
 async function generatePuzzleWithDifficulty(diff: Difficulty): Promise<Puzzle> {
   // try up to 50 times to find a puzzle matching difficulty
   for (let i = 0; i < 50; i++) {
-    const puzzle = generatePuzzle();
+    let puzzle = generatePuzzle();
+
+    if (diff === 'Impossible') {
+      // scramble the inserted solution so the puzzle has no valid solutions
+      puzzle.path.forEach(({ r, c }, idx) => {
+        let val = randomHex();
+        if (val === puzzle.solutionSeq[idx]) {
+          val = randomHex();
+        }
+        puzzle.grid[r][c] = val;
+      });
+      // assign a random buffer size between 1 and the original solution length - 1
+      puzzle.bufferSize = Math.max(1, Math.floor(Math.random() * puzzle.solutionSeq.length));
+    }
+
     const solutions = countSolutions(puzzle);
     if (
       (diff === 'Easy' && solutions > 5) ||
@@ -41,7 +64,18 @@ async function generatePuzzleWithDifficulty(diff: Difficulty): Promise<Puzzle> {
   logError(
     `Failed to generate puzzle with difficulty ${diff} after 50 attempts, using random puzzle`
   );
-  return generatePuzzle();
+  let puzzle = generatePuzzle();
+  if (diff === 'Impossible') {
+    puzzle.path.forEach(({ r, c }, idx) => {
+      let val = randomHex();
+      if (val === puzzle.solutionSeq[idx]) {
+        val = randomHex();
+      }
+      puzzle.grid[r][c] = val;
+    });
+    puzzle.bufferSize = Math.max(1, Math.floor(Math.random() * puzzle.solutionSeq.length));
+  }
+  return puzzle;
 }
 
 export async function createPuzzle(options: {
