@@ -58,6 +58,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   border: 2px solid $neon;
   background: color.adjust($color-lighter-bg, $alpha: -0.3);
   margin-bottom: 2rem;
+  width: 100%;
 
   &__header {
     font-size: 1.5rem;
@@ -99,6 +100,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   background: color.adjust($color-lighter-bg, $alpha: -0.3);
 
   margin-bottom: 2rem;
+  width: 100%;
 
   &__header {
     font-size: 1.5rem;
@@ -136,6 +138,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   grid-gap: 10px;
   justify-content: center;
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .path-lines {
@@ -217,7 +220,8 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   }
 
   &.invalid {
-    animation: flash-red 0.3s;
+    border-color: $color-error;
+    animation: pulse-red 0.5s 2;
   }
 }
 
@@ -241,7 +245,7 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     border: 1px solid $neon;
     color: $neon;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-family: $font-stack;
     text-transform: uppercase;
     text-align: center;
@@ -249,7 +253,6 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
     &.solved {
       border-color: $color-success;
       color: $color-success;
-      animation: flash-red 0.2s, flash-success 0.5s 0.2s, subtle-glitch 2s infinite;
       text-decoration: line-through;
       text-decoration-thickness: 2px;
       position: relative;
@@ -305,22 +308,37 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .timer-box {
   @include cyber-font;
   border: 2px solid $color-highlight;
-  background: rgba(0, 0, 0, 0.75);
+  padding: 10px 15px;
+  background: rgba(0, 0, 0, 0.9);
   color: $color-highlight;
-  padding: 0.5rem 1rem;
+  font-size: 1.5rem;
   margin-bottom: 1rem;
+  &.pulse-glow {
+    animation: timer-pulse 1s infinite alternate;
+  }
 }
-
+.buffer-box {
 .buffer-box {
   @include cyber-font;
   border: 2px solid $color-highlight;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.9);
   color: $color-highlight;
-  padding: 0.5rem 1rem;
-  text-align: center;
+  padding: 10px 15px;
+  display: flex;
+  gap: 5px;
   margin-bottom: 1rem;
 }
 
+.buffer-slot {
+  display: inline-block;
+  border: 1px solid $color-highlight;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.85);
+  color: $color-highlight;
+}
 .buttons {
   margin: 2rem 0;
   text-align: center;
@@ -446,6 +464,16 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
 .exit-button:hover {
   background: $color-success;
   color: $color-bg;
+}
+
+@keyframes timer-pulse {
+  from { box-shadow: 0 0 10px $color-highlight; }
+  to { box-shadow: 0 0 20px $color-highlight; }
+}
+
+@keyframes pulse-red {
+  from { box-shadow: 0 0 10px $color-error; }
+  to { box-shadow: 0 0 20px $color-error; }
 }
 
 @keyframes fade-out {

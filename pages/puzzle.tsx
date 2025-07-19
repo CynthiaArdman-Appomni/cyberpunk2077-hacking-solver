@@ -565,10 +565,22 @@ export default function PuzzlePage() {
         </Row>
         <Row className="mb-3">
           <Col xs={6} lg={4}>
-            <div className={styles["timer-box"]}>BREACH TIME REMAINING: {timeLeft}s</div>
+            <div
+              className={cz(styles["timer-box"], {
+                [styles["pulse-glow"]]: timeLeft <= 10,
+              })}
+            >
+              BREACH TIME REMAINING: {timeLeft}s
+            </div>
           </Col>
           <Col xs={6} lg={{ span: 4, offset: 4 }} className="text-lg-right">
-            <div className={styles["buffer-box"]}>BUFFER: {sequence}</div>
+            <div className={styles["buffer-box"]}>
+              {Array.from({ length: bufferSize }).map((_, i) => (
+                <span key={i} className={styles["buffer-slot"]}>
+                  {selection[i] ? puzzle.grid[selection[i].r][selection[i].c] : ""}
+                </span>
+              ))}
+            </div>
           </Col>
         </Row>
         <Row>
