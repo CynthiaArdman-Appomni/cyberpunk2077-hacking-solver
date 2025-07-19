@@ -64,7 +64,13 @@ export async function createPuzzle(options: {
     try {
       await sql!
         `INSERT INTO puzzles (id, grid, daemons, start_time, duration)
-        VALUES (${id}, ${stored.grid}, ${stored.daemons}, ${stored.startTime}, ${timeLimit})`;
+        VALUES (
+          ${id},
+          ${JSON.stringify(stored.grid)},
+          ${JSON.stringify(stored.daemons)},
+          ${stored.startTime},
+          ${timeLimit}
+        )`;
     } catch (e) {
       logError('Database error on createPuzzle', e);
     }
