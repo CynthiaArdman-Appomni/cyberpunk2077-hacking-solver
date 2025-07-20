@@ -12,7 +12,11 @@ const MainTitle = ({ className, as = "h1" }: Props) => {
   return (
     <Tag className={[styles.title, className].filter((s) => s).join(" ")}>
       <Link href="/solver">
-        <a>NIGHT CITY RP NETRUN PROTOCOL</a>
+        <a>
+          NIGHT CITY RP
+          <br className="d-md-none" />
+          NETRUN PROTOCOL
+        </a>
       </Link>
     </Tag>
   );
