@@ -363,18 +363,12 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   }
 }
 
-.difficulty-row {
-  position: relative;
-}
-
 .breach-notify {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  position: relative;
   font-family: $font-stack;
   font-size: 5rem;
   font-weight: bold;
+  white-space: nowrap;
   color: $color-success;
   text-shadow: 0 0 15px $color-success, 0 0 30px $color-success;
   pointer-events: none;

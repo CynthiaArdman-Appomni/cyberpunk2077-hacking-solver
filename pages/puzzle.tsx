@@ -658,19 +658,23 @@ export default function PuzzlePage() {
             </div>
           </Col>
         </Row>
-        <Row className={`mb-3 ${styles['difficulty-row']}`}>
+        <Row className="mb-3">
           <Col>
-            {breachFlash && (
+            <div className={styles["difficulty-box"]}>Difficulty: {difficulty ?? "?"}</div>
+          </Col>
+        </Row>
+        {breachFlash && (
+          <Row className="mb-2">
+            <Col xs={12} lg={8}>
               <div
                 className={`${styles['breach-notify']} ${styles.show}`}
                 data-text="DAEMON BREACHED"
               >
                 DAEMON BREACHED
               </div>
-            )}
-            <div className={styles["difficulty-box"]}>Difficulty: {difficulty ?? "?"}</div>
-          </Col>
-        </Row>
+            </Col>
+          </Row>
+        )}
         <Row>
           <Col xs={12} lg={8}>
             <p className={styles.description}>
