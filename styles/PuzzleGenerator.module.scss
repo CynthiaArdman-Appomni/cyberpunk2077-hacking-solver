@@ -363,9 +363,13 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   }
 }
 
+.difficulty-row {
+  position: relative;
+}
+
 .breach-notify {
-  position: fixed;
-  top: 1rem;
+  position: absolute;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
   font-family: $font-stack;

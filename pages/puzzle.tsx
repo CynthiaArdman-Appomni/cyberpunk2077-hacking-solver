@@ -621,9 +621,6 @@ export default function PuzzlePage() {
       >
         <audio ref={breachAudio} src="/beep.mp3" />
         <audio ref={successAudio} src="/success.mp3" />
-        {breachFlash && (
-          <div className={`${styles['breach-notify']} ${styles.show}`} data-text="DAEMON BREACHED">DAEMON BREACHED</div>
-        )}
         <Row className="align-items-center">
           <Col>
             <MainTitle className={indexStyles.title} />
@@ -661,8 +658,16 @@ export default function PuzzlePage() {
             </div>
           </Col>
         </Row>
-        <Row className="mb-3">
+        <Row className={`mb-3 ${styles['difficulty-row']}`}>
           <Col>
+            {breachFlash && (
+              <div
+                className={`${styles['breach-notify']} ${styles.show}`}
+                data-text="DAEMON BREACHED"
+              >
+                DAEMON BREACHED
+              </div>
+            )}
             <div className={styles["difficulty-box"]}>Difficulty: {difficulty ?? "?"}</div>
           </Col>
         </Row>
