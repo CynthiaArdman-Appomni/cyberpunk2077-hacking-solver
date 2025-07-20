@@ -66,8 +66,16 @@ async function generatePuzzleWithDifficulty(diff: Difficulty): Promise<Puzzle> {
         }
         puzzle.grid[r][c] = val;
       });
-      // assign a random buffer size between 1 and the original solution length - 1
-      puzzle.bufferSize = Math.max(1, Math.floor(Math.random() * puzzle.solutionSeq.length));
+
+      // pick a buffer size that does not trivially reveal impossibility
+      const longestDaemon = Math.max(...puzzle.daemons.map((d) => d.length));
+      const maxBuffer = Math.max(longestDaemon, puzzle.solutionSeq.length - 1);
+      const minBuffer = longestDaemon;
+      const range = maxBuffer - minBuffer;
+      puzzle.bufferSize =
+        range > 0
+          ? Math.floor(Math.random() * (range + 1)) + minBuffer
+          : minBuffer;
     }
 
     const solutions = countSolutions(puzzle);
@@ -93,7 +101,14 @@ async function generatePuzzleWithDifficulty(diff: Difficulty): Promise<Puzzle> {
       }
       puzzle.grid[r][c] = val;
     });
-    puzzle.bufferSize = Math.max(1, Math.floor(Math.random() * puzzle.solutionSeq.length));
+    const longestDaemon = Math.max(...puzzle.daemons.map((d) => d.length));
+    const maxBuffer = Math.max(longestDaemon, puzzle.solutionSeq.length - 1);
+    const minBuffer = longestDaemon;
+    const range = maxBuffer - minBuffer;
+    puzzle.bufferSize =
+      range > 0
+        ? Math.floor(Math.random() * (range + 1)) + minBuffer
+        : minBuffer;
   }
   return puzzle;
 }
