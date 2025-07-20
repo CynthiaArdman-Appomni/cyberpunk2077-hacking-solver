@@ -363,8 +363,16 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   }
 }
 
-.breach-notify {
+.breach-wrapper {
   position: relative;
+  height: 0;
+}
+
+.breach-notify {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   font-family: $font-stack;
   font-size: 5rem;
   font-weight: bold;

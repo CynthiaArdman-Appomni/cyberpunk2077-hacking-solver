@@ -664,16 +664,14 @@ export default function PuzzlePage() {
           </Col>
         </Row>
         {breachFlash && (
-          <Row className="mb-2">
-            <Col xs={12} lg={8}>
-              <div
-                className={`${styles['breach-notify']} ${styles.show}`}
-                data-text="DAEMON BREACHED"
-              >
-                DAEMON BREACHED
-              </div>
-            </Col>
-          </Row>
+          <div className={styles['breach-wrapper']}>
+            <div
+              className={`${styles['breach-notify']} ${styles.show}`}
+              data-text="DAEMON BREACHED"
+            >
+              DAEMON BREACHED
+            </div>
+          </div>
         )}
         <Row>
           <Col xs={12} lg={8}>
