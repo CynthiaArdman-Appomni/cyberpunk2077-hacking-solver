@@ -1,7 +1,8 @@
 export const parseMatrix = (str: string): number[][] =>
   str
     .trim()
-    .split(/[(\n|\r\n)]/)
+    .split(/\r?\n/)
+    .filter((row) => row.length > 0)
     .map((row) =>
       row
         .trim()
