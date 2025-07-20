@@ -513,9 +513,6 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
       >
         <audio ref={breachAudio} src="/beep.mp3" />
         <audio ref={successAudio} src="/success.mp3" />
-        {breachFlash && (
-          <div className={`${styles['breach-notify']} ${styles.show}`}>DAEMON BREACHED</div>
-        )}
         <Row className="align-items-center">
           <Col>
             <MainTitle className={indexStyles.title} />
@@ -551,6 +548,16 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
             </div>
           </Col>
         </Row>
+        {breachFlash && (
+          <div className={styles['breach-wrapper']}>
+            <div
+              className={`${styles['breach-notify']} ${styles.show}`}
+              data-text="DAEMON BREACHED"
+            >
+              DAEMON BREACHED
+            </div>
+          </div>
+        )}
         <Row>
           <Col xs={12} lg={8}>
             <p className={styles.description}>

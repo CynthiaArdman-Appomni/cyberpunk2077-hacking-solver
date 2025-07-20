@@ -363,14 +363,20 @@ $font-stack: "Orbitron", "Roboto", sans-serif;
   }
 }
 
+.breach-wrapper {
+  position: relative;
+  height: 0;
+}
+
 .breach-notify {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   font-family: $font-stack;
   font-size: 5rem;
   font-weight: bold;
+  white-space: nowrap;
   color: $color-success;
   text-shadow: 0 0 15px $color-success, 0 0 30px $color-success;
   pointer-events: none;
