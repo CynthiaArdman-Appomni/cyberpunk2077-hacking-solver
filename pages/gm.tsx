@@ -477,7 +477,9 @@ export default function GMPage() {
                       const isSelected = selection.some((p) => p.r === r && p.c === c);
                       return (
                         <div
-                          ref={(el) => (cellRefs.current[r][c] = el)}
+                          ref={(el) => {
+                            cellRefs.current[r][c] = el;
+                          }}
                           key={`${r}-${c}`}
                           className={cz(styles.cell, {
                             [styles.selected]: isSelected,

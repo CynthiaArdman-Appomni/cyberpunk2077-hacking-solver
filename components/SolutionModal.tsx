@@ -35,11 +35,14 @@ const SolutionContext = React.createContext<SolutionContextType>({
   result: null,
 });
 
-const Sb: FC<{ className?: string }> = ({ children, className }) => {
+const Sb: FC<{ className?: string; children?: React.ReactNode }> = ({
+  children,
+  className,
+}) => {
   return <span className={cz(styles.semibold, className)}>{children}</span>;
 };
 
-const Code: FC = ({ children }) => (
+const Code: FC<{ children?: React.ReactNode }> = ({ children }) => (
   <span className={styles.code}>{children}</span>
 );
 
