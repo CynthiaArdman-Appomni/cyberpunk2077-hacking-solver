@@ -27,11 +27,14 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <>
-      <Head>
-        <link rel="icon" href="/favicon.ico" />
+        <Head>
+          <link rel="icon" href="/favicon.ico" />
 
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://cyberpunk-hacker.com" />
+          {/* Ensure proper scaling on mobile devices */}
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content="https://cyberpunk-hacker.com" />
         <meta
           property="og:description"
           content="Cyberpunk 2077 Breach Protocol hacking minigame solver. Can't come up with a solution to grab all of the unlockables? We've got you covered. Start cracking, samurai."
