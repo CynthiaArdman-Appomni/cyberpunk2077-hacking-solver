@@ -34,6 +34,21 @@ function randomCodeWord() {
   return CODE_WORDS[Math.floor(Math.random() * CODE_WORDS.length)];
 }
 
+function pickUniqueCodeWords(count: number): string[] {
+  const pool = [...CODE_WORDS];
+  const selected: string[] = [];
+  for (let i = 0; i < count; i++) {
+    if (pool.length === 0) {
+      selected.push(randomCodeWord());
+    } else {
+      const idx = Math.floor(Math.random() * pool.length);
+      selected.push(pool[idx]);
+      pool.splice(idx, 1);
+    }
+  }
+  return selected;
+}
+
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Impossible' | 'Unknown';
 
 export interface StoredPuzzle extends Puzzle {
@@ -122,14 +137,15 @@ export async function createPuzzle(options: {
   const puzzle = await generatePuzzleWithDifficulty(difficulty);
   const solutionCount = countSolutions(puzzle);
   const id = randomBytes(8).toString('hex');
+  const words = pickUniqueCodeWords(puzzle.daemons.length + 1);
   const stored: StoredPuzzle = {
     ...puzzle,
     timeLimit,
     startTime: startOnFirstClick ? null : new Date().toISOString(),
     difficulty,
     solutionCount,
-    secretWord: randomCodeWord(),
-    daemonWords: puzzle.daemons.map(() => randomCodeWord()),
+    secretWord: words[0],
+    daemonWords: words.slice(1),
   };
   puzzles.set(id, stored);
   log(`Created puzzle ${id} (${difficulty})`);
