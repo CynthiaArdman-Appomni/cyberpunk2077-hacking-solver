@@ -47,11 +47,8 @@ export class CvWorker {
 
   load = () => {
     if (this.loaded) {
-      console.log("resolved");
       return Promise.resolve();
     }
-
-    console.log("starting");
     return new Promise<void>((resolve, reject) => {
       const self = this;
 
@@ -60,7 +57,6 @@ export class CvWorker {
 
       function catchLoadResponse(e: MessageEvent<any>) {
         const { action, payload } = e.data;
-        console.log("catchLoadResponse", e);
 
         if (action === "load_success") {
           self.loaded = true;
@@ -84,6 +80,5 @@ interface WWorker extends Worker {
 
 export const createWorker = async (): Promise<CvWorker> => {
   const Worker = (await import("./cv.worker")).default as WWorker;
-  console.log(Worker);
   return new CvWorker(new Worker());
 };

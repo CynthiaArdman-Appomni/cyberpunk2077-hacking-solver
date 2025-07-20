@@ -244,18 +244,11 @@ class IndexContainer extends React.Component<{}, IndexContainerState> {
     const scheduleSolve = () =>
       setTimeout(async () => {
         const solve = (await import("../lib/bruter")).default;
-        console.log("running");
 
         const matrix = parseMatrix(matrixText);
         const sequences = parseMatrix(sequencesText);
         const solution = solve(matrix, sequences, bufferSize, {
           useSequencePriorityOrder,
-        });
-        console.log("solution", {
-          solution,
-          useSequencePriorityOrder,
-          sequencesText,
-          unprioritizedSequencesText,
         });
 
         this.setState({

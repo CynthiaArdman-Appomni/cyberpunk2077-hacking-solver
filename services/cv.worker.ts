@@ -5,7 +5,6 @@ function postAction(action: WorkerResultAction, payload?: any) {
   return postMessage({ action, payload });
 }
 
-console.log("cv.worker.ts");
 
 export default {};
 
@@ -143,7 +142,6 @@ const processScreenshot = (imageData: ImageData) => {
       }
     );
 
-    console.log({ graySample, blueSample });
     const grayLower = new cv.Mat(
       croppedLab.rows,
       croppedLab.cols,
@@ -207,7 +205,6 @@ const processScreenshot = (imageData: ImageData) => {
         cv.rectangle1(grayMask, rect, new cv.Scalar(0, 0, 255, 255));
       });
       const outImageData = toImageData(grayMask); //imageDataFromMat(cropped);
-      console.log("could not find grayStripRect");
       postAction("process_screenshot_success", { comboImage: outImageData });
 
       setTimeout(() => {
@@ -308,7 +305,6 @@ const processScreenshot = (imageData: ImageData) => {
     const gridSize = Math.round(
       (gridCropped.cols - approxGridOffset / 2) / approxGridOffset
     );
-    console.log({ gridSize });
 
     const blurAmount = interpolateSteps(
       approxGridOffset,
