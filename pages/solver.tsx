@@ -16,6 +16,7 @@ import MainTitle from "../components/MainTitle";
 import SolutionModal from "../components/SolutionModal";
 
 import { parseMatrix } from "../util";
+import { createWorker as createSolverWorker, SolverWorker } from "../services/solver";
 import { SolverResult } from "../lib/bruter";
 import styles from "../styles/Index.module.scss";
 import HackButton from "../components/HackButton";
@@ -207,6 +208,7 @@ interface IndexContainerState {
 }
 
 class IndexContainer extends React.Component<{}, IndexContainerState> {
+  solverWorker: SolverWorker | null = null;
   state = {
     matrixText: "",
     sequencesText: "",
@@ -233,6 +235,11 @@ class IndexContainer extends React.Component<{}, IndexContainerState> {
   setUnprioritizedSequencesText = (text: string) =>
     this.setState({ unprioritizedSequencesText: text });
 
+  async componentDidMount() {
+    this.solverWorker = await createSolverWorker();
+    await this.solverWorker.load();
+  }
+
   runSolver = (
     useSequencePriorityOrder?: boolean,
     overrides?: { sequencesText?: string; matrixText?: string }
@@ -243,12 +250,24 @@ class IndexContainer extends React.Component<{}, IndexContainerState> {
 
     const scheduleSolve = () =>
       setTimeout(async () => {
-        const solve = (await import("../lib/bruter")).default;
+        if (!this.solverWorker) {
+          this.solverWorker = await createSolverWorker();
+          await this.solverWorker.load();
+        }
 
         const matrix = parseMatrix(matrixText);
         const sequences = parseMatrix(sequencesText);
-        const solution = solve(matrix, sequences, bufferSize, {
+        const solution = await this.solverWorker.solve(
+          matrix,
+          sequences,
+          bufferSize,
+          { useSequencePriorityOrder }
+        );
+        console.log("solution", {
+          solution,
           useSequencePriorityOrder,
+          sequencesText,
+          unprioritizedSequencesText,
         });
 
         this.setState({

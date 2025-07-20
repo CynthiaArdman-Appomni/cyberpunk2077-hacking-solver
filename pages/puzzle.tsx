@@ -682,7 +682,7 @@ export default function PuzzlePage() {
                 <h3 className={styles["grid-box__header_text"]}>ENTER CODE MATRIX</h3>
               </div>
               <div className={styles["grid-box__inside"]}>
-                <div className={styles.grid}>
+                <div className={styles.grid} role="grid">
                   {puzzle.grid.map((row, r) =>
                     row.map((val, c) => {
                       const isSelected = selection.some(
@@ -703,13 +703,18 @@ export default function PuzzlePage() {
                       else if (!isSelected) classes.push(styles.dim);
                       if (isSelected) classes.push(styles.selected);
                       return (
-                        <div
+                        <button
+                          type="button"
                           key={`${r}-${c}`}
                           className={classes.join(" ")}
                           onClick={() => handleCellClick(r, c)}
+                          aria-pressed={isSelected}
+                          aria-label={`cell ${r + 1}, ${c + 1} value ${val}`}
+                          role="gridcell"
+                          tabIndex={0}
                         >
                           {val}
-                        </div>
+                        </button>
                       );
                     })
                   )}

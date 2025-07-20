@@ -563,7 +563,8 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
             <div
               className={cz(styles["grid-box"], {
                 [styles.pulse]: breachFlash,
-                [styles["fade-out"]]: ended && solved.size === (puzzle?.daemons.length || 0),
+                [styles["fade-out"]]:
+                  ended && solved.size === (puzzle?.daemons.length || 0) && showOverlay,
                 [styles.failure]: failed,
               })}
             >
@@ -604,7 +605,8 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
             <div
               className={cz(styles["daemon-box"], {
                 [styles.pulse]: breachFlash,
-                [styles["fade-out"]]: ended && solved.size === (puzzle?.daemons.length || 0),
+                [styles["fade-out"]]:
+                  ended && solved.size === (puzzle?.daemons.length || 0) && showOverlay,
                 [styles.failure]: failed,
               })}
             >
@@ -633,7 +635,7 @@ export default function PlayPuzzlePage({ initialPuzzle, hasError }: NetrunProps)
         <Row>
           <Col lg={8}>
             <div className={styles.buttons}>
-              <Button onClick={resetPuzzle}>Reset Puzzle</Button>
+              <Button onClick={resetPuzzle} disabled={ended}>Reset Puzzle</Button>
             </div>
           </Col>
         </Row>

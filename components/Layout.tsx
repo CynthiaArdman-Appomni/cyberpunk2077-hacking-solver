@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import Link from "next/link";
 import { Container, Row, Col } from "react-bootstrap";
 import styles from "../styles/Layout.module.scss";
@@ -50,7 +50,7 @@ function Copyright({ className }: { className?: string }) {
   return <p className={className}>cxcorp | 2020-{new Date().getFullYear()}</p>;
 }
 
-const Layout: FC = ({ children }) => {
+const Layout: FC<{ children?: ReactNode }> = ({ children }) => {
   return (
     <>
       <div className={styles.backdrop} />
